@@ -33,7 +33,7 @@ ICONS_DIR: Path = RESOURCES_DIR / "icons"
 
 # ==================== APPLICATION CONSTANTS ====================
 APP_NAME: str = "RNV Text Transformer"
-APP_VERSION: str = "3.0.3"
+APP_VERSION: str = "3.3.0"
 DEFAULT_WINDOW_WIDTH: int = 900
 DEFAULT_WINDOW_HEIGHT: int = 600
 DEFAULT_WINDOW_X: int = 100
