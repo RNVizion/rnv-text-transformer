@@ -1,0 +1,39 @@
+# .coveragerc — coverage.py configuration for RNV Text Transformer
+#
+# Matches the --source flag used by run_tests.py. RNV_Capitalizer_App.py
+# (the GUI entry point) is excluded until application-level tests cover
+# it, so we don't inflate the denominator before Phase 3.
+
+[run]
+branch = True
+source =
+    core
+    utils
+    ui
+    cli
+omit =
+    test_rnv_text_transformer.py
+    tests/*
+    conftest.py
+    RNV_Capitalizer_App.py
+    */__pycache__/*
+    .venv/*
+    venv/*
+    env/*
+
+[report]
+show_missing = True
+skip_covered = False
+precision = 1
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @overload
+
+[html]
+directory = coverage_html
+title = RNV Text Transformer Coverage

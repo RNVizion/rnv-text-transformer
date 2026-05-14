@@ -1,0 +1,667 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1BECFD3E-B8AE-4029-A69A-475E23F6AE87}|RNV_Text_Transformer.pyproj|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\RNV_Text_Transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{1BECFD3E-B8AE-4029-A69A-475E23F6AE87}|RNV_Text_Transformer.pyproj|solutionrelative:RNV_Text_Transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1BECFD3E-B8AE-4029-A69A-475E23F6AE87}|RNV_Text_Transformer.pyproj|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\test_rnv_text_transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{1BECFD3E-B8AE-4029-A69A-475E23F6AE87}|RNV_Text_Transformer.pyproj|solutionrelative:test_rnv_text_transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\settings_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\settings_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\logger.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\logger.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\file_handler.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\file_handler.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\error_handler.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\error_handler.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_styles.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\dialog_styles.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_helper.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\dialog_helper.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\clipboard_utils.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\clipboard_utils.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\async_workers.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:utils\\async_workers.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\watch_folder_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\watch_folder_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\settings_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\settings_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\regex_builder_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\regex_builder_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\preset_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\preset_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\main_window.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\main_window.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\line_number_text_edit.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\line_number_text_edit.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\image_button.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\image_button.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\find_replace_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\find_replace_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\export_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\export_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\encoding_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\encoding_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\drag_drop_text_edit.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\drag_drop_text_edit.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\compare_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\compare_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\batch_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\batch_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\base_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\base_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\about_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ui\\about_dialog.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\theme_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\theme_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\text_transformer.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_statistics.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\text_statistics.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_cleaner.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\text_cleaner.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\resource_loader.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\resource_loader.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\regex_patterns.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\regex_patterns.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\preset_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\preset_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\folder_watcher.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\folder_watcher.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\export_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\export_manager.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\diff_engine.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\diff_engine.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\batch_processor.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:core\\batch_processor.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\cli\\rnv_transform.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:cli\\rnv_transform.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 37,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "settings_manager.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\settings_manager.py",
+              "RelativeDocumentMoniker": "utils\\settings_manager.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\settings_manager.py",
+              "RelativeToolTip": "utils\\settings_manager.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:09.984Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "logger.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\logger.py",
+              "RelativeDocumentMoniker": "utils\\logger.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\logger.py",
+              "RelativeToolTip": "utils\\logger.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:09.777Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "file_handler.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\file_handler.py",
+              "RelativeDocumentMoniker": "utils\\file_handler.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\file_handler.py",
+              "RelativeToolTip": "utils\\file_handler.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:09.563Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "error_handler.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\error_handler.py",
+              "RelativeDocumentMoniker": "utils\\error_handler.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\error_handler.py",
+              "RelativeToolTip": "utils\\error_handler.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:09.358Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "dialog_styles.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_styles.py",
+              "RelativeDocumentMoniker": "utils\\dialog_styles.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_styles.py",
+              "RelativeToolTip": "utils\\dialog_styles.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:09.103Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "dialog_helper.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_helper.py",
+              "RelativeDocumentMoniker": "utils\\dialog_helper.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\dialog_helper.py",
+              "RelativeToolTip": "utils\\dialog_helper.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:08.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "config.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\config.py",
+              "RelativeDocumentMoniker": "utils\\config.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\config.py",
+              "RelativeToolTip": "utils\\config.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:08.622Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "clipboard_utils.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\clipboard_utils.py",
+              "RelativeDocumentMoniker": "utils\\clipboard_utils.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\clipboard_utils.py",
+              "RelativeToolTip": "utils\\clipboard_utils.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:08.444Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "async_workers.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\async_workers.py",
+              "RelativeDocumentMoniker": "utils\\async_workers.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\utils\\async_workers.py",
+              "RelativeToolTip": "utils\\async_workers.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:50:08.244Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "watch_folder_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\watch_folder_dialog.py",
+              "RelativeDocumentMoniker": "ui\\watch_folder_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\watch_folder_dialog.py",
+              "RelativeToolTip": "ui\\watch_folder_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:58.861Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "settings_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\settings_dialog.py",
+              "RelativeDocumentMoniker": "ui\\settings_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\settings_dialog.py",
+              "RelativeToolTip": "ui\\settings_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:58.589Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "regex_builder_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\regex_builder_dialog.py",
+              "RelativeDocumentMoniker": "ui\\regex_builder_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\regex_builder_dialog.py",
+              "RelativeToolTip": "ui\\regex_builder_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:58.268Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "preset_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\preset_dialog.py",
+              "RelativeDocumentMoniker": "ui\\preset_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\preset_dialog.py",
+              "RelativeToolTip": "ui\\preset_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:58.035Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "main_window.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\main_window.py",
+              "RelativeDocumentMoniker": "ui\\main_window.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\main_window.py",
+              "RelativeToolTip": "ui\\main_window.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:57.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "line_number_text_edit.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\line_number_text_edit.py",
+              "RelativeDocumentMoniker": "ui\\line_number_text_edit.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\line_number_text_edit.py",
+              "RelativeToolTip": "ui\\line_number_text_edit.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:57.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "image_button.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\image_button.py",
+              "RelativeDocumentMoniker": "ui\\image_button.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\image_button.py",
+              "RelativeToolTip": "ui\\image_button.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:57.431Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "find_replace_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\find_replace_dialog.py",
+              "RelativeDocumentMoniker": "ui\\find_replace_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\find_replace_dialog.py",
+              "RelativeToolTip": "ui\\find_replace_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:57.239Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "export_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\export_dialog.py",
+              "RelativeDocumentMoniker": "ui\\export_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\export_dialog.py",
+              "RelativeToolTip": "ui\\export_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:57.029Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "encoding_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\encoding_dialog.py",
+              "RelativeDocumentMoniker": "ui\\encoding_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\encoding_dialog.py",
+              "RelativeToolTip": "ui\\encoding_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:56.705Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "drag_drop_text_edit.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\drag_drop_text_edit.py",
+              "RelativeDocumentMoniker": "ui\\drag_drop_text_edit.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\drag_drop_text_edit.py",
+              "RelativeToolTip": "ui\\drag_drop_text_edit.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:56.527Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "compare_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\compare_dialog.py",
+              "RelativeDocumentMoniker": "ui\\compare_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\compare_dialog.py",
+              "RelativeToolTip": "ui\\compare_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:56.333Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "batch_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\batch_dialog.py",
+              "RelativeDocumentMoniker": "ui\\batch_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\batch_dialog.py",
+              "RelativeToolTip": "ui\\batch_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:56.144Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "base_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\base_dialog.py",
+              "RelativeDocumentMoniker": "ui\\base_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\base_dialog.py",
+              "RelativeToolTip": "ui\\base_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:55.937Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "about_dialog.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\about_dialog.py",
+              "RelativeDocumentMoniker": "ui\\about_dialog.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\ui\\about_dialog.py",
+              "RelativeToolTip": "ui\\about_dialog.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:55.704Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "theme_manager.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\theme_manager.py",
+              "RelativeDocumentMoniker": "core\\theme_manager.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\theme_manager.py",
+              "RelativeToolTip": "core\\theme_manager.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:45.763Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "text_transformer.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_transformer.py",
+              "RelativeDocumentMoniker": "core\\text_transformer.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_transformer.py",
+              "RelativeToolTip": "core\\text_transformer.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:45.515Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "text_statistics.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_statistics.py",
+              "RelativeDocumentMoniker": "core\\text_statistics.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_statistics.py",
+              "RelativeToolTip": "core\\text_statistics.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:45.212Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "text_cleaner.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_cleaner.py",
+              "RelativeDocumentMoniker": "core\\text_cleaner.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\text_cleaner.py",
+              "RelativeToolTip": "core\\text_cleaner.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:44.978Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "resource_loader.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\resource_loader.py",
+              "RelativeDocumentMoniker": "core\\resource_loader.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\resource_loader.py",
+              "RelativeToolTip": "core\\resource_loader.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:44.721Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "regex_patterns.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\regex_patterns.py",
+              "RelativeDocumentMoniker": "core\\regex_patterns.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\regex_patterns.py",
+              "RelativeToolTip": "core\\regex_patterns.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:44.533Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "preset_manager.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\preset_manager.py",
+              "RelativeDocumentMoniker": "core\\preset_manager.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\preset_manager.py",
+              "RelativeToolTip": "core\\preset_manager.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:44.361Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "folder_watcher.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\folder_watcher.py",
+              "RelativeDocumentMoniker": "core\\folder_watcher.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\folder_watcher.py",
+              "RelativeToolTip": "core\\folder_watcher.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:44.181Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "export_manager.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\export_manager.py",
+              "RelativeDocumentMoniker": "core\\export_manager.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\export_manager.py",
+              "RelativeToolTip": "core\\export_manager.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:43.96Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "diff_engine.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\diff_engine.py",
+              "RelativeDocumentMoniker": "core\\diff_engine.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\diff_engine.py",
+              "RelativeToolTip": "core\\diff_engine.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:43.772Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "batch_processor.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\batch_processor.py",
+              "RelativeDocumentMoniker": "core\\batch_processor.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\core\\batch_processor.py",
+              "RelativeToolTip": "core\\batch_processor.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:43.547Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "rnv_transform.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\cli\\rnv_transform.py",
+              "RelativeDocumentMoniker": "cli\\rnv_transform.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\cli\\rnv_transform.py",
+              "RelativeToolTip": "cli\\rnv_transform.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:49:35.003Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "test_rnv_text_transformer.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\test_rnv_text_transformer.py",
+              "RelativeDocumentMoniker": "test_rnv_text_transformer.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\test_rnv_text_transformer.py",
+              "RelativeToolTip": "test_rnv_text_transformer.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:45:14.932Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RNV_Text_Transformer.py",
+              "DocumentMoniker": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\RNV_Text_Transformer.py",
+              "RelativeDocumentMoniker": "RNV_Text_Transformer.py",
+              "ToolTip": "C:\\Users\\vizio\\source\\repos\\RNV_Text_Transformer\\RNV_Text_Transformer\\RNV_Text_Transformer.py",
+              "RelativeToolTip": "RNV_Text_Transformer.py",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAiwFgAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-04-22T22:45:13.892Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

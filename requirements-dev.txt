@@ -1,0 +1,24 @@
+# RNV Text Transformer — development & test dependencies
+# Install with: pip install -r requirements-dev.txt
+
+# Core test runner
+pytest>=7.4
+
+# Qt interaction testing — qtbot, waitSignal, waitUntil, mouseClick
+pytest-qt>=4.4
+
+# Coverage measurement
+pytest-cov>=4.1
+coverage>=7.4
+
+# Performance regression tests (Phase 6)
+pytest-benchmark>=4.0
+
+# Property-based testing (Phase 5)
+hypothesis>=6.92
+
+# Snapshot testing (Phase 2)
+syrupy>=4.6
+
+# Mutation testing (Phase 7 — one-off audit)
+mutmut>=2.4

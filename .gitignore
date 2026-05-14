@@ -1,0 +1,169 @@
+# =============================================================================
+# Python
+# =============================================================================
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+wheelhouse/
+share/python-wheels/
+*.manifest
+
+# PyInstaller — produced by build_windows.bat / build_linux.sh
+# The .spec file IS committed; build outputs are not.
+*.spec.bak
+
+# =============================================================================
+# Virtual environments
+# =============================================================================
+
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# =============================================================================
+# Test infrastructure (generated artifacts — do not commit)
+# =============================================================================
+
+# Hypothesis: per-machine cache of falsifying examples and database state.
+# Hypothesis is deterministic per-seed; the cache is a runtime helper, not
+# canonical state. Each developer's cache is local.
+.hypothesis/
+
+# pytest-benchmark: per-run timing data files. Saved baselines (e.g. via
+# --benchmark-save=baseline) live here and are machine-specific. Each
+# developer's baseline reflects their hardware and isn't portable.
+.benchmarks/
+
+# pytest cache
+.pytest_cache/
+
+# coverage.py per-suite data files — these are merged into .coverage by
+# run_tests.py. Both the per-suite files AND the merged file should not
+# be committed.
+.coverage
+.coverage.*
+coverage_html/
+coverage_report.txt
+
+# CI-generated coverage XML uploaded to Codecov
+coverage.xml
+
+# syrupy snapshot test ambient artifacts (the __snapshots__ folders ARE
+# committed — they're the snapshot baselines. Only the .ambr lock files
+# and per-run reports should be ignored.)
+**/__snapshots__/*.ambr.bak
+
+# Mutmut cache (mutation testing tool)
+.mutmut-cache
+mutants/
+
+# =============================================================================
+# IDEs & editors
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.\#*
+
+# =============================================================================
+# OS-specific
+# =============================================================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Linux
+.directory
+.Trash-*
+
+# =============================================================================
+# Logs & temp files
+# =============================================================================
+
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*~
+
+# =============================================================================
+# Project-specific
+# =============================================================================
+
+# Internal planning / scaffolding docs (never committed to portfolio repo)
+RNV_Phase*_Analysis.md
+RNV_Test_Mutation_Audit.md
+
+# Production-fix staging files from the test plan
+*_PATCHED.py
+
+# Phase deliverable bundles
+phase8*/
+*.zip
+
+# Local QSettings backup files
+*.ini.bak
+
+# User-specific runtime files
+user_presets.json.bak
+watch_rules.json.bak
