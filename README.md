@@ -1,14 +1,22 @@
 # RNV Text Transformer
 
-[![Linux](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Linux&logo=linux)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
-[![Windows](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Windows&logo=windows)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)
+![PyQt6](https://img.shields.io/badge/PyQt-6-41CD52)
+![Version](https://img.shields.io/badge/version-3.3.0-orange)
+![License](https://img.shields.io/badge/license-MIT-yellow)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+![Tests](https://img.shields.io/badge/tests-786%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-76%25-brightgreen)
+
+[![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
+[![Tests (Windows)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Windows%29&logo=windows)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
 [![Coverage](https://codecov.io/gh/RNVizion/rnv-text-transformer/branch/main/graph/badge.svg)](https://codecov.io/gh/RNVizion/rnv-text-transformer)
-[![Python 3.13](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **A professional-grade desktop text transformation suite built with PyQt6.**
 
 RNV Text Transformer is a Windows desktop application for transforming, cleaning, comparing, and batch-processing text across 10+ file formats. It combines a polished three-theme UI with a full-featured command-line interface and a background folder-watching engine, all backed by a modular, fully type-hinted Python 3.13 codebase.
+
+> Part of the [RNVizion toolkit](https://github.com/RNVizion) — a suite of professional desktop tools for developers and designers.
 
 ---
 
@@ -24,6 +32,7 @@ RNV Text Transformer is a Windows desktop application for transforming, cleaning
 - [Testing](#testing)
 - [Engineering Notes](#engineering-notes)
 - [Built With](#built-with)
+- [Related Projects](#related-projects)
 - [License](#license)
 - [Author](#author)
 
@@ -213,6 +222,7 @@ The project follows a clear four-package layout that separates concerns:
 rnv-text-transformer/
 ├── RNV_Text_Transformer.py       # GUI entry point
 ├── requirements.txt
+├── requirements-dev.txt
 ├── pyproject.toml
 ├── LICENSE
 ├── README.md
@@ -374,14 +384,28 @@ The methodology that found these bugs — property-based testing for pure logic,
 
 ---
 
+## Related Projects
+
+Part of the RNVizion suite of professional desktop tools:
+
+- **[RNV Icon Builder](https://github.com/RNVizion/rnv-icon-builder)** — Create multi-resolution ICO files from PNG, ICO, and SVG sources with platform-specific exports (Android, iOS, favicon).
+- **[RNV Color Picker](https://github.com/RNVizion/rnv-color-picker)** — Extract, organize, and export colors from images or the screen with 15+ palette formats.
+- **[RNV Color Mixer](https://github.com/RNVizion/rnv-color-mixer)** — Bringing real-world paint mixing to the digital palette.
+
+---
+
 ## License
 
-Released under the [MIT License](LICENSE). See the LICENSE file for the full text.
+[MIT](LICENSE) — free to use, modify, and distribute.
 
 ---
 
 ## Author
 
-Built by [RNVizion](https://github.com/RNVizion).
+Built by [RNVizion](https://github.com/RNVizion)
 
-If you find this project interesting or useful, feel free to reach out or open an issue.
+---
+
+<p align="center">
+  Built with PyQt6 · 786 tests · 76% coverage
+</p>
