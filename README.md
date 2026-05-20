@@ -10,7 +10,6 @@
 
 [![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
 [![Tests (Windows)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Windows%29&logo=windows)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
-[![Coverage](https://codecov.io/gh/RNVizion/rnv-text-transformer/branch/main/graph/badge.svg)](https://codecov.io/gh/RNVizion/rnv-text-transformer)
 
 **A professional-grade desktop text transformation suite built with PyQt6.**
 
