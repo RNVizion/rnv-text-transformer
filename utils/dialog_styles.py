@@ -66,7 +66,7 @@ class DialogStyleManager:
     - success/error/warning: Semantic colors
     
     MainWindow Colors (separate from dialog bg for intentional contrast):
-    - window_bg: Main window background (#000000 dark, #F5F5F5 light)
+    - window_bg: Main window background (#000000 dark, #f5f5f5 light)
     - button_bg/button_text/button_hover_bg/button_pressed_text: Button colors
     - input_bg/input_text/input_border: Input field colors
     - label_bg/label_text: Label colors
@@ -98,13 +98,13 @@ class DialogStyleManager:
     
     DARK: ClassVar[dict[str, str]] = {
         # Backgrounds
-        'bg': '#1A1A1A',
-        'bg_secondary': '#2A2A2A',
+        'bg': '#1a1a1a',
+        'bg_secondary': '#2a2a2a',
         'bg_tertiary': '#333333',
-        'bg_hover': '#3A3A3A',
+        'bg_hover': '#3a3a3a',
         
         # Text
-        'text': '#E0E0E0',
+        'text': '#e0e0e0',
         'text_muted': '#888888',
         'text_disabled': '#555555',
         
@@ -135,32 +135,32 @@ class DialogStyleManager:
         'tooltip_border': '#d2bc93',
         
         # Checkbox indicator
-        'checkbox_indicator_bg': '#1A1A1A',
+        'checkbox_indicator_bg': '#1a1a1a',
         'checkbox_border': '#555555',
         
         # Dropdown / list hover
-        'list_hover_bg': '#FFFFFF',
+        'list_hover_bg': '#ffffff',
         'list_hover_text': '#000000',
         
         # MainWindow-specific (pure black background, distinct from dialog bg)
         'window_bg': '#000000',
-        'button_bg': '#1A1A1A',
-        'button_text': '#E0E0E0',
+        'button_bg': '#1a1a1a',
+        'button_text': '#e0e0e0',
         'button_hover_bg': '#333333',
         'button_pressed_text': '#000000',
-        'input_bg': '#1A1A1A',
-        'input_text': '#E0E0E0',
+        'input_bg': '#1a1a1a',
+        'input_text': '#e0e0e0',
         'input_border': '#333333',
         'label_bg': '#000000',
-        'label_text': '#E0E0E0',
+        'label_text': '#e0e0e0',
         'output_text_color': '#d2bc93',
         'border_color': '#333333',
-        'text_color': '#E0E0E0',
+        'text_color': '#e0e0e0',
         
         # Line number gutter widget
-        'line_number_bg': '#1A1A1A',
+        'line_number_bg': '#1a1a1a',
         'line_number_fg': '#666666',
-        'line_number_current_bg': '#2A2A2A',
+        'line_number_current_bg': '#2a2a2a',
         'line_number_current_fg': '#d2bc93',
 
         # Diff / compare semantic highlight colors
@@ -195,26 +195,26 @@ class DialogStyleManager:
     
     LIGHT: ClassVar[dict[str, str]] = {
         # Backgrounds
-        'bg': '#F5F5F5',
-        'bg_secondary': '#FFFFFF',
-        'bg_tertiary': '#E8E8E8',
-        'bg_hover': '#EEEEEE',
+        'bg': '#f5f5f5',
+        'bg_secondary': '#ffffff',
+        'bg_tertiary': '#e8e8e8',
+        'bg_hover': '#eeeeee',
         
         # Text
         'text': '#000000',
         'text_muted': '#666666',
-        'text_disabled': '#AAAAAA',
+        'text_disabled': '#aaaaaa',
         
         # Borders
-        'border': '#CCCCCC',
-        'border_light': '#DDDDDD',
+        'border': '#cccccc',
+        'border_light': '#dddddd',
         'border_focus': '#b19145',
         
         # Accent colors
         'accent': '#b19145',
         'accent_hover': '#c4a458',
         'accent_pressed': '#8a7236',
-        'accent_text': '#FFFFFF',  # Text on accent background
+        'accent_text': '#ffffff',  # Text on accent background
         
         # Semantic colors
         'success': '#28a745',
@@ -224,40 +224,40 @@ class DialogStyleManager:
         
         # Special
         'selection_bg': '#b19145',
-        'selection_text': '#FFFFFF',
-        'scrollbar_bg': '#E0E0E0',
-        'scrollbar_handle': '#AAAAAA',
+        'selection_text': '#ffffff',
+        'scrollbar_bg': '#e0e0e0',
+        'scrollbar_handle': '#aaaaaa',
         'scrollbar_handle_hover': '#888888',
-        'scrollbar_handle_main': '#AAAAAA',
+        'scrollbar_handle_main': '#aaaaaa',
         'tooltip_border': '#b19145',
         
         # Checkbox indicator
-        'checkbox_indicator_bg': '#FFFFFF',
-        'checkbox_border': '#AAAAAA',
+        'checkbox_indicator_bg': '#ffffff',
+        'checkbox_border': '#aaaaaa',
         
         # Dropdown / list hover
-        'list_hover_bg': '#1A1A1A',
-        'list_hover_text': '#FFFFFF',
+        'list_hover_bg': '#1a1a1a',
+        'list_hover_text': '#ffffff',
         
         # MainWindow-specific
-        'window_bg': '#F5F5F5',
-        'button_bg': '#FFFFFF',
+        'window_bg': '#f5f5f5',
+        'button_bg': '#ffffff',
         'button_text': '#000000',
         'button_hover_bg': '#333333',
-        'button_pressed_text': '#FFFFFF',
-        'input_bg': '#FFFFFF',
+        'button_pressed_text': '#ffffff',
+        'input_bg': '#ffffff',
         'input_text': '#000000',
-        'input_border': '#CCCCCC',
-        'label_bg': '#F5F5F5',
+        'input_border': '#cccccc',
+        'label_bg': '#f5f5f5',
         'label_text': '#000000',
         'output_text_color': '#b19145',
-        'border_color': '#CCCCCC',
+        'border_color': '#cccccc',
         'text_color': '#000000',
         
         # Line number gutter widget
-        'line_number_bg': '#F0F0F0',
+        'line_number_bg': '#f0f0f0',
         'line_number_fg': '#999999',
-        'line_number_current_bg': '#E8E8E8',
+        'line_number_current_bg': '#e8e8e8',
         'line_number_current_fg': '#b19145',
 
         # Diff / compare semantic highlight colors
