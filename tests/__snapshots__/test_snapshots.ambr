@@ -564,7 +564,7 @@
                   border-radius: 4px;
                   margin-top: 10px;
                   padding-top: 10px;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QGroupBox::title {
                   subcontrol-origin: margin;
@@ -648,7 +648,7 @@
                   color: #ffffff;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
               QComboBox:disabled {
@@ -714,7 +714,7 @@
               QPushButton:hover {
                   background-color: #eeeeee;
                   border-color: #8c7337;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QPushButton:pressed {
                   background-color: #8c7337;
@@ -835,7 +835,7 @@
                   border-radius: 4px;
                   margin-top: 10px;
                   padding-top: 10px;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QGroupBox::title {
                   subcontrol-origin: margin;
@@ -919,7 +919,7 @@
                   color: #ffffff;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
               QComboBox:disabled {
@@ -985,7 +985,7 @@
               QPushButton:hover {
                   background-color: #eeeeee;
                   border-color: #8c7337;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QPushButton:pressed {
                   background-color: #8c7337;
@@ -1621,7 +1621,7 @@
                   border-radius: 4px;
                   margin-top: 10px;
                   padding-top: 10px;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QGroupBox::title {
                   subcontrol-origin: margin;
@@ -1705,7 +1705,7 @@
                   color: #ffffff;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
               QComboBox:disabled {
@@ -1771,7 +1771,7 @@
               QPushButton:hover {
                   background-color: #eeeeee;
                   border-color: #8c7337;
-                  color: #8c7337;
+                  color: #7e6529;
               }
               QPushButton:pressed {
                   background-color: #8c7337;
@@ -1897,12 +1897,12 @@
               }
               QTabBar::tab:selected {
                   background-color: #f5f5f5;
-                  color: #8c7337;
+                  color: #7e6529;
                   border-bottom: 2px solid #8c7337;
               }
               QTabBar::tab:hover:!selected {
                   background-color: #eeeeee;
-                  color: #8c7337;
+                  color: #7e6529;
                   border-bottom: 2px solid #8c7337;
               }
           
@@ -1922,7 +1922,7 @@
                   color: #ffffff;
               }
               QTableWidget::item:hover {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
               QHeaderView::section {
@@ -1956,7 +1956,7 @@
                   color: #ffffff;
               }
               QListWidget::item:hover:!selected {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
           
@@ -1976,7 +1976,7 @@
                   color: #ffffff;
               }
               QTreeWidget::item:hover:!selected {
-                  background-color: #9f864a;
+                  background-color: #7e6529;
                   color: #ffffff;
               }
               QTreeWidget::branch {
@@ -2010,7 +2010,7 @@
                   border-radius: 8px;
               }
               QSlider::handle:horizontal:hover {
-                  background: #9f864a;
+                  background: #7e6529;
               }
               QSlider::sub-page:horizontal {
                   background: #8c7337;
@@ -2030,7 +2030,7 @@
                   border-radius: 8px;
               }
               QSlider::handle:vertical:hover {
-                  background: #9f864a;
+                  background: #7e6529;
               }
           
   
@@ -2118,6 +2118,7 @@
   {
     "accent": "#d2bc93",
     "accent_hover": "#dcc9a3",
+    "accent_ink": "#d2bc93",
     "accent_pressed": "#b7a480",
     "accent_text": "#000000",
     "bg": "#1a1a1a",
@@ -2190,7 +2191,8 @@
   '''
   {
     "accent": "#8c7337",
-    "accent_hover": "#9f864a",
+    "accent_hover": "#7e6529",
+    "accent_ink": "#7e6529",
     "accent_pressed": "#8c7337",
     "accent_text": "#ffffff",
     "bg": "#f5f5f5",
@@ -2228,7 +2230,7 @@
     "image_scrollbar_border": "rgba(51, 51, 51, 100)",
     "image_scrollbar_handle": "rgba(80, 80, 80, 150)",
     "image_scrollbar_handle_hover": "rgba(100, 100, 100, 200)",
-    "info": "#8c7337",
+    "info": "#7e6529",
     "input_bg": "#ffffff",
     "input_border": "#cccccc",
     "input_text": "#000000",
@@ -2236,7 +2238,7 @@
     "label_text": "#000000",
     "line_number_bg": "#f0f0f0",
     "line_number_current_bg": "#e8e8e8",
-    "line_number_current_fg": "#8c7337",
+    "line_number_current_fg": "#7e6529",
     "line_number_fg": "#999999",
     "list_hover_bg": "#1a1a1a",
     "list_hover_text": "#ffffff",
@@ -2277,13 +2279,13 @@
   header:      font-size: 14pt; font-weight: bold; color: #000000;
   subtitle:    color: #666666; margin-bottom: 10px;
   description: color: #666666; font-size: 9pt;
-  tip:         color: #8c7337; font-style: italic;
+  tip:         color: #7e6529; font-style: italic;
   status(success): color: #28a745;
   status(error): color: #dc3545;
   status(warning): color: #ffc107;
   status(muted): color: #666666;
-  status(info): color: #8c7337;
-  status(accent): color: #8c7337;
+  status(info): color: #7e6529;
+  status(accent): color: #7e6529;
   
   '''
 # ---

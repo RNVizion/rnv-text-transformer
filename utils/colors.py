@@ -95,8 +95,8 @@ def lighten(color: str, step: int) -> str:
         Six-digit hex string, lowercase
 
     Example:
-        >>> lighten(BRAND_DARK_GOLD, 19)
-        '#9f864a'
+        >>> lighten(BRAND_DARK_GOLD, -14)
+        '#7e6529'
     """
     rgb = color.lstrip('#')
     if len(rgb) != 6:
@@ -105,8 +105,34 @@ def lighten(color: str, step: int) -> str:
     return '#' + ''.join(f'{max(0, min(255, c + step)):02x}' for c in chans)
 
 
-#: Light-mode hover tint. Derived, not ruled.
-BRAND_DARK_GOLD_HOVER: Final[str] = lighten(BRAND_DARK_GOLD, 19)
+#: Light-mode DEEP gold. The single derivative, serving two roles.
+#:
+#: 1. Hover backgrounds (combo, table, list, tree rows; slider handles).
+#:    These carry white text, exactly as the selected row does, so they need a
+#:    gold dark enough for white. The previous hover value was a LIGHTER tint
+#:    (#9f864a) and white measured 3.5099 on it -- a failure inherited from
+#:    the pre-alignment palette, where it was 2.3868.
+#:
+#: 2. Gold-bearing text on a light ground. #8c7337 fills and bounds
+#:    correctly everywhere, but as text it measures 4.1670 on #f5f5f5, 3.9156
+#:    on #eeeeee and 3.7077 on #e8e8e8, against a 4.5 floor.
+#:
+#: Both roles want the same thing -- a darker gold -- so they share one value
+#: rather than each carrying its own.
+#:
+#:    white on it .................. 5.5547
+#:    as text on #f5f5f5 ........... 5.0949
+#:    as text on #eeeeee ........... 4.7875
+#:    as text on #e8e8e8 ........... 4.5334   <- binding
+#:
+#: -14 per channel is the smallest uniform step that clears all four.
+#: -13 gives 4.4675 on #e8e8e8 and fails. Hue is unchanged at 42.4 degrees.
+#:
+#: Hover moves AWAY from the ground, which is what dark mode already does:
+#: a dark ground takes a lighter hover, a light ground takes a deeper one.
+#:
+#: Never use as a fill under BLACK text -- black on it is 3.66:1.
+BRAND_DARK_GOLD_DEEP: Final[str] = lighten(BRAND_DARK_GOLD, -14)
 
 #: Light-mode pressed state. It IS the accent: darkening from BRAND_DARK_GOLD
 #: drops black-on-gold under the 4.5 floor (a shade 18% darker measures 3.37),
@@ -164,7 +190,7 @@ def with_alpha(color: str, alpha: int) -> str:
 __all__ = [
     'BRAND_GOLD',
     'BRAND_DARK_GOLD',
-    'BRAND_DARK_GOLD_HOVER',
+    'BRAND_DARK_GOLD_DEEP',
     'BRAND_DARK_GOLD_PRESSED',
     'lighten',
     'with_alpha',

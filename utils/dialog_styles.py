@@ -38,7 +38,7 @@ from functools import lru_cache
 from utils.colors import (
     BRAND_GOLD,
     BRAND_DARK_GOLD,
-    BRAND_DARK_GOLD_HOVER,
+    BRAND_DARK_GOLD_DEEP,
     BRAND_DARK_GOLD_PRESSED,
 )
 
@@ -124,6 +124,8 @@ class DialogStyleManager:
         'accent': BRAND_GOLD,
         'accent_hover': '#dcc9a3',
         'accent_pressed': '#b7a480',
+        'accent_ink': BRAND_GOLD,  # Accent when it carries text
+        'accent_ink': BRAND_GOLD,  # Accent when it carries text
         'accent_text': '#000000',  # Text on accent background
         
         # Semantic colors
@@ -219,15 +221,17 @@ class DialogStyleManager:
         
         # Accent colors
         'accent': BRAND_DARK_GOLD,
-        'accent_hover': BRAND_DARK_GOLD_HOVER,
+        'accent_hover': BRAND_DARK_GOLD_DEEP,
         'accent_pressed': BRAND_DARK_GOLD_PRESSED,
+        'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
+        'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
         'accent_text': '#ffffff',  # Text on accent background
         
         # Semantic colors
         'success': '#28a745',
         'error': '#dc3545',
         'warning': '#ffc107',
-        'info': BRAND_DARK_GOLD,
+        'info': BRAND_DARK_GOLD_DEEP,
         
         # Special
         'selection_bg': BRAND_DARK_GOLD,
@@ -265,7 +269,7 @@ class DialogStyleManager:
         'line_number_bg': '#f0f0f0',
         'line_number_fg': '#999999',
         'line_number_current_bg': '#e8e8e8',
-        'line_number_current_fg': BRAND_DARK_GOLD,
+        'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
 
         # Diff / compare semantic highlight colors
         'diff_added_bg':   '#d4edda',
@@ -553,7 +557,7 @@ class DialogStyleManager:
             'warning': c['warning'],
             'muted': c['text_muted'],
             'info': c['info'],
-            'accent': c['accent'],
+            'accent': c['accent_ink'],
         }
         color = color_map.get(status, c['text'])
         return f"color: {color};"
@@ -624,7 +628,7 @@ class DialogStyleManager:
             CSS style string for tip labels
         """
         c = cls.get_colors(is_dark)
-        return f"color: {c['accent']}; font-style: italic;"
+        return f"color: {c['accent_ink']}; font-style: italic;"
     
     # ==================== INTERNAL BUILDERS ====================
     
@@ -654,7 +658,7 @@ class DialogStyleManager:
                 border-radius: 4px;
                 margin-top: 10px;
                 padding-top: 10px;
-                color: {c['accent']};
+                color: {c['accent_ink']};
             }}
             QGroupBox::title {{
                 subcontrol-origin: margin;
@@ -804,7 +808,7 @@ class DialogStyleManager:
             QPushButton:hover {{
                 background-color: {c['bg_hover']};
                 border-color: {c['accent']};
-                color: {c['accent']};
+                color: {c['accent_ink']};
             }}
             QPushButton:pressed {{
                 background-color: {c['accent']};
@@ -1020,12 +1024,12 @@ class DialogStyleManager:
             }}
             QTabBar::tab:selected {{
                 background-color: {c['bg']};
-                color: {c['accent']};
+                color: {c['accent_ink']};
                 border-bottom: 2px solid {c['accent']};
             }}
             QTabBar::tab:hover:!selected {{
                 background-color: {c['bg_hover']};
-                color: {c['accent']};
+                color: {c['accent_ink']};
                 border-bottom: 2px solid {c['accent_pressed']};
             }}
         """

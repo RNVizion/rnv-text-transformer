@@ -6,7 +6,7 @@ Utility modules for the application.
 from utils.colors import (
     BRAND_GOLD,
     BRAND_DARK_GOLD,
-    BRAND_DARK_GOLD_HOVER,
+    BRAND_DARK_GOLD_DEEP,
     BRAND_DARK_GOLD_PRESSED,
     lighten,
     with_alpha,
@@ -63,7 +63,7 @@ __all__ = [
     # Brand Colors
     'BRAND_GOLD',
     'BRAND_DARK_GOLD',
-    'BRAND_DARK_GOLD_HOVER',
+    'BRAND_DARK_GOLD_DEEP',
     'BRAND_DARK_GOLD_PRESSED',
     'lighten',
     'with_alpha',
