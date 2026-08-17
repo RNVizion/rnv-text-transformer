@@ -3,6 +3,15 @@ RNV Text Transformer - Utils Package
 Utility modules for the application.
 """
 
+from utils.colors import (
+    BRAND_GOLD,
+    BRAND_DARK_GOLD,
+    BRAND_DARK_GOLD_HOVER,
+    BRAND_DARK_GOLD_PRESSED,
+    lighten,
+    with_alpha,
+)
+
 from utils.config import (
     APP_NAME,
     APP_VERSION,
@@ -51,6 +60,13 @@ from utils.async_workers import (
 
 
 __all__ = [
+    # Brand Colors
+    'BRAND_GOLD',
+    'BRAND_DARK_GOLD',
+    'BRAND_DARK_GOLD_HOVER',
+    'BRAND_DARK_GOLD_PRESSED',
+    'lighten',
+    'with_alpha',
     # Config
     'APP_NAME',
     'APP_VERSION',

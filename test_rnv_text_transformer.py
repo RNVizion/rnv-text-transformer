@@ -1186,7 +1186,7 @@ class TestDialogStyleManager(unittest.TestCase):
         self.assertEqual(DialogStyleManager.DARK["accent"].lower(), "#d2bc93")
 
     def test_light_accent_is_brand_gold_dark(self):
-        self.assertEqual(DialogStyleManager.LIGHT["accent"].lower(), "#b19145")
+        self.assertEqual(DialogStyleManager.LIGHT["accent"].lower(), "#8c7337")
 
     def test_dark_and_light_have_same_keys(self):
         self.assertEqual(set(DialogStyleManager.DARK.keys()), set(DialogStyleManager.LIGHT.keys()))
@@ -1884,7 +1884,7 @@ class TestThemeManager(unittest.TestCase):
 
     def test_colors_light_accent_is_brand_gold_dark(self):
         self.tm.set_theme("light")
-        self.assertEqual(self.tm.colors["accent"].lower(), "#b19145")
+        self.assertEqual(self.tm.colors["accent"].lower(), "#8c7337")
 
     # ── cycle_theme ────────────────────────────────────────────────────────────
     def test_cycle_theme_dark_to_light(self):

@@ -108,7 +108,7 @@ Read from and write to a wide range of formats, with background threading for la
 ### Themes
 
 - **Dark mode** with brand gold accent (`#d2bc93`)
-- **Light mode** with darker gold accent (`#b19145`)
+- **Light mode** with darker gold accent (`#8c7337`)
 - **Image mode** with fully custom background imagery and transparent UI overlays
 
 A custom themed-tooltip system bypasses native Qt tooltip rendering to deliver consistent cross-platform styling.

@@ -16,13 +16,17 @@ The RNV brand uses a **gold accent on dark/neutral backgrounds** across all appl
 
 | Role | Dark / Image Mode | Light Mode | Usage |
 |------|-------------------|------------|-------|
-| **Brand Gold (Primary)** | `#d2bc93` | `#b19145` | Accent, borders, selections, hover states |
-| **Brand Gold (Hover)** | `#dcc9a3` | `#c4a458` | Lighter tint for hover feedback |
-| **Brand Gold (Pressed)** | `#b7a480` | `#8a7236` | Darker shade for pressed/active states |
+| **Brand Gold (Primary)** | `#d2bc93` | `#8c7337` | Accent, borders, selections, hover states |
+| **Brand Gold (Hover)** | `#dcc9a3` | `#9f864a` | Lighter tint for hover feedback — derived as accent +19/channel |
+| **Brand Gold (Pressed)** | `#b7a480` | `#8c7337` | Pressed/active. On light this **is** the accent: a darker shade drops black-on-gold under 4.5 and would force white text |
 
 ### Why Two Golds?
 
-`#d2bc93` (bright gold) on a white background has poor contrast (fails WCAG AA). `#b19145` (dark gold) provides proper readability on light surfaces while maintaining the same gold identity. On dark backgrounds, `#d2bc93` reads clearly and feels premium.
+`#d2bc93` (bright gold) on a white background has poor contrast (fails WCAG AA). `#8c7337` (dark gold) clears the 4.5 floor on light surfaces — as text, as a border, and as a fill under black — while keeping the same gold identity. On dark backgrounds, `#d2bc93` reads clearly and feels premium.
+
+**`#8c7337` replaced `#b19145` on 17 August 2026.** The retired value measured **2.997638:1** against white — short of the 3.0 floor by 0.0024, and of the 4.5 text floor by far more. It cleared 1 of its 6 jobs; the current value clears 5. The exception is gold as text on `#EEEEEE` (3.9156:1), which still fails and is still not permitted.
+
+**Text on gold is `#000000`.** At `#8c7337` black measures 4.6226:1 and white 4.5429:1.
 
 ### One Accent, Everywhere
 
@@ -117,31 +121,31 @@ LIGHT = {
     # ── Borders ──
     'border':          '#CCCCCC',   # Standard borders (inputs, panels, dividers)
     'border_light':    '#DDDDDD',   # Subtle borders (internal separators)
-    'border_focus':    '#b19145',   # Focus ring color (dark gold)
+    'border_focus':    '#8c7337',   # Focus ring color (dark gold)
 
     # ── Accent (Brand Gold — Dark Variant) ──
-    'accent':          '#b19145',   # Primary accent — buttons, links, active states
-    'accent_hover':    '#c4a458',   # Hover tint
-    'accent_pressed':  '#8a7236',   # Pressed/active shade
+    'accent':          '#8c7337',   # Primary accent — buttons, links, active states
+    'accent_hover':    '#9f864a',   # Hover tint (derived from accent)
+    'accent_pressed':  '#8c7337',   # Pressed/active — the accent itself
     'accent_text':     '#FFFFFF',   # Text ON accent background (white on dark gold)
 
     # ── Semantic Status Colors ──
     'success':         '#28a745',   # Success messages, confirmations
     'error':           '#dc3545',   # Error messages, destructive actions
     'warning':         '#ffc107',   # Warning messages, caution states
-    'info':            '#b19145',   # Informational messages, output text (dark gold)
+    'info':            '#8c7337',   # Informational messages, output text (dark gold)
 
     # ── Selections ──
-    'selection_bg':    '#b19145',   # Text selection background
+    'selection_bg':    '#8c7337',   # Text selection background
     'selection_text':  '#FFFFFF',   # Text selection foreground
 
     # ── Scrollbars ──
     'scrollbar_bg':    '#E0E0E0',   # Scrollbar track
     'scrollbar_handle':'#AAAAAA',   # Scrollbar thumb (handle)
-    #                  '#b19145'    # Scrollbar thumb on hover (uses accent)
+    #                  '#8c7337'    # Scrollbar thumb on hover (uses accent)
 
     # ── Tooltips ──
-    'tooltip_border':  '#b19145',   # Tooltip border (dark gold)
+    'tooltip_border':  '#8c7337',   # Tooltip border (dark gold)
     #                  '#FFFFFF'    # Tooltip background (uses bg_secondary)
     #                  '#000000'    # Tooltip text (uses text)
 
@@ -156,7 +160,7 @@ LIGHT = {
     'input_border':    '#CCCCCC',   # Text input border
     'label_bg':        '#F5F5F5',   # Label background (matches window)
     'label_text':      '#000000',   # Label text
-    'output_text_color':'#b19145',  # Output text area accent (dark gold)
+    'output_text_color':'#8c7337',  # Output text area accent (dark gold)
     'border_color':    '#CCCCCC',   # Legacy alias for border
     'text_color':      '#000000',   # Legacy alias for text
 }
@@ -256,10 +260,10 @@ Resolved colors (Light Mode):
 | State | Background | Text | Border |
 |-------|-----------|------|--------|
 | Normal | `#FFFFFF` | `#000000` | `#CCCCCC` |
-| Hover | `#EEEEEE` | **`#b19145`** | **`#b19145`** |
-| Pressed | **`#b19145`** | `#FFFFFF` | `#b19145` |
+| Hover | `#EEEEEE` | **`#8c7337`** | **`#8c7337`** |
+| Pressed | **`#8c7337`** | `#000000` | `#8c7337` |
 | Disabled | `#E8E8E8` | `#AAAAAA` | `#CCCCCC` |
-| Default | `#FFFFFF` | `#000000` | **`#b19145`** |
+| Default | `#FFFFFF` | `#000000` | **`#8c7337`** |
 
 ### Why Two Different Styles?
 
@@ -275,7 +279,7 @@ Checkboxes and radio buttons use brand gold across all modes — consistent with
 |------|-------------------|----------------|--------------|------------------|----------------------|
 | Dark | `#d2bc93` | `#d2bc93` | `#d2bc93` | `#555555` | `#1A1A1A` |
 | Image | `#d2bc93` | `#d2bc93` | `#d2bc93` | `#555555` | `rgba(0,0,0,100)` |
-| Light | `#b19145` | `#b19145` | `#b19145` | `#AAAAAA` | `#FFFFFF` |
+| Light | `#8c7337` | `#8c7337` | `#8c7337` | `#AAAAAA` | `#FFFFFF` |
 
 ---
 
@@ -288,7 +292,7 @@ Used by the `LineNumberTextEdit` widget.
 | Gutter background | `#1A1A1A` | `#F0F0F0` |
 | Line number text | `#666666` | `#999999` |
 | Current line background | `#2A2A2A` | `#E8E8E8` |
-| Current line number | `#d2bc93` (gold) | `#b19145` (dark gold) |
+| Current line number | `#d2bc93` (gold) | `#8c7337` (dark gold) |
 
 ---
 
@@ -299,7 +303,7 @@ Search match highlighting uses brand gold for visual consistency.
 | Mode | Highlight Color |
 |------|----------------|
 | Dark / Image | `#d2bc93` |
-| Light | `#b19145` |
+| Light | `#8c7337` |
 
 ---
 
@@ -346,22 +350,25 @@ Each step is approximately `+16` in RGB value, creating a subtle but perceptible
 
 | Background | Text Color | Contrast Ratio | WCAG |
 |-----------|------------|----------------|------|
-| `#000000` | `#E0E0E0` | 14.5:1 | AAA |
-| `#1A1A1A` | `#E0E0E0` | 11.4:1 | AAA |
-| `#2A2A2A` | `#E0E0E0` | 9.1:1 | AAA |
-| `#d2bc93` | `#000000` | 10.2:1 | AAA |
-| `#F5F5F5` | `#000000` | 18.1:1 | AAA |
-| `#FFFFFF` | `#000000` | 21.0:1 | AAA |
-| `#b19145` | `#FFFFFF` | 4.0:1 | AA (large text) |
+| `#000000` | `#E0E0E0` | 15.91:1 | AAA |
+| `#1A1A1A` | `#E0E0E0` | 13.18:1 | AAA |
+| `#2A2A2A` | `#E0E0E0` | 10.87:1 | AAA |
+| `#d2bc93` | `#000000` | 11.35:1 | AAA |
+| `#F5F5F5` | `#000000` | 19.26:1 | AAA |
+| `#FFFFFF` | `#000000` | 21.00:1 | AAA |
+| `#8c7337` | `#000000` | 4.62:1 | AA |
+
+> **Measured, not transcribed.** Every ratio above is computed from the hex values by `apply_gold_alignment.py` using the WCAG 2.x relative-luminance formula. The previous version of this table had six of its seven rows wrong; the seventh read `4.0:1, AA (large text)` for a pair that measures 2.9976:1, and the light palette was built on it.
 
 ### Accent on Background
 
-| Background | Accent | Result |
-|-----------|--------|--------|
-| `#1A1A1A` | `#d2bc93` | Gold text/border on dark — high visibility |
-| `#2A2A2A` | `#d2bc93` | Gold border on tooltip — clear definition |
-| `#FFFFFF` | `#b19145` | Dark gold on white — sufficient contrast |
-| `#F5F5F5` | `#b19145` | Dark gold on light gray — clear accent |
+| Background | Accent | Measured | Result |
+|-----------|--------|----------|--------|
+| `#1A1A1A` | `#d2bc93` | 9.4107:1 | Gold text/border on dark — high visibility |
+| `#2A2A2A` | `#d2bc93` | 7.7610:1 | Gold border on tooltip — clear definition |
+| `#FFFFFF` | `#8c7337` | 4.5429:1 | Dark gold on white |
+| `#F5F5F5` | `#8c7337` | 4.1670:1 | Dark gold on light gray |
+| `#EEEEEE` | `#8c7337` | 3.9156:1 | Dark gold on hover gray — **not permitted for text** |
 
 ---
 
@@ -380,7 +387,7 @@ Info uses brand gold (consistent with accent):
 | Mode | Info Color | Hex |
 |------|-----------|-----|
 | Dark / Image | Brand gold | `#d2bc93` |
-| Light | Dark gold | `#b19145` |
+| Light | Dark gold | `#8c7337` |
 
 ---
 
@@ -390,22 +397,22 @@ Every interactive element uses brand gold — no secondary colors:
 
 | Element | Dark / Image | Light |
 |---------|-------------|-------|
-| Dialog button hover text & border | `#d2bc93` | `#b19145` |
-| Dialog button pressed background | `#d2bc93` | `#b19145` |
-| Dialog button default border | `#d2bc93` | `#b19145` |
-| Focus border | `#d2bc93` | `#b19145` |
-| Checkbox checked | `#d2bc93` | `#b19145` |
-| Radio button checked | `#d2bc93` | `#b19145` |
-| Text selection background | `#d2bc93` | `#b19145` |
-| Scrollbar hover | `#d2bc93` | `#b19145` |
-| Tooltip border | `#d2bc93` | `#b19145` |
-| Search highlight | `#d2bc93` | `#b19145` |
-| Current line number | `#d2bc93` | `#b19145` |
-| Output text color | `#d2bc93` | `#b19145` |
-| Info status messages | `#d2bc93` | `#b19145` |
-| GroupBox title | `#d2bc93` | `#b19145` |
-| Tip text | `#d2bc93` | `#b19145` |
-| Version label (About) | `#d2bc93` | `#b19145` |
+| Dialog button hover text & border | `#d2bc93` | `#8c7337` |
+| Dialog button pressed background | `#d2bc93` | `#8c7337` |
+| Dialog button default border | `#d2bc93` | `#8c7337` |
+| Focus border | `#d2bc93` | `#8c7337` |
+| Checkbox checked | `#d2bc93` | `#8c7337` |
+| Radio button checked | `#d2bc93` | `#8c7337` |
+| Text selection background | `#d2bc93` | `#8c7337` |
+| Scrollbar hover | `#d2bc93` | `#8c7337` |
+| Tooltip border | `#d2bc93` | `#8c7337` |
+| Search highlight | `#d2bc93` | `#8c7337` |
+| Current line number | `#d2bc93` | `#8c7337` |
+| Output text color | `#d2bc93` | `#8c7337` |
+| Info status messages | `#d2bc93` | `#8c7337` |
+| GroupBox title | `#d2bc93` | `#8c7337` |
+| Tip text | `#d2bc93` | `#8c7337` |
+| Version label (About) | `#d2bc93` | `#8c7337` |
 
 Note: Main window action buttons (Transform, Copy, Load, Save) do **not** use gold on hover — they use subtle background darkening only. See "Button Systems" section above.
 
@@ -419,7 +426,7 @@ Note: Main window action buttons (Transform, Copy, Load, Save) do **not** use go
 4. **Create color dictionaries**: Copy DARK and LIGHT from this document
 5. **Wire theme manager**: Return DARK for dark/image mode, LIGHT for light mode
 6. **Image mode transparency**: Use `rgba()` overlays from the transparency table
-7. **Use brand gold for ALL accents**: `#d2bc93` on dark, `#b19145` on light — no blue, no secondary colors
+7. **Use brand gold for ALL accents**: `#d2bc93` on dark, `#8c7337` on light — no blue, no secondary colors
 8. **Choose button style per context**: Subtle hover for workspace buttons, full gold accent for dialog buttons
 9. **Implement custom tooltips**: See `RNV_Custom_Tooltip_System.md`
 10. **Set window icon**: Use `ResourceLoader.load_app_icon()` in base dialog and standalone dialogs

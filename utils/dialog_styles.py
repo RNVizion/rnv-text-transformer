@@ -35,6 +35,13 @@ from __future__ import annotations
 from typing import ClassVar
 from functools import lru_cache
 
+from utils.colors import (
+    BRAND_GOLD,
+    BRAND_DARK_GOLD,
+    BRAND_DARK_GOLD_HOVER,
+    BRAND_DARK_GOLD_PRESSED,
+)
+
 
 class DialogStyleManager:
     """
@@ -111,10 +118,10 @@ class DialogStyleManager:
         # Borders
         'border': '#333333',
         'border_light': '#444444',
-        'border_focus': '#d2bc93',
+        'border_focus': BRAND_GOLD,
         
         # Accent colors
-        'accent': '#d2bc93',
+        'accent': BRAND_GOLD,
         'accent_hover': '#dcc9a3',
         'accent_pressed': '#b7a480',
         'accent_text': '#000000',  # Text on accent background
@@ -123,16 +130,16 @@ class DialogStyleManager:
         'success': '#28a745',
         'error': '#dc3545',
         'warning': '#ffc107',
-        'info': '#d2bc93',
+        'info': BRAND_GOLD,
         
         # Special
-        'selection_bg': '#d2bc93',
+        'selection_bg': BRAND_GOLD,
         'selection_text': '#000000',
         'scrollbar_bg': '#252525',
         'scrollbar_handle': '#444444',
         'scrollbar_handle_hover': '#606060',
         'scrollbar_handle_main': '#505050',
-        'tooltip_border': '#d2bc93',
+        'tooltip_border': BRAND_GOLD,
         
         # Checkbox indicator
         'checkbox_indicator_bg': '#1a1a1a',
@@ -153,7 +160,7 @@ class DialogStyleManager:
         'input_border': '#333333',
         'label_bg': '#000000',
         'label_text': '#e0e0e0',
-        'output_text_color': '#d2bc93',
+        'output_text_color': BRAND_GOLD,
         'border_color': '#333333',
         'text_color': '#e0e0e0',
         
@@ -161,7 +168,7 @@ class DialogStyleManager:
         'line_number_bg': '#1a1a1a',
         'line_number_fg': '#666666',
         'line_number_current_bg': '#2a2a2a',
-        'line_number_current_fg': '#d2bc93',
+        'line_number_current_fg': BRAND_GOLD,
 
         # Diff / compare semantic highlight colors
         'diff_added_bg':   '#1a4d1a',
@@ -208,28 +215,28 @@ class DialogStyleManager:
         # Borders
         'border': '#cccccc',
         'border_light': '#dddddd',
-        'border_focus': '#b19145',
+        'border_focus': BRAND_DARK_GOLD,
         
         # Accent colors
-        'accent': '#b19145',
-        'accent_hover': '#c4a458',
-        'accent_pressed': '#8a7236',
-        'accent_text': '#ffffff',  # Text on accent background
+        'accent': BRAND_DARK_GOLD,
+        'accent_hover': BRAND_DARK_GOLD_HOVER,
+        'accent_pressed': BRAND_DARK_GOLD_PRESSED,
+        'accent_text': '#000000',  # Text on accent background
         
         # Semantic colors
         'success': '#28a745',
         'error': '#dc3545',
         'warning': '#ffc107',
-        'info': '#b19145',
+        'info': BRAND_DARK_GOLD,
         
         # Special
-        'selection_bg': '#b19145',
-        'selection_text': '#ffffff',
+        'selection_bg': BRAND_DARK_GOLD,
+        'selection_text': '#000000',
         'scrollbar_bg': '#e0e0e0',
         'scrollbar_handle': '#aaaaaa',
         'scrollbar_handle_hover': '#888888',
         'scrollbar_handle_main': '#aaaaaa',
-        'tooltip_border': '#b19145',
+        'tooltip_border': BRAND_DARK_GOLD,
         
         # Checkbox indicator
         'checkbox_indicator_bg': '#ffffff',
@@ -250,7 +257,7 @@ class DialogStyleManager:
         'input_border': '#cccccc',
         'label_bg': '#f5f5f5',
         'label_text': '#000000',
-        'output_text_color': '#b19145',
+        'output_text_color': BRAND_DARK_GOLD,
         'border_color': '#cccccc',
         'text_color': '#000000',
         
@@ -258,7 +265,7 @@ class DialogStyleManager:
         'line_number_bg': '#f0f0f0',
         'line_number_fg': '#999999',
         'line_number_current_bg': '#e8e8e8',
-        'line_number_current_fg': '#b19145',
+        'line_number_current_fg': BRAND_DARK_GOLD,
 
         # Diff / compare semantic highlight colors
         'diff_added_bg':   '#d4edda',

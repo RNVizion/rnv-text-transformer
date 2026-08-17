@@ -86,6 +86,11 @@ mutants/
 .vscode/
 *.code-workspace
 
+# Visual Studio
+.vs/
+*.suo
+*.user
+
 # PyCharm / IntelliJ
 .idea/
 *.iml

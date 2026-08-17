@@ -260,7 +260,7 @@ The `show_tip()` method expects a `colors` dict with these three keys:
 |-----|---------|-----------------|------------|
 | `bg_secondary` | Tooltip background | `#2A2A2A` | `#FFFFFF` |
 | `text` | Text color | `#E0E0E0` | `#000000` |
-| `tooltip_border` | Border color | `#d2bc93` (brand gold) | `#b19145` (dark gold) |
+| `tooltip_border` | Border color | `#d2bc93` (brand gold) | `#8c7337` (dark gold) |
 
 Your theme manager's color dictionary must include these keys. If your app uses different key names, update the references in `show_tip()` accordingly.
 
