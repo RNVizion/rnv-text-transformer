@@ -26,7 +26,7 @@ The RNV brand uses a **gold accent on dark/neutral backgrounds** across all appl
 
 **`#8c7337` replaced `#b19145` on 17 August 2026.** The retired value measured **2.997638:1** against white — short of the 3.0 floor by 0.0024, and of the 4.5 text floor by far more. It cleared 1 of its 6 jobs; the current value clears 5. The exception is gold as text on `#EEEEEE` (3.9156:1), which still fails and is still not permitted.
 
-**Text on gold is `#000000`.** At `#8c7337` black measures 4.6226:1 and white 4.5429:1.
+**Text on gold.** The register rules `#000000`. At `#8c7337` both clear the 4.5 floor — black 4.6226:1, white 4.5429:1 — so the dialog buttons' gold/white inversion, which puts `#FFFFFF` on the pressed state as the mirror of hover, is compliant at this value. It was not at `#b19145`, where white measured 2.9976:1. Worth a ruling from Brand Infrastructure rather than a silent choice either way.
 
 ### One Accent, Everywhere
 
@@ -261,7 +261,7 @@ Resolved colors (Light Mode):
 |-------|-----------|------|--------|
 | Normal | `#FFFFFF` | `#000000` | `#CCCCCC` |
 | Hover | `#EEEEEE` | **`#8c7337`** | **`#8c7337`** |
-| Pressed | **`#8c7337`** | `#000000` | `#8c7337` |
+| Pressed | **`#8c7337`** | `#FFFFFF` | `#8c7337` |
 | Disabled | `#E8E8E8` | `#AAAAAA` | `#CCCCCC` |
 | Default | `#FFFFFF` | `#000000` | **`#8c7337`** |
 

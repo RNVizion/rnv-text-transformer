@@ -221,7 +221,7 @@ class DialogStyleManager:
         'accent': BRAND_DARK_GOLD,
         'accent_hover': BRAND_DARK_GOLD_HOVER,
         'accent_pressed': BRAND_DARK_GOLD_PRESSED,
-        'accent_text': '#000000',  # Text on accent background
+        'accent_text': '#ffffff',  # Text on accent background
         
         # Semantic colors
         'success': '#28a745',
@@ -231,7 +231,7 @@ class DialogStyleManager:
         
         # Special
         'selection_bg': BRAND_DARK_GOLD,
-        'selection_text': '#000000',
+        'selection_text': '#ffffff',
         'scrollbar_bg': '#e0e0e0',
         'scrollbar_handle': '#aaaaaa',
         'scrollbar_handle_hover': '#888888',
