@@ -332,7 +332,72 @@ def with_alpha(color: str, alpha: int) -> str:
     return f"#{alpha:02X}{rgb}"
 
 
+# ==================== PROVENANCE ====================
+#
+# Where every colour constant in this module comes from. Declarative and
+# in the file rather than in the test, because a classification that lives
+# only in a test goes stale in the direction that reports clean: add a
+# constant, forget the test entry, and the test passes while checking one
+# fewer thing than it claims.
+#
+# tests/test_brand_mirror.py asserts this is complete in BOTH directions,
+# that every "register" entry still matches rnv-brand, that every
+# "derived" entry is genuinely computed rather than a literal wearing the
+# label, and that nothing app-owned is secretly a register value.
+#
+#   register      mirrored from RNVizion/rnv-brand engine/brand.py
+#   derived       computed here from a register value
+#   app-ramp      a step on this app's neutral ramp; the register
+#                 explicitly declines to name these
+#   app-semantic  neither brand nor ramp -- diff and regex highlighting
+
+PROVENANCE: Final[dict[str, str]] = {
+    # -- register
+    'BRAND_GOLD': 'register',
+    'BRAND_DARK_GOLD': 'register',
+    'TRUE_BLACK': 'register',
+    'WHITE': 'register',
+    'BRAND_BLACK': 'register',
+    'APP_CARD': 'register',
+    'APP_BORDER': 'register',
+    'APP_TEXT': 'register',
+    'APP_TEXT_DIM': 'register',
+    'STATUS_SUCCESS': 'register',
+    'STATUS_WARNING': 'register',
+    'STATUS_ERROR': 'register',
+    # -- derived
+    'BRAND_DARK_GOLD_DEEP': 'derived',
+    'BRAND_DARK_GOLD_PRESSED': 'derived',
+    'GOLD_HOVER': 'derived',
+    'GOLD_PRESSED': 'derived',
+    # -- app-ramp
+    'GREY_3A': 'app-ramp',
+    'GREY_44': 'app-ramp',
+    'GREY_55': 'app-ramp',
+    'GREY_60': 'app-ramp',
+    'GREY_66': 'app-ramp',
+    'GREY_88': 'app-ramp',
+    'GREY_CC': 'app-ramp',
+    'GREY_DD': 'app-ramp',
+    'GREY_E8': 'app-ramp',
+    'GREY_EE': 'app-ramp',
+    'GREY_F5': 'app-ramp',
+    # -- app-semantic
+    'DIFF_ADDED_DARK': 'app-semantic',
+    'DIFF_REMOVED_DARK': 'app-semantic',
+    'DIFF_CHANGED_DARK': 'app-semantic',
+    'DIFF_CURRENT_DARK': 'app-semantic',
+    'DIFF_ADDED_LIGHT': 'app-semantic',
+    'DIFF_REMOVED_LIGHT': 'app-semantic',
+    'DIFF_CHANGED_LIGHT': 'app-semantic',
+    'DIFF_CURRENT_LIGHT': 'app-semantic',
+    'REGEX_MATCH_DARK': 'app-semantic',
+    'REGEX_MATCH_LIGHT': 'app-semantic',
+    'REGEX_GROUP_PALETTE': 'app-semantic',
+}
+
 __all__ = [
+    'PROVENANCE',
     'BRAND_GOLD',
     'BRAND_DARK_GOLD',
     'BRAND_DARK_GOLD_DEEP',

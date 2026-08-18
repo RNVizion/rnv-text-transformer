@@ -1,18 +1,17 @@
 """
-Brand mirror and palette-literal guard.
+Brand mirror, palette-literal and provenance guard.
 
-Two invariants:
+Three things this file refuses to let happen:
 
-1. No palette entry is a bare hex literal. Every colour in DialogStyleManager
-   .DARK and .LIGHT resolves through a named constant in utils/colors.py.
-   Enforced by parsing the source, because a value check cannot see the
-   difference between '#333333' and APP_BORDER -- they are the same string at
-   runtime and completely different in a diff.
+1. A colour appears in the palette as a bare hex literal instead of a name.
+2. A mirrored value drifts from RNVizion/rnv-brand.
+3. A constant is added to utils/colors.py without saying where it came from.
 
-2. The values mirrored from RNVizion/rnv-brand still match the register.
-   This app ships standalone and cannot depend on the brand package, so the
-   check runs only when that package happens to be importable and skips
-   loudly otherwise. A mirror nobody checks is a copy waiting to drift.
+(3) is the one that matters most, and it is why PROVENANCE lives in colors.py
+rather than here. A hand-written list inside a test covers what it covers and
+says nothing about what it misses -- it goes stale in the direction that
+reports clean. The completeness checks below close that: every colour constant
+must have a provenance entry, and every entry must name a real constant.
 """
 from __future__ import annotations
 
@@ -24,27 +23,148 @@ import pytest
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
-STYLES = pathlib.Path(__file__).resolve().parents[1] / 'utils' / 'dialog_styles.py'
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+STYLES = ROOT / 'utils' / 'dialog_styles.py'
+COLORS = ROOT / 'utils' / 'colors.py'
 
-# constant name in utils/colors.py -> how to reach it in engine/brand.py
-MIRRORED = {
-    'BRAND_GOLD':      ('BRAND_GOLD', None),
-    'BRAND_DARK_GOLD': ('BRAND_DARK_GOLD', None),
-    'BRAND_BLACK':     ('BRAND_BLACK', None),
-    'TRUE_BLACK':      ('TRUE_BLACK', None),
-    'WHITE':           ('WHITE', None),
-    'APP_CARD':        ('APP', 'card'),
-    'APP_BORDER':      ('APP', 'border'),
-    'APP_TEXT':        ('APP', 'text'),
-    'APP_TEXT_DIM':    ('APP', 'text-dim'),
-    'STATUS_SUCCESS':  ('STATUS', 'success'),
-    'STATUS_WARNING':  ('STATUS', 'warning'),
-    'STATUS_ERROR':    ('STATUS', 'error'),
-}
+VALID_GROUPS = {'register', 'derived', 'app-ramp', 'app-semantic'}
 
+
+def _colour_constants() -> dict[str, ast.AST]:
+    """Every module-level colour constant in colors.py -> its value node."""
+    tree = ast.parse(COLORS.read_text(encoding='utf-8'))
+    out = {}
+    for node in tree.body:
+        if not (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)):
+            continue
+        name = node.target.id
+        if name == 'PROVENANCE':
+            continue
+        value = getattr(colors, name, None)
+        is_colour = (isinstance(value, str) and value.startswith('#')) or (
+            isinstance(value, tuple) and value
+            and all(isinstance(v, str) and v.startswith('#') for v in value))
+        if is_colour:
+            out[name] = node.value
+    return out
+
+
+def _brand_value(brand, name: str):
+    """Resolve a mirrored constant in engine/brand.py BY CONVENTION.
+
+    APP_TEXT_DIM  -> APP["text-dim"]
+    STATUS_ERROR  -> STATUS["error"]
+    anything else -> the module attribute of the same name
+
+    Convention rather than a second hardcoded map, which would go stale behind
+    the first one exactly as MIRRORED did.
+    """
+    for prefix in ('APP', 'STATUS'):
+        if name.startswith(prefix + '_'):
+            key = name[len(prefix) + 1:].lower().replace('_', '-')
+            return getattr(brand, prefix)[key]
+    return getattr(brand, name)
+
+
+# ---------------------------------------------------------------- completeness
+
+def test_provenance_covers_every_constant():
+    """No colour constant may sit outside PROVENANCE."""
+    missing = sorted(set(_colour_constants()) - set(colors.PROVENANCE))
+    assert not missing, (
+        'colour constants with no provenance entry:\n  ' + '\n  '.join(missing)
+        + '\n\nAdd each to PROVENANCE in utils/colors.py as one of '
+        + ', '.join(sorted(VALID_GROUPS)))
+
+
+def test_provenance_has_no_phantom_entries():
+    """And no entry may name a constant that no longer exists."""
+    phantom = sorted(set(colors.PROVENANCE) - set(_colour_constants()))
+    assert not phantom, (
+        'PROVENANCE names constants that are not defined:\n  '
+        + '\n  '.join(phantom))
+
+
+def test_provenance_groups_are_valid():
+    bad = {k: v for k, v in colors.PROVENANCE.items() if v not in VALID_GROUPS}
+    assert not bad, f'unknown provenance group(s): {bad}'
+
+
+# ---------------------------------------------------------------- the register
+
+def test_register_values_match_rnv_brand():
+    """Every 'register' constant still equals the register. Skips if absent."""
+    brand = pytest.importorskip(
+        'engine.brand',
+        reason='rnv-brand not importable here; mirror unverified this run')
+    drift = []
+    for name, group in colors.PROVENANCE.items():
+        if group != 'register':
+            continue
+        mine = getattr(colors, name)
+        try:
+            theirs = _brand_value(brand, name)
+        except (AttributeError, KeyError):
+            drift.append(f'{name}: not found in engine/brand.py by convention')
+            continue
+        if mine.lower() != theirs.lower():
+            drift.append(f'{name}: mirror {mine} vs register {theirs}')
+    assert not drift, 'the mirror has drifted:\n  ' + '\n  '.join(drift)
+
+
+def test_app_owned_values_are_not_register_values():
+    """Something app-owned that IS a brand value is misclassified."""
+    brand = pytest.importorskip(
+        'engine.brand', reason='rnv-brand not importable here')
+    named = {}
+    for attr in ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_BLACK',
+                 'TRUE_BLACK', 'WHITE', 'WEB_BLACK'):
+        named[getattr(brand, attr).lower()] = attr
+    for dict_name in ('APP', 'STATUS'):
+        for key, value in getattr(brand, dict_name).items():
+            if isinstance(value, str) and value.startswith('#'):
+                named.setdefault(value.lower(), f'{dict_name}["{key}"]')
+
+    wrong = []
+    for name, group in colors.PROVENANCE.items():
+        if not group.startswith('app-'):
+            continue
+        value = getattr(colors, name)
+        for v in (value,) if isinstance(value, str) else value:
+            if v.lower() in named:
+                wrong.append(f'{name} = {v} is {named[v.lower()]} in the register, '
+                             f'but marked {group}')
+    assert not wrong, 'misclassified as app-owned:\n  ' + '\n  '.join(wrong)
+
+
+# ------------------------------------------------------------------- derived
+
+def test_derived_constants_are_actually_derived():
+    """A literal must not wear the 'derived' label."""
+    nodes = _colour_constants()
+    literal = []
+    for name, group in colors.PROVENANCE.items():
+        if group != 'derived':
+            continue
+        node = nodes.get(name)
+        if isinstance(node, ast.Constant):
+            literal.append(f'{name} is marked derived but assigned the literal '
+                           f'{node.value!r}')
+    assert not literal, '\n  '.join(literal)
+
+
+def test_register_constants_are_literals_not_computed():
+    """A mirrored value must be written down, so the mirror can be compared."""
+    nodes = _colour_constants()
+    computed = [n for n, g in colors.PROVENANCE.items()
+                if g == 'register' and not isinstance(nodes.get(n), ast.Constant)]
+    assert not computed, (
+        'marked register but computed, so nothing mirrors: ' + ', '.join(computed))
+
+
+# ------------------------------------------------------------------- palette
 
 def _palette_nodes():
-    """Yield (theme, key, value_node) for both palette dicts."""
     tree = ast.parse(STYLES.read_text(encoding='utf-8'))
     cls = next(n for n in ast.walk(tree)
                if isinstance(n, ast.ClassDef) and n.name == 'DialogStyleManager')
@@ -62,47 +182,20 @@ def _palette_nodes():
 
 @pytest.mark.parametrize('theme', ['DARK', 'LIGHT'])
 def test_no_bare_hex_in_palette(theme):
-    """Every colour entry resolves through a named constant."""
-    bare = []
-    for t, key, node in _palette_nodes():
-        if t != theme:
-            continue
-        if isinstance(node, ast.Constant) and isinstance(node.value, str) \
-                and node.value.startswith('#'):
-            bare.append(f'{t}[{key!r}] = {node.value!r}')
-    assert not bare, (
-        'bare hex literals in the palette -- give them a name in '
-        'utils/colors.py:\n  ' + '\n  '.join(bare))
+    bare = [f'{t}[{key!r}] = {n.value!r}' for t, key, n in _palette_nodes()
+            if t == theme and isinstance(n, ast.Constant)
+            and isinstance(n.value, str) and n.value.startswith('#')]
+    assert not bare, ('bare hex literals in the palette -- give them a name in '
+                      'utils/colors.py:\n  ' + '\n  '.join(bare))
 
 
 def test_every_palette_colour_is_a_known_constant():
-    """The name used must exist in utils/colors.py and hold that value."""
-    unknown = []
-    for theme, key, node in _palette_nodes():
-        if isinstance(node, ast.Name):
-            if not hasattr(colors, node.id):
-                unknown.append(f'{theme}[{key!r}] -> utils.colors.{node.id} missing')
+    unknown = [f'{t}[{key!r}] -> utils.colors.{n.id} missing'
+               for t, key, n in _palette_nodes()
+               if isinstance(n, ast.Name) and not hasattr(colors, n.id)]
     assert not unknown, '\n  '.join(unknown)
 
 
 def test_regex_group_palette_is_named():
-    """The capture-group colours live in colors.py, not inline."""
     assert tuple(DialogStyleManager.REGEX_GROUP_COLORS) == \
         tuple(colors.REGEX_GROUP_PALETTE)
-
-
-def test_mirror_matches_the_register():
-    """Mirrored values still equal RNVizion/rnv-brand. Skips if absent."""
-    brand = pytest.importorskip(
-        'engine.brand',
-        reason='rnv-brand not importable here; mirror unverified this run')
-    drift = []
-    for local, (attr, key) in MIRRORED.items():
-        mine = getattr(colors, local)
-        theirs = getattr(brand, attr)
-        if key is not None:
-            theirs = theirs[key]
-        if mine.lower() != theirs.lower():
-            drift.append(f'{local}: mirror {mine} vs register {theirs}')
-    assert not drift, 'the mirror has drifted from the register:\n  ' + \
-        '\n  '.join(drift)
