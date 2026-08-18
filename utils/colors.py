@@ -202,11 +202,18 @@ STATUS_ERROR: Final[str] = '#dc3545'
 # mode is the half still minting, and a future pass should close it --
 # which would change these values, so it is not this pass.
 
-#: dark-mode hover. Named in the register by hex, not promoted
-GOLD_HOVER: Final[str] = '#dcc9a3'
+#: dark-mode hover. DERIVED, not minted -- the register rules that a surface
+#: needing a lighter or darker gold derives it. Held closest to the value it
+#: replaces (#dcc9a3, RGB distance 2.4) rather than to a tidy step, because the
+#: brief was to change the provenance and not the appearance. Hue snaps back to
+#: BRAND_GOLD's 39.0 degrees exactly; the minted value had drifted to 40.0.
+GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)
 
-#: dark-mode pressed. Same standing
-GOLD_PRESSED: Final[str] = '#b7a480'
+#: dark-mode pressed. Same derivation, same reasoning (replaces #b7a480,
+#: RGB distance 3.3, hue drift 39.3 -> 39.0). Dark mode has room for a distinct
+#: pressed state; light mode does not, which is why BRAND_DARK_GOLD_PRESSED is
+#: the accent itself and this is not.
+GOLD_PRESSED: Final[str] = lighten(BRAND_GOLD, -23)
 
 
 # ============ THE APP'S NEUTRAL RAMP ============
@@ -227,20 +234,16 @@ GOLD_PRESSED: Final[str] = '#b7a480'
 # Named by their byte so the ramp reads in order and a step cannot be
 # confused with a role. Adding one is not drift.
 
-GREY_25: Final[str] = '#252525'
 GREY_3A: Final[str] = '#3a3a3a'
 GREY_44: Final[str] = '#444444'
-GREY_50: Final[str] = '#505050'
 GREY_55: Final[str] = '#555555'
 GREY_60: Final[str] = '#606060'
 GREY_66: Final[str] = '#666666'
 GREY_88: Final[str] = '#888888'
-GREY_99: Final[str] = '#999999'
 GREY_CC: Final[str] = '#cccccc'
 GREY_DD: Final[str] = '#dddddd'
 GREY_E8: Final[str] = '#e8e8e8'
 GREY_EE: Final[str] = '#eeeeee'
-GREY_F0: Final[str] = '#f0f0f0'
 GREY_F5: Final[str] = '#f5f5f5'
 
 
@@ -348,20 +351,16 @@ __all__ = [
     'STATUS_ERROR',
     'GOLD_HOVER',
     'GOLD_PRESSED',
-    'GREY_25',
     'GREY_3A',
     'GREY_44',
-    'GREY_50',
     'GREY_55',
     'GREY_60',
     'GREY_66',
     'GREY_88',
-    'GREY_99',
     'GREY_CC',
     'GREY_DD',
     'GREY_E8',
     'GREY_EE',
-    'GREY_F0',
     'GREY_F5',
     'DIFF_ADDED_DARK',
     'DIFF_REMOVED_DARK',

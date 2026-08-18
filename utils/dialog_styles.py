@@ -48,20 +48,16 @@ from utils.colors import (
     STATUS_ERROR,
     GOLD_HOVER,
     GOLD_PRESSED,
-    GREY_25,
     GREY_3A,
     GREY_44,
-    GREY_50,
     GREY_55,
     GREY_60,
     GREY_66,
     GREY_88,
-    GREY_99,
     GREY_CC,
     GREY_DD,
     GREY_E8,
     GREY_EE,
-    GREY_F0,
     GREY_F5,
     DIFF_ADDED_DARK,
     DIFF_REMOVED_DARK,
@@ -175,10 +171,10 @@ class DialogStyleManager:
         # Special
         'selection_bg': BRAND_GOLD,
         'selection_text': TRUE_BLACK,
-        'scrollbar_bg': GREY_25,
+        'scrollbar_bg': APP_CARD,
         'scrollbar_handle': GREY_44,
         'scrollbar_handle_hover': GREY_60,
-        'scrollbar_handle_main': GREY_50,
+        'scrollbar_handle_main': GREY_44,
         'tooltip_border': BRAND_GOLD,
         
         # Checkbox indicator
@@ -206,7 +202,7 @@ class DialogStyleManager:
         
         # Line number gutter widget
         'line_number_bg': BRAND_BLACK,
-        'line_number_fg': GREY_66,
+        'line_number_fg': GREY_88,
         'line_number_current_bg': APP_CARD,
         'line_number_current_fg': BRAND_GOLD,
 
@@ -220,7 +216,7 @@ class DialogStyleManager:
         'diff_html_equal_bg':  WHITE,
         'diff_html_insert_bg': DIFF_ADDED_LIGHT,
         'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
-        'diff_html_header_bg': GREY_F0,
+        'diff_html_header_bg': GREY_EE,
         'diff_html_line_num':  GREY_88,
         'diff_html_border':    GREY_DD,
         'diff_html_stats_text':GREY_66,
@@ -304,8 +300,8 @@ class DialogStyleManager:
         'text_color': TRUE_BLACK,
         
         # Line number gutter widget
-        'line_number_bg': GREY_F0,
-        'line_number_fg': GREY_99,
+        'line_number_bg': GREY_EE,
+        'line_number_fg': GREY_66,
         'line_number_current_bg': GREY_E8,
         'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
 
@@ -319,7 +315,7 @@ class DialogStyleManager:
         'diff_html_equal_bg':  WHITE,
         'diff_html_insert_bg': DIFF_ADDED_LIGHT,
         'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
-        'diff_html_header_bg': GREY_F0,
+        'diff_html_header_bg': GREY_EE,
         'diff_html_line_num':  GREY_88,
         'diff_html_border':    GREY_DD,
         'diff_html_stats_text':GREY_66,

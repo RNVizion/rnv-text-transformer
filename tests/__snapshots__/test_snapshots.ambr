@@ -106,7 +106,7 @@
                   color: #000000;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
               QComboBox:disabled {
@@ -211,7 +211,7 @@
               
               /* ===== SCROLL BAR ===== */
               QScrollBar:vertical {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   width: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -233,7 +233,7 @@
               }
               
               QScrollBar:horizontal {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   height: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -377,7 +377,7 @@
                   color: #000000;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
               QComboBox:disabled {
@@ -482,7 +482,7 @@
               
               /* ===== SCROLL BAR ===== */
               QScrollBar:vertical {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   width: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -504,7 +504,7 @@
               }
               
               QScrollBar:horizontal {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   height: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -1190,7 +1190,7 @@
                   color: #000000;
               }
               QComboBox QAbstractItemView::item:hover {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
               QComboBox:disabled {
@@ -1295,7 +1295,7 @@
               
               /* ===== SCROLL BAR ===== */
               QScrollBar:vertical {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   width: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -1317,7 +1317,7 @@
               }
               
               QScrollBar:horizontal {
-                  background-color: #252525;
+                  background-color: #2a2a2a;
                   height: 12px;
                   border-radius: 6px;
                   margin: 0;
@@ -1388,7 +1388,7 @@
               QTabBar::tab:hover:!selected {
                   background-color: #3a3a3a;
                   color: #d2bc93;
-                  border-bottom: 2px solid #b7a480;
+                  border-bottom: 2px solid #bba57c;
               }
           
   
@@ -1407,7 +1407,7 @@
                   color: #000000;
               }
               QTableWidget::item:hover {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
               QHeaderView::section {
@@ -1441,7 +1441,7 @@
                   color: #000000;
               }
               QListWidget::item:hover:!selected {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
           
@@ -1461,7 +1461,7 @@
                   color: #000000;
               }
               QTreeWidget::item:hover:!selected {
-                  background-color: #dcc9a3;
+                  background-color: #dfc9a0;
                   color: #000000;
               }
               QTreeWidget::branch {
@@ -1495,7 +1495,7 @@
                   border-radius: 8px;
               }
               QSlider::handle:horizontal:hover {
-                  background: #dcc9a3;
+                  background: #dfc9a0;
               }
               QSlider::sub-page:horizontal {
                   background: #d2bc93;
@@ -1515,7 +1515,7 @@
                   border-radius: 8px;
               }
               QSlider::handle:vertical:hover {
-                  background: #dcc9a3;
+                  background: #dfc9a0;
               }
           
   
@@ -2117,9 +2117,9 @@
   '''
   {
     "accent": "#d2bc93",
-    "accent_hover": "#dcc9a3",
+    "accent_hover": "#dfc9a0",
     "accent_ink": "#d2bc93",
-    "accent_pressed": "#b7a480",
+    "accent_pressed": "#bba57c",
     "accent_text": "#000000",
     "bg": "#1a1a1a",
     "bg_hover": "#3a3a3a",
@@ -2141,7 +2141,7 @@
     "diff_html_border": "#dddddd",
     "diff_html_delete_bg": "#f8d7da",
     "diff_html_equal_bg": "#ffffff",
-    "diff_html_header_bg": "#f0f0f0",
+    "diff_html_header_bg": "#eeeeee",
     "diff_html_insert_bg": "#d4edda",
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
@@ -2165,15 +2165,15 @@
     "line_number_bg": "#1a1a1a",
     "line_number_current_bg": "#2a2a2a",
     "line_number_current_fg": "#d2bc93",
-    "line_number_fg": "#666666",
+    "line_number_fg": "#888888",
     "list_hover_bg": "#ffffff",
     "list_hover_text": "#000000",
     "output_text_color": "#d2bc93",
     "regex_match_bg": "#4a4a00",
-    "scrollbar_bg": "#252525",
+    "scrollbar_bg": "#2a2a2a",
     "scrollbar_handle": "#444444",
     "scrollbar_handle_hover": "#606060",
-    "scrollbar_handle_main": "#505050",
+    "scrollbar_handle_main": "#444444",
     "selection_bg": "#d2bc93",
     "selection_text": "#000000",
     "success": "#28a745",
@@ -2215,7 +2215,7 @@
     "diff_html_border": "#dddddd",
     "diff_html_delete_bg": "#f8d7da",
     "diff_html_equal_bg": "#ffffff",
-    "diff_html_header_bg": "#f0f0f0",
+    "diff_html_header_bg": "#eeeeee",
     "diff_html_insert_bg": "#d4edda",
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
@@ -2236,10 +2236,10 @@
     "input_text": "#000000",
     "label_bg": "#f5f5f5",
     "label_text": "#000000",
-    "line_number_bg": "#f0f0f0",
+    "line_number_bg": "#eeeeee",
     "line_number_current_bg": "#e8e8e8",
     "line_number_current_fg": "#7e6529",
-    "line_number_fg": "#999999",
+    "line_number_fg": "#666666",
     "list_hover_bg": "#1a1a1a",
     "list_hover_text": "#ffffff",
     "output_text_color": "#8c7337",
@@ -2334,7 +2334,7 @@
   .diff-delete { background-color: #f8d7da; }
   .diff-replace-left { background-color: #f8d7da; }
   .diff-replace-right { background-color: #d4edda; }
-  .header { background-color: #f0f0f0; font-weight: bold; padding: 10px; margin-bottom: 10px; }
+  .header { background-color: #eeeeee; font-weight: bold; padding: 10px; margin-bottom: 10px; }
   .stats { margin-bottom: 20px; color: #666666; }
   </style>
   </head>
