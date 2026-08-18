@@ -236,6 +236,39 @@ class TextCleaner:
         return result + "\n"
 
     @staticmethod
+    def _join_lines(original: str, lines: list[str]) -> str:
+        """
+        Join lines with '\\n' so that ``splitlines()`` reads back exactly
+        ``lines``, then restore any trailing separator from ``original``.
+
+        ``'\\n'.join()`` is not a round trip when the final line is empty,
+        because a trailing '\\n' is a TERMINATOR to ``splitlines()`` rather
+        than a separator::
+
+            ['0', '', '']  -> '0\\n\\n'  -> ['0', '']    one line short
+            ['a', '']      -> 'a\\n'     -> ['a']        one line short
+
+        Left unhandled, every pass silently drops the final blank line --
+        which is both data loss on ordinary text and the reason the affected
+        operations were not idempotent.
+
+        An empty final line therefore needs one extra terminator to survive
+        the round trip. ``_preserve_trailing_newline`` is still applied after:
+        it covers the *input* side of the same asymmetry, which is separate.
+
+        Args:
+            original: The text the operation received
+            lines: The processed lines, in output order
+
+        Returns:
+            Text that splits back into exactly ``lines``
+        """
+        result = '\n'.join(lines)
+        if lines and lines[-1] == '':
+            result += '\n'
+        return TextCleaner._preserve_trailing_newline(original, result)
+
+    @staticmethod
     def remove_duplicate_lines(text: str, preserve_order: bool = True) -> str:
         """
         Remove duplicate lines from text.
@@ -259,11 +292,11 @@ class TextCleaner:
                 if line not in seen:
                     seen.add(line)
                     unique.append(line)
-            result = '\n'.join(unique)
+            result = unique
         else:
-            result = '\n'.join(sorted(set(lines)))
+            result = sorted(set(lines))
 
-        return TextCleaner._preserve_trailing_newline(text, result)
+        return TextCleaner._join_lines(text, result)
     
     @staticmethod
     def sort_lines(text: str, reverse: bool = False, case_insensitive: bool = True) -> str:
@@ -280,8 +313,8 @@ class TextCleaner:
         """
         lines = text.splitlines()
         key_func = str.lower if case_insensitive else None
-        result = '\n'.join(sorted(lines, key=key_func, reverse=reverse))
-        return TextCleaner._preserve_trailing_newline(text, result)
+        return TextCleaner._join_lines(
+            text, sorted(lines, key=key_func, reverse=reverse))
     
     @staticmethod
     def strip_html_tags(text: str) -> str:
@@ -337,8 +370,7 @@ class TextCleaner:
             Text with leading spaces removed from each line
         """
         lines = text.splitlines()
-        result = '\n'.join(line.lstrip() for line in lines)
-        return TextCleaner._preserve_trailing_newline(text, result)
+        return TextCleaner._join_lines(text, [line.lstrip() for line in lines])
     
     @staticmethod
     def remove_trailing_spaces(text: str) -> str:
@@ -352,8 +384,7 @@ class TextCleaner:
             Text with trailing spaces removed from each line
         """
         lines = text.splitlines()
-        result = '\n'.join(line.rstrip() for line in lines)
-        return TextCleaner._preserve_trailing_newline(text, result)
+        return TextCleaner._join_lines(text, [line.rstrip() for line in lines])
     
     # ==================== SPLIT/JOIN OPERATIONS ====================
     

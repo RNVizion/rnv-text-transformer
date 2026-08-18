@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import string
 
+import pytest
+
 from hypothesis import given, settings, strategies as st
 
 from core.text_transformer import TextTransformer
@@ -321,3 +323,44 @@ class TestTextStatisticsProperties:
             lines=0,
             paragraphs=0,
         )
+
+# ════════════════════════════════════════════════════════════════════════════
+# Trailing blank line preservation
+#
+# Regression guard for the splitlines()/join() round-trip bug: joining a line
+# list whose final entry is empty produced a string that read back one line
+# short, so every pass silently deleted a trailing blank line.
+# ════════════════════════════════════════════════════════════════════════════
+class TestTrailingBlankLines:
+    """core/text_cleaner.py -- _join_lines round trip."""
+
+    OPS = [
+        CleanupOperation.REMOVE_LEADING_SPACES,
+        CleanupOperation.REMOVE_TRAILING_SPACES,
+        CleanupOperation.SORT_LINES,
+        CleanupOperation.SORT_LINES_REVERSE,
+    ]
+
+    @pytest.mark.parametrize('op', OPS)
+    @pytest.mark.parametrize('text', ['a\n\n', 'a\nb\n\n', '\n\n', 'a\n\n\n'])
+    def test_trailing_blank_lines_survive(self, op, text):
+        """A blank final line must not be eaten."""
+        before = len(text.splitlines())
+        after = len(TextCleaner.cleanup(text, op).splitlines())
+        assert after == before, (
+            f'{op} turned {before} lines into {after} for {text!r}')
+
+    @pytest.mark.parametrize('op', OPS)
+    @pytest.mark.parametrize('text', ['\r\r0', 'a\n\n', '\x850', 'a\x0b\x0b',
+                                     '\u2028\u2028z', '\n\n', 'b\na\n\n'])
+    def test_idempotent_on_boundary_characters(self, op, text):
+        """Every splitlines() boundary, not just '\n' and '\r'."""
+        once = TextCleaner.cleanup(text, op)
+        twice = TextCleaner.cleanup(once, op)
+        assert once == twice, f'{op} not idempotent for {text!r}'
+
+    def test_join_lines_round_trips(self):
+        """The helper's contract: splitlines(_join_lines(x, L)) == L."""
+        for lines in ([], [''], ['', ''], ['a', ''], ['0', '', ''], ['a', 'b']):
+            joined = TextCleaner._join_lines('', lines)
+            assert joined.splitlines() == lines, f'{lines} did not round trip'
