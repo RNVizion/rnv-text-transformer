@@ -141,6 +141,148 @@ BRAND_DARK_GOLD_DEEP: Final[str] = lighten(BRAND_DARK_GOLD, -14)
 BRAND_DARK_GOLD_PRESSED: Final[str] = BRAND_DARK_GOLD
 
 
+# ==================== THE REGISTER, MIRRORED ====================
+#
+# Mirrored from RNVizion/rnv-brand engine/brand.py. MIRRORED, not
+# imported: this application ships standalone and cannot take a
+# dependency on the brand repository. tests/test_brand_mirror.py fails
+# if these drift, whenever that package is importable.
+#
+# engine/brand.py's APP dict is this app's dark palette almost exactly --
+# window, panel, card, border, text, text-dim. It was named there while
+# this file spelled it out in hex.
+
+#: App window ground; text on gold, on either surface
+TRUE_BLACK: Final[str] = '#000000'
+
+#: Light-surface cards and inputs; the ramp's far anchor
+WHITE: Final[str] = '#ffffff'
+
+#: Brand black (charcoal). Raised surfaces in apps
+BRAND_BLACK: Final[str] = '#1a1a1a'
+
+#: engine/brand.py APP["card"]
+APP_CARD: Final[str] = '#2a2a2a'
+
+#: engine/brand.py APP["border"]
+APP_BORDER: Final[str] = '#333333'
+
+#: engine/brand.py APP["text"]
+APP_TEXT: Final[str] = '#e0e0e0'
+
+#: engine/brand.py APP["text-dim"]
+APP_TEXT_DIM: Final[str] = '#aaaaaa'
+
+#: engine/brand.py STATUS["success"]
+STATUS_SUCCESS: Final[str] = '#28a745'
+
+#: engine/brand.py STATUS["warning"]
+STATUS_WARNING: Final[str] = '#ffc107'
+
+#: engine/brand.py STATUS["error"]
+STATUS_ERROR: Final[str] = '#dc3545'
+
+
+# ============ HAND-PICKED GOLD MODULATIONS ============
+#
+# The register names #dcc9a3 by hex and refuses to promote it:
+#
+#   "Values between and beyond the two are modulations, and none of
+#    them is promoted. #dcc9a3 (three apps) sits on the gold axis
+#    extended past brand gold by about 30%... A surface that needs a
+#    lighter or darker gold derives it; it doesn't mint one."
+#
+# These two were minted. They are named here rather than re-derived,
+# because no simple rule reproduces them: against BRAND_GOLD their
+# deltas are +10,+13,+16 and -27,-24,-19, and neither an HLS lightness
+# move nor a white/black mix lands on them exactly. Inventing a formula
+# that happens to hit a hand-picked number is a literal in disguise.
+#
+# The light-mode equivalents ARE derived (BRAND_DARK_GOLD_DEEP). Dark
+# mode is the half still minting, and a future pass should close it --
+# which would change these values, so it is not this pass.
+
+#: dark-mode hover. Named in the register by hex, not promoted
+GOLD_HOVER: Final[str] = '#dcc9a3'
+
+#: dark-mode pressed. Same standing
+GOLD_PRESSED: Final[str] = '#b7a480'
+
+
+# ============ THE APP'S NEUTRAL RAMP ============
+#
+# The register declines to name these, deliberately:
+#
+#   "Every neutral in all five desktop apps -- twenty-three distinct
+#    values from #000000 to #ffffff -- is a pure grey, R = G = B,
+#    without exception. That isn't twenty-three colors; it's one ramp
+#    with steps chosen per surface. The brand doesn't publish them,
+#    doesn't count them, and doesn't drift when an app adds one."
+#
+# So these are APP-OWNED, named as ramp steps rather than dressed up as
+# brand values. The two anchors (TRUE_BLACK, WHITE) and the four steps
+# the register does name (BRAND_BLACK, APP_CARD, APP_BORDER, APP_TEXT,
+# APP_TEXT_DIM) are above; these are the rest of this app's layering.
+#
+# Named by their byte so the ramp reads in order and a step cannot be
+# confused with a role. Adding one is not drift.
+
+GREY_25: Final[str] = '#252525'
+GREY_3A: Final[str] = '#3a3a3a'
+GREY_44: Final[str] = '#444444'
+GREY_50: Final[str] = '#505050'
+GREY_55: Final[str] = '#555555'
+GREY_60: Final[str] = '#606060'
+GREY_66: Final[str] = '#666666'
+GREY_88: Final[str] = '#888888'
+GREY_99: Final[str] = '#999999'
+GREY_CC: Final[str] = '#cccccc'
+GREY_DD: Final[str] = '#dddddd'
+GREY_E8: Final[str] = '#e8e8e8'
+GREY_EE: Final[str] = '#eeeeee'
+GREY_F0: Final[str] = '#f0f0f0'
+GREY_F5: Final[str] = '#f5f5f5'
+
+
+# ============ APP SEMANTICS ============
+#
+# Neither brand values nor ramp steps. Diff highlighting borrows the
+# Bootstrap alert palette; the regex colours are this app alone.
+
+
+DIFF_ADDED_DARK: Final[str] = '#1a4d1a'
+
+DIFF_REMOVED_DARK: Final[str] = '#4d1a1a'
+
+DIFF_CHANGED_DARK: Final[str] = '#4d4d1a'
+
+DIFF_CURRENT_DARK: Final[str] = '#4d1a4d'
+#: Bootstrap alert-success background
+DIFF_ADDED_LIGHT: Final[str] = '#d4edda'
+#: Bootstrap alert-danger background
+DIFF_REMOVED_LIGHT: Final[str] = '#f8d7da'
+#: Bootstrap alert-warning background
+DIFF_CHANGED_LIGHT: Final[str] = '#fff3cd'
+
+DIFF_CURRENT_LIGHT: Final[str] = '#e2d4f0'
+
+REGEX_MATCH_DARK: Final[str] = '#4a4a00'
+
+REGEX_MATCH_LIGHT: Final[str] = '#ffff99'
+
+
+#: Dark-only capture-group highlighting; index 0 is group 1.
+REGEX_GROUP_PALETTE: Final[tuple[str, ...]] = (
+    '#3d5c5c',
+    '#5c3d5c',
+    '#5c5c3d',
+    '#3d5c3d',
+    '#5c3d3d',
+    '#3d3d5c',
+    '#5c4d3d',
+    '#3d5c4d',
+)
+
 # ==================== ALPHA HELPER ====================
 
 def with_alpha(color: str, alpha: int) -> str:
@@ -194,4 +336,42 @@ __all__ = [
     'BRAND_DARK_GOLD_PRESSED',
     'lighten',
     'with_alpha',
+    'TRUE_BLACK',
+    'WHITE',
+    'BRAND_BLACK',
+    'APP_CARD',
+    'APP_BORDER',
+    'APP_TEXT',
+    'APP_TEXT_DIM',
+    'STATUS_SUCCESS',
+    'STATUS_WARNING',
+    'STATUS_ERROR',
+    'GOLD_HOVER',
+    'GOLD_PRESSED',
+    'GREY_25',
+    'GREY_3A',
+    'GREY_44',
+    'GREY_50',
+    'GREY_55',
+    'GREY_60',
+    'GREY_66',
+    'GREY_88',
+    'GREY_99',
+    'GREY_CC',
+    'GREY_DD',
+    'GREY_E8',
+    'GREY_EE',
+    'GREY_F0',
+    'GREY_F5',
+    'DIFF_ADDED_DARK',
+    'DIFF_REMOVED_DARK',
+    'DIFF_CHANGED_DARK',
+    'DIFF_CURRENT_DARK',
+    'DIFF_ADDED_LIGHT',
+    'DIFF_REMOVED_LIGHT',
+    'DIFF_CHANGED_LIGHT',
+    'DIFF_CURRENT_LIGHT',
+    'REGEX_MATCH_DARK',
+    'REGEX_MATCH_LIGHT',
+    'REGEX_GROUP_PALETTE',
 ]

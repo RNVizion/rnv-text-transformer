@@ -36,6 +36,44 @@ from typing import ClassVar
 from functools import lru_cache
 
 from utils.colors import (
+    TRUE_BLACK,
+    WHITE,
+    BRAND_BLACK,
+    APP_CARD,
+    APP_BORDER,
+    APP_TEXT,
+    APP_TEXT_DIM,
+    STATUS_SUCCESS,
+    STATUS_WARNING,
+    STATUS_ERROR,
+    GOLD_HOVER,
+    GOLD_PRESSED,
+    GREY_25,
+    GREY_3A,
+    GREY_44,
+    GREY_50,
+    GREY_55,
+    GREY_60,
+    GREY_66,
+    GREY_88,
+    GREY_99,
+    GREY_CC,
+    GREY_DD,
+    GREY_E8,
+    GREY_EE,
+    GREY_F0,
+    GREY_F5,
+    DIFF_ADDED_DARK,
+    DIFF_REMOVED_DARK,
+    DIFF_CHANGED_DARK,
+    DIFF_CURRENT_DARK,
+    DIFF_ADDED_LIGHT,
+    DIFF_REMOVED_LIGHT,
+    DIFF_CHANGED_LIGHT,
+    DIFF_CURRENT_LIGHT,
+    REGEX_MATCH_DARK,
+    REGEX_MATCH_LIGHT,
+    REGEX_GROUP_PALETTE,
     BRAND_GOLD,
     BRAND_DARK_GOLD,
     BRAND_DARK_GOLD_DEEP,
@@ -105,90 +143,90 @@ class DialogStyleManager:
     
     DARK: ClassVar[dict[str, str]] = {
         # Backgrounds
-        'bg': '#1a1a1a',
-        'bg_secondary': '#2a2a2a',
-        'bg_tertiary': '#333333',
-        'bg_hover': '#3a3a3a',
+        'bg': BRAND_BLACK,
+        'bg_secondary': APP_CARD,
+        'bg_tertiary': APP_BORDER,
+        'bg_hover': GREY_3A,
         
         # Text
-        'text': '#e0e0e0',
-        'text_muted': '#888888',
-        'text_disabled': '#555555',
+        'text': APP_TEXT,
+        'text_muted': GREY_88,
+        'text_disabled': GREY_55,
         
         # Borders
-        'border': '#333333',
-        'border_light': '#444444',
+        'border': APP_BORDER,
+        'border_light': GREY_44,
         'border_focus': BRAND_GOLD,
         
         # Accent colors
         'accent': BRAND_GOLD,
-        'accent_hover': '#dcc9a3',
-        'accent_pressed': '#b7a480',
+        'accent_hover': GOLD_HOVER,
+        'accent_pressed': GOLD_PRESSED,
         'accent_ink': BRAND_GOLD,  # Accent when it carries text
         'accent_ink': BRAND_GOLD,  # Accent when it carries text
-        'accent_text': '#000000',  # Text on accent background
+        'accent_text': TRUE_BLACK,  # Text on accent background
         
         # Semantic colors
-        'success': '#28a745',
-        'error': '#dc3545',
-        'warning': '#ffc107',
+        'success': STATUS_SUCCESS,
+        'error': STATUS_ERROR,
+        'warning': STATUS_WARNING,
         'info': BRAND_GOLD,
         
         # Special
         'selection_bg': BRAND_GOLD,
-        'selection_text': '#000000',
-        'scrollbar_bg': '#252525',
-        'scrollbar_handle': '#444444',
-        'scrollbar_handle_hover': '#606060',
-        'scrollbar_handle_main': '#505050',
+        'selection_text': TRUE_BLACK,
+        'scrollbar_bg': GREY_25,
+        'scrollbar_handle': GREY_44,
+        'scrollbar_handle_hover': GREY_60,
+        'scrollbar_handle_main': GREY_50,
         'tooltip_border': BRAND_GOLD,
         
         # Checkbox indicator
-        'checkbox_indicator_bg': '#1a1a1a',
-        'checkbox_border': '#555555',
+        'checkbox_indicator_bg': BRAND_BLACK,
+        'checkbox_border': GREY_55,
         
         # Dropdown / list hover
-        'list_hover_bg': '#ffffff',
-        'list_hover_text': '#000000',
+        'list_hover_bg': WHITE,
+        'list_hover_text': TRUE_BLACK,
         
         # MainWindow-specific (pure black background, distinct from dialog bg)
-        'window_bg': '#000000',
-        'button_bg': '#1a1a1a',
-        'button_text': '#e0e0e0',
-        'button_hover_bg': '#333333',
-        'button_pressed_text': '#000000',
-        'input_bg': '#1a1a1a',
-        'input_text': '#e0e0e0',
-        'input_border': '#333333',
-        'label_bg': '#000000',
-        'label_text': '#e0e0e0',
+        'window_bg': TRUE_BLACK,
+        'button_bg': BRAND_BLACK,
+        'button_text': APP_TEXT,
+        'button_hover_bg': APP_BORDER,
+        'button_pressed_text': TRUE_BLACK,
+        'input_bg': BRAND_BLACK,
+        'input_text': APP_TEXT,
+        'input_border': APP_BORDER,
+        'label_bg': TRUE_BLACK,
+        'label_text': APP_TEXT,
         'output_text_color': BRAND_GOLD,
-        'border_color': '#333333',
-        'text_color': '#e0e0e0',
+        'border_color': APP_BORDER,
+        'text_color': APP_TEXT,
         
         # Line number gutter widget
-        'line_number_bg': '#1a1a1a',
-        'line_number_fg': '#666666',
-        'line_number_current_bg': '#2a2a2a',
+        'line_number_bg': BRAND_BLACK,
+        'line_number_fg': GREY_66,
+        'line_number_current_bg': APP_CARD,
         'line_number_current_fg': BRAND_GOLD,
 
         # Diff / compare semantic highlight colors
-        'diff_added_bg':   '#1a4d1a',
-        'diff_removed_bg': '#4d1a1a',
-        'diff_changed_bg': '#4d4d1a',
-        'diff_current_bg': '#4d1a4d',
+        'diff_added_bg':   DIFF_ADDED_DARK,
+        'diff_removed_bg': DIFF_REMOVED_DARK,
+        'diff_changed_bg': DIFF_CHANGED_DARK,
+        'diff_current_bg': DIFF_CURRENT_DARK,
 
         # Diff HTML export colors (standalone document — always light-styled)
-        'diff_html_equal_bg':  '#ffffff',
-        'diff_html_insert_bg': '#d4edda',
-        'diff_html_delete_bg': '#f8d7da',
-        'diff_html_header_bg': '#f0f0f0',
-        'diff_html_line_num':  '#888888',
-        'diff_html_border':    '#dddddd',
-        'diff_html_stats_text':'#666666',
+        'diff_html_equal_bg':  WHITE,
+        'diff_html_insert_bg': DIFF_ADDED_LIGHT,
+        'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
+        'diff_html_header_bg': GREY_F0,
+        'diff_html_line_num':  GREY_88,
+        'diff_html_border':    GREY_DD,
+        'diff_html_stats_text':GREY_66,
 
         # Regex builder match highlight
-        'regex_match_bg': '#4a4a00',
+        'regex_match_bg': REGEX_MATCH_DARK,
 
         # Image mode semi-transparent overlay values (rgba — used only in image mode)
         'image_overlay_bg':            'rgba(0, 0, 0, 171)',
@@ -204,19 +242,19 @@ class DialogStyleManager:
     
     LIGHT: ClassVar[dict[str, str]] = {
         # Backgrounds
-        'bg': '#f5f5f5',
-        'bg_secondary': '#ffffff',
-        'bg_tertiary': '#e8e8e8',
-        'bg_hover': '#eeeeee',
+        'bg': GREY_F5,
+        'bg_secondary': WHITE,
+        'bg_tertiary': GREY_E8,
+        'bg_hover': GREY_EE,
         
         # Text
-        'text': '#000000',
-        'text_muted': '#666666',
-        'text_disabled': '#aaaaaa',
+        'text': TRUE_BLACK,
+        'text_muted': GREY_66,
+        'text_disabled': APP_TEXT_DIM,
         
         # Borders
-        'border': '#cccccc',
-        'border_light': '#dddddd',
+        'border': GREY_CC,
+        'border_light': GREY_DD,
         'border_focus': BRAND_DARK_GOLD,
         
         # Accent colors
@@ -225,69 +263,69 @@ class DialogStyleManager:
         'accent_pressed': BRAND_DARK_GOLD_PRESSED,
         'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
         'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
-        'accent_text': '#ffffff',  # Text on accent background
+        'accent_text': WHITE,  # Text on accent background
         
         # Semantic colors
-        'success': '#28a745',
-        'error': '#dc3545',
-        'warning': '#ffc107',
+        'success': STATUS_SUCCESS,
+        'error': STATUS_ERROR,
+        'warning': STATUS_WARNING,
         'info': BRAND_DARK_GOLD_DEEP,
         
         # Special
         'selection_bg': BRAND_DARK_GOLD,
-        'selection_text': '#ffffff',
-        'scrollbar_bg': '#e0e0e0',
-        'scrollbar_handle': '#aaaaaa',
-        'scrollbar_handle_hover': '#888888',
-        'scrollbar_handle_main': '#aaaaaa',
+        'selection_text': WHITE,
+        'scrollbar_bg': APP_TEXT,
+        'scrollbar_handle': APP_TEXT_DIM,
+        'scrollbar_handle_hover': GREY_88,
+        'scrollbar_handle_main': APP_TEXT_DIM,
         'tooltip_border': BRAND_DARK_GOLD,
         
         # Checkbox indicator
-        'checkbox_indicator_bg': '#ffffff',
-        'checkbox_border': '#aaaaaa',
+        'checkbox_indicator_bg': WHITE,
+        'checkbox_border': APP_TEXT_DIM,
         
         # Dropdown / list hover
-        'list_hover_bg': '#1a1a1a',
-        'list_hover_text': '#ffffff',
+        'list_hover_bg': BRAND_BLACK,
+        'list_hover_text': WHITE,
         
         # MainWindow-specific
-        'window_bg': '#f5f5f5',
-        'button_bg': '#ffffff',
-        'button_text': '#000000',
-        'button_hover_bg': '#333333',
-        'button_pressed_text': '#ffffff',
-        'input_bg': '#ffffff',
-        'input_text': '#000000',
-        'input_border': '#cccccc',
-        'label_bg': '#f5f5f5',
-        'label_text': '#000000',
+        'window_bg': GREY_F5,
+        'button_bg': WHITE,
+        'button_text': TRUE_BLACK,
+        'button_hover_bg': APP_BORDER,
+        'button_pressed_text': WHITE,
+        'input_bg': WHITE,
+        'input_text': TRUE_BLACK,
+        'input_border': GREY_CC,
+        'label_bg': GREY_F5,
+        'label_text': TRUE_BLACK,
         'output_text_color': BRAND_DARK_GOLD,
-        'border_color': '#cccccc',
-        'text_color': '#000000',
+        'border_color': GREY_CC,
+        'text_color': TRUE_BLACK,
         
         # Line number gutter widget
-        'line_number_bg': '#f0f0f0',
-        'line_number_fg': '#999999',
-        'line_number_current_bg': '#e8e8e8',
+        'line_number_bg': GREY_F0,
+        'line_number_fg': GREY_99,
+        'line_number_current_bg': GREY_E8,
         'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
 
         # Diff / compare semantic highlight colors
-        'diff_added_bg':   '#d4edda',
-        'diff_removed_bg': '#f8d7da',
-        'diff_changed_bg': '#fff3cd',
-        'diff_current_bg': '#e2d4f0',
+        'diff_added_bg':   DIFF_ADDED_LIGHT,
+        'diff_removed_bg': DIFF_REMOVED_LIGHT,
+        'diff_changed_bg': DIFF_CHANGED_LIGHT,
+        'diff_current_bg': DIFF_CURRENT_LIGHT,
 
         # Diff HTML export colors (standalone document — always light-styled)
-        'diff_html_equal_bg':  '#ffffff',
-        'diff_html_insert_bg': '#d4edda',
-        'diff_html_delete_bg': '#f8d7da',
-        'diff_html_header_bg': '#f0f0f0',
-        'diff_html_line_num':  '#888888',
-        'diff_html_border':    '#dddddd',
-        'diff_html_stats_text':'#666666',
+        'diff_html_equal_bg':  WHITE,
+        'diff_html_insert_bg': DIFF_ADDED_LIGHT,
+        'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
+        'diff_html_header_bg': GREY_F0,
+        'diff_html_line_num':  GREY_88,
+        'diff_html_border':    GREY_DD,
+        'diff_html_stats_text':GREY_66,
 
         # Regex builder match highlight
-        'regex_match_bg': '#ffff99',
+        'regex_match_bg': REGEX_MATCH_LIGHT,
 
         # Image mode semi-transparent overlay values (rgba — used only in image mode)
         # Same values as DARK since image mode always uses dark-based overlays
@@ -305,10 +343,7 @@ class DialogStyleManager:
     # ==================== REGEX GROUP HIGHLIGHT PALETTE ====================
     # Dark-only visualization palette for regex capture group highlighting.
     # Each color corresponds to a different capture group (group 1 → index 0, etc.).
-    REGEX_GROUP_COLORS: ClassVar[list[str]] = [
-        "#3d5c5c", "#5c3d5c", "#5c5c3d", "#3d5c3d",
-        "#5c3d3d", "#3d3d5c", "#5c4d3d", "#3d5c4d",
-    ]
+    REGEX_GROUP_COLORS: ClassVar[list[str]] = list(REGEX_GROUP_PALETTE)
 
     # ==================== PUBLIC METHODS ====================
     
