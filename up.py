@@ -1,52 +1,55 @@
 #!/usr/bin/env python3
 """
-Every hex behind a named constant -> rnv-text-transformer
-=========================================================
+Palette consolidation -> rnv-text-transformer
+==============================================
 
-utils/dialog_styles.py holds 45 distinct hex literals across 108 occurrences.
-This gives every one of them a name, in four groups, because the RNVizion
-brand register (RNVizion/rnv-brand) rules them three different ways and
-flattening that would lose the ruling.
+RUN apply_color_constants.py FIRST. That pass is naming only and asserts both
+stylesheets are byte-identical; this pass changes values. Keeping them apart is
+what lets the first one prove it moved nothing -- fold them together and a
+botched rename hides inside an intended colour change.
 
-  A. THE REGISTER, MIRRORED -- 10 literals, 52 occurrences
-     Already named in rnv-brand's engine/brand.py. They take the register's
-     names, not invented ones. engine/brand.py's APP dict is literally this
-     app's dark palette: window, panel, card, border, text, text-dim.
+Two things, both value changes.
 
-  B. DERIVED FROM THE REGISTER -- BRAND_DARK_GOLD_DEEP, already present
+1. FOUR REDUNDANT GREYS MERGED
+   Of 22 greys in the palette, 7 are named by the register and 15 are the app's
+   own. Only four are genuinely redundant; the rest carry a distinction --
+   five per theme are the depth ramp (window / panel / card / tertiary /
+   hover), and flattening those costs the UI its layering.
 
-  C. HAND-PICKED GOLD MODULATIONS -- 2 literals
-     #dcc9a3 and #b7a480. The register names #dcc9a3 by hex and declines to
-     promote it: "Values between and beyond the two are modulations, and none
-     of them is promoted... A surface that needs a lighter or darker gold
-     derives it; it doesn't mint one." These were minted. They are NAMED here,
-     not re-derived -- see the note in colors.py.
+     DARK  scrollbar_handle_main  GREY_50 -> GREY_44   LIGHT already merged
+                                                       these two (#aaaaaa)
+     DARK  scrollbar_bg           GREY_25 -> APP_CARD  ratio 1.068; a track
+                                                       between panel and card
+     LIGHT line_number_fg         GREY_99 -> GREY_66   sole user of #999999
+           ...and gutter contrast goes 2.50 -> 4.95
+     BOTH  gutter/header ground   GREY_F0 -> GREY_EE   ratio 1.018, and the
+                                                       two never share a surface
 
-  D. THE APP'S NEUTRAL RAMP -- 15 literals, 32 occurrences
-     The register deliberately refuses to name these: "That isn't twenty-three
-     colors; it's one ramp with steps chosen per surface. The brand doesn't
-     publish them, doesn't count them, and doesn't drift when an app adds one."
-     So they are app-owned, and named as ramp steps rather than dressed up as
-     brand values.
+   Riding along, no value removed: DARK line_number_fg GREY_66 -> GREY_88, the
+   theme's own text_muted. Gutter contrast 3.03 -> 4.91.
 
-  E. APP SEMANTICS -- 18 literals, 22 occurrences
-     Diff highlights (Bootstrap alert palette), the regex match highlight, and
-     the eight-colour regex capture-group palette. Local, with provenance.
+2. THE TWO DARK GOLDS DERIVED RATHER THAN MINTED
+   The register: "Values between and beyond the two are modulations, and none
+   of them is promoted... A surface that needs a lighter or darker gold derives
+   it; it doesn't mint one." Light mode already derives. Dark was still minting.
 
-No value changes. Not one. This is naming only, and it is asserted: every
-generated stylesheet must be byte-identical afterwards.
+     GOLD_HOVER    #dcc9a3 -> lighten(BRAND_GOLD, +13)  #dfc9a0
+     GOLD_PRESSED  #b7a480 -> lighten(BRAND_GOLD, -23)  #bba57c
 
-The guard
----------
-tests/test_brand_mirror.py:
-  - fails if any palette entry is a bare hex literal rather than a constant
-  - fails if the mirrored register values drift, when rnv-brand is importable
-  - skips the drift check cleanly when it is not, saying so
+   The steps were chosen to land closest to the hand-picked values, not for
+   symmetry: RGB distance 2.4 and 3.3 out of 255. Separation from the accent
+   holds (1.145 vs 1.138; 1.292 vs 1.315) and hue snaps back to BRAND_GOLD's
+   39.0 degrees exactly, where the minted pair had drifted to 40.0 and 39.3.
 
-Run from the repository root:
+   +19 would have matched light's perceptual separation more neatly. Fidelity
+   won: the brief was to derive, not to restyle.
 
-    python3 apply_color_constants.py            # apply and verify
-    python3 apply_color_constants.py --check    # dry run
+Snapshots move -- deliberately, for nine palette entries (seven grey
+repoints plus the two golds). Nothing else may move, and that
+is asserted.
+
+    python3 apply_palette_consolidation.py            # apply and verify
+    python3 apply_palette_consolidation.py --check    # dry run
 
 Idempotent. Nothing is committed.
 """
@@ -54,7 +57,6 @@ Idempotent. Nothing is committed.
 from __future__ import annotations
 
 import argparse
-import ast
 import re
 import subprocess
 import sys
@@ -71,248 +73,68 @@ def die(m):  print(f"{RED}\nABORT: {m}{OFF}"); sys.exit(1)
 def step(n, m): print(f"\n{BOLD}[{n}]{OFF} {m}")
 
 
-def sh(cmd, check=False, quiet=True):
-    return subprocess.run(cmd, check=check, text=True, capture_output=quiet)
+def sh(cmd, quiet=True):
+    return subprocess.run(cmd, check=False, text=True, capture_output=quiet)
 
 
-# --------------------------------------------------------------------------
-# name -> (value, group, comment).  Order is the order they are emitted.
-# --------------------------------------------------------------------------
-REGISTER = [
-    ('TRUE_BLACK',     '#000000', 'App window ground; text on gold, on either surface'),
-    ('WHITE',          '#ffffff', "Light-surface cards and inputs; the ramp's far anchor"),
-    ('BRAND_BLACK',    '#1a1a1a', 'Brand black (charcoal). Raised surfaces in apps'),
-    ('APP_CARD',       '#2a2a2a', 'engine/brand.py APP["card"]'),
-    ('APP_BORDER',     '#333333', 'engine/brand.py APP["border"]'),
-    ('APP_TEXT',       '#e0e0e0', 'engine/brand.py APP["text"]'),
-    ('APP_TEXT_DIM',   '#aaaaaa', 'engine/brand.py APP["text-dim"]'),
-    ('STATUS_SUCCESS', '#28a745', 'engine/brand.py STATUS["success"]'),
-    ('STATUS_WARNING', '#ffc107', 'engine/brand.py STATUS["warning"]'),
-    ('STATUS_ERROR',   '#dc3545', 'engine/brand.py STATUS["error"]'),
+def _lighten(color, n):
+    rgb = color.lstrip('#')
+    return '#' + ''.join(
+        f'{max(0, min(255, int(rgb[i:i+2], 16) + n)):02x}' for i in (0, 2, 4))
+
+
+BRAND_GOLD = '#d2bc93'
+HOVER_STEP, PRESSED_STEP = 13, -23
+NEW_HOVER = _lighten(BRAND_GOLD, HOVER_STEP)      # #dfc9a0
+NEW_PRESSED = _lighten(BRAND_GOLD, PRESSED_STEP)  # #bba57c
+
+RETIRED = ['GREY_25', 'GREY_50', 'GREY_99', 'GREY_F0']
+
+# (label, scope marker or None, old, new)
+REPOINTS = [
+    ('DARK scrollbar_bg -> APP_CARD', '    DARK: ClassVar',
+     "'scrollbar_bg': GREY_25,", "'scrollbar_bg': APP_CARD,"),
+    ('DARK scrollbar_handle_main -> GREY_44', '    DARK: ClassVar',
+     "'scrollbar_handle_main': GREY_50,", "'scrollbar_handle_main': GREY_44,"),
+    ('DARK line_number_fg -> GREY_88 (text_muted)', '    DARK: ClassVar',
+     "'line_number_fg': GREY_66,", "'line_number_fg': GREY_88,"),
+    ('LIGHT line_number_fg -> GREY_66 (text_muted)', '    LIGHT: ClassVar',
+     "'line_number_fg': GREY_99,", "'line_number_fg': GREY_66,"),
+    ('LIGHT line_number_bg -> GREY_EE', '    LIGHT: ClassVar',
+     "'line_number_bg': GREY_F0,", "'line_number_bg': GREY_EE,"),
 ]
 
-GOLD_MOD = [
-    ('GOLD_HOVER',   '#dcc9a3', 'dark-mode hover. Named in the register by hex, not promoted'),
-    ('GOLD_PRESSED', '#b7a480', 'dark-mode pressed. Same standing'),
-]
+GOLD_BLOCK = f'''#: dark-mode hover. DERIVED, not minted -- the register rules that a surface
+#: needing a lighter or darker gold derives it. Held closest to the value it
+#: replaces (#dcc9a3, RGB distance 2.4) rather than to a tidy step, because the
+#: brief was to change the provenance and not the appearance. Hue snaps back to
+#: BRAND_GOLD's 39.0 degrees exactly; the minted value had drifted to 40.0.
+GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, {HOVER_STEP})
 
-RAMP = [
-    ('GREY_25', '#252525'), ('GREY_3A', '#3a3a3a'), ('GREY_44', '#444444'),
-    ('GREY_50', '#505050'), ('GREY_55', '#555555'), ('GREY_60', '#606060'),
-    ('GREY_66', '#666666'), ('GREY_88', '#888888'), ('GREY_99', '#999999'),
-    ('GREY_CC', '#cccccc'), ('GREY_DD', '#dddddd'), ('GREY_E8', '#e8e8e8'),
-    ('GREY_EE', '#eeeeee'), ('GREY_F0', '#f0f0f0'), ('GREY_F5', '#f5f5f5'),
-]
-
-SEMANTIC = [
-    ('DIFF_ADDED_DARK',    '#1a4d1a', ''),
-    ('DIFF_REMOVED_DARK',  '#4d1a1a', ''),
-    ('DIFF_CHANGED_DARK',  '#4d4d1a', ''),
-    ('DIFF_CURRENT_DARK',  '#4d1a4d', ''),
-    ('DIFF_ADDED_LIGHT',   '#d4edda', 'Bootstrap alert-success background'),
-    ('DIFF_REMOVED_LIGHT', '#f8d7da', 'Bootstrap alert-danger background'),
-    ('DIFF_CHANGED_LIGHT', '#fff3cd', 'Bootstrap alert-warning background'),
-    ('DIFF_CURRENT_LIGHT', '#e2d4f0', ''),
-    ('REGEX_MATCH_DARK',   '#4a4a00', ''),
-    ('REGEX_MATCH_LIGHT',  '#ffff99', ''),
-]
-
-REGEX_GROUPS = ['#3d5c5c', '#5c3d5c', '#5c5c3d', '#3d5c3d',
-                '#5c3d3d', '#3d3d5c', '#5c4d3d', '#3d5c4d']
-
-MARKER = '# ==================== THE REGISTER, MIRRORED ===================='
+#: dark-mode pressed. Same derivation, same reasoning (replaces #b7a480,
+#: RGB distance 3.3, hue drift 39.3 -> 39.0). Dark mode has room for a distinct
+#: pressed state; light mode does not, which is why BRAND_DARK_GOLD_PRESSED is
+#: the accent itself and this is not.
+GOLD_PRESSED: Final[str] = lighten(BRAND_GOLD, {PRESSED_STEP})'''
 
 
-def build_block() -> str:
-    L = [MARKER, '#',
-         '# Mirrored from RNVizion/rnv-brand engine/brand.py. MIRRORED, not',
-         '# imported: this application ships standalone and cannot take a',
-         '# dependency on the brand repository. tests/test_brand_mirror.py fails',
-         '# if these drift, whenever that package is importable.',
-         '#',
-         "# engine/brand.py's APP dict is this app's dark palette almost exactly --",
-         '# window, panel, card, border, text, text-dim. It was named there while',
-         '# this file spelled it out in hex.',
-         '']
-    for n, v, c in REGISTER:
-        L.append(f"#: {c}" if c else '')
-        L.append(f"{n}: Final[str] = '{v}'")
-        L.append('')
-
-    L += ['', '# ============ HAND-PICKED GOLD MODULATIONS ============', '#',
-          '# The register names #dcc9a3 by hex and refuses to promote it:',
-          '#',
-          '#   "Values between and beyond the two are modulations, and none of',
-          "#    them is promoted. #dcc9a3 (three apps) sits on the gold axis",
-          '#    extended past brand gold by about 30%... A surface that needs a',
-          "#    lighter or darker gold derives it; it doesn't mint one.\"",
-          '#',
-          '# These two were minted. They are named here rather than re-derived,',
-          '# because no simple rule reproduces them: against BRAND_GOLD their',
-          '# deltas are +10,+13,+16 and -27,-24,-19, and neither an HLS lightness',
-          '# move nor a white/black mix lands on them exactly. Inventing a formula',
-          '# that happens to hit a hand-picked number is a literal in disguise.',
-          '#',
-          '# The light-mode equivalents ARE derived (BRAND_DARK_GOLD_DEEP). Dark',
-          '# mode is the half still minting, and a future pass should close it --',
-          '# which would change these values, so it is not this pass.',
-          '']
-    for n, v, c in GOLD_MOD:
-        L.append(f'#: {c}')
-        L.append(f"{n}: Final[str] = '{v}'")
-        L.append('')
-
-    L += ['', "# ============ THE APP'S NEUTRAL RAMP ============", '#',
-          '# The register declines to name these, deliberately:',
-          '#',
-          '#   "Every neutral in all five desktop apps -- twenty-three distinct',
-          '#    values from #000000 to #ffffff -- is a pure grey, R = G = B,',
-          "#    without exception. That isn't twenty-three colors; it's one ramp",
-          '#    with steps chosen per surface. The brand doesn\'t publish them,',
-          "#    doesn't count them, and doesn't drift when an app adds one.\"",
-          '#',
-          '# So these are APP-OWNED, named as ramp steps rather than dressed up as',
-          '# brand values. The two anchors (TRUE_BLACK, WHITE) and the four steps',
-          '# the register does name (BRAND_BLACK, APP_CARD, APP_BORDER, APP_TEXT,',
-          '# APP_TEXT_DIM) are above; these are the rest of this app\'s layering.',
-          '#',
-          '# Named by their byte so the ramp reads in order and a step cannot be',
-          '# confused with a role. Adding one is not drift.',
-          '']
-    for n, v in RAMP:
-        L.append(f"{n}: Final[str] = '{v}'")
-    L += ['', '', '# ============ APP SEMANTICS ============', '#',
-          '# Neither brand values nor ramp steps. Diff highlighting borrows the',
-          '# Bootstrap alert palette; the regex colours are this app alone.',
-          '']
-    for n, v, c in SEMANTIC:
-        L.append(f'#: {c}' if c else '')
-        L.append(f"{n}: Final[str] = '{v}'")
-    L += ['', '',
-          '#: Dark-only capture-group highlighting; index 0 is group 1.',
-          'REGEX_GROUP_PALETTE: Final[tuple[str, ...]] = (']
-    for v in REGEX_GROUPS:
-        L.append(f"    '{v}',")
-    L.append(')')
-    return '\n'.join(l for l in L) + '\n\n'
-
-
-ALL_NAMES = ([n for n, _, _ in REGISTER] + [n for n, _, _ in GOLD_MOD]
-             + [n for n, _ in RAMP] + [n for n, _, _ in SEMANTIC]
-             + ['REGEX_GROUP_PALETTE'])
-VALUE_OF = ({n: v for n, v, _ in REGISTER} | {n: v for n, v, _ in GOLD_MOD}
-            | dict(RAMP) | {n: v for n, v, _ in SEMANTIC})
-
-
-GUARD = '''"""
-Brand mirror and palette-literal guard.
-
-Two invariants:
-
-1. No palette entry is a bare hex literal. Every colour in DialogStyleManager
-   .DARK and .LIGHT resolves through a named constant in utils/colors.py.
-   Enforced by parsing the source, because a value check cannot see the
-   difference between '#333333' and APP_BORDER -- they are the same string at
-   runtime and completely different in a diff.
-
-2. The values mirrored from RNVizion/rnv-brand still match the register.
-   This app ships standalone and cannot depend on the brand package, so the
-   check runs only when that package happens to be importable and skips
-   loudly otherwise. A mirror nobody checks is a copy waiting to drift.
-"""
-from __future__ import annotations
-
-import ast
-import pathlib
-
-import pytest
-
-from utils import colors
-from utils.dialog_styles import DialogStyleManager
-
-STYLES = pathlib.Path(__file__).resolve().parents[1] / 'utils' / 'dialog_styles.py'
-
-# constant name in utils/colors.py -> how to reach it in engine/brand.py
-MIRRORED = {
-    'BRAND_GOLD':      ('BRAND_GOLD', None),
-    'BRAND_DARK_GOLD': ('BRAND_DARK_GOLD', None),
-    'BRAND_BLACK':     ('BRAND_BLACK', None),
-    'TRUE_BLACK':      ('TRUE_BLACK', None),
-    'WHITE':           ('WHITE', None),
-    'APP_CARD':        ('APP', 'card'),
-    'APP_BORDER':      ('APP', 'border'),
-    'APP_TEXT':        ('APP', 'text'),
-    'APP_TEXT_DIM':    ('APP', 'text-dim'),
-    'STATUS_SUCCESS':  ('STATUS', 'success'),
-    'STATUS_WARNING':  ('STATUS', 'warning'),
-    'STATUS_ERROR':    ('STATUS', 'error'),
-}
-
-
-def _palette_nodes():
-    """Yield (theme, key, value_node) for both palette dicts."""
-    tree = ast.parse(STYLES.read_text(encoding='utf-8'))
-    cls = next(n for n in ast.walk(tree)
-               if isinstance(n, ast.ClassDef) and n.name == 'DialogStyleManager')
-    for node in cls.body:
-        target = None
-        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            target = node.target.id
-        elif isinstance(node, ast.Assign) and len(node.targets) == 1 \\
-                and isinstance(node.targets[0], ast.Name):
-            target = node.targets[0].id
-        if target in ('DARK', 'LIGHT') and isinstance(node.value, ast.Dict):
-            for k, v in zip(node.value.keys, node.value.values):
-                yield target, getattr(k, 'value', '?'), v
-
-
-@pytest.mark.parametrize('theme', ['DARK', 'LIGHT'])
-def test_no_bare_hex_in_palette(theme):
-    """Every colour entry resolves through a named constant."""
-    bare = []
-    for t, key, node in _palette_nodes():
-        if t != theme:
-            continue
-        if isinstance(node, ast.Constant) and isinstance(node.value, str) \\
-                and node.value.startswith('#'):
-            bare.append(f'{t}[{key!r}] = {node.value!r}')
-    assert not bare, (
-        'bare hex literals in the palette -- give them a name in '
-        'utils/colors.py:\\n  ' + '\\n  '.join(bare))
-
-
-def test_every_palette_colour_is_a_known_constant():
-    """The name used must exist in utils/colors.py and hold that value."""
-    unknown = []
-    for theme, key, node in _palette_nodes():
-        if isinstance(node, ast.Name):
-            if not hasattr(colors, node.id):
-                unknown.append(f'{theme}[{key!r}] -> utils.colors.{node.id} missing')
-    assert not unknown, '\\n  '.join(unknown)
-
-
-def test_regex_group_palette_is_named():
-    """The capture-group colours live in colors.py, not inline."""
-    assert tuple(DialogStyleManager.REGEX_GROUP_COLORS) == \\
-        tuple(colors.REGEX_GROUP_PALETTE)
-
-
-def test_mirror_matches_the_register():
-    """Mirrored values still equal RNVizion/rnv-brand. Skips if absent."""
-    brand = pytest.importorskip(
-        'engine.brand',
-        reason='rnv-brand not importable here; mirror unverified this run')
-    drift = []
-    for local, (attr, key) in MIRRORED.items():
-        mine = getattr(colors, local)
-        theirs = getattr(brand, attr)
-        if key is not None:
-            theirs = theirs[key]
-        if mine.lower() != theirs.lower():
-            drift.append(f'{local}: mirror {mine} vs register {theirs}')
-    assert not drift, 'the mirror has drifted from the register:\\n  ' + \\
-        '\\n  '.join(drift)
-'''
+def scoped_sub(path, marker, old, new, dry):
+    text = path.read_text(encoding='utf-8')
+    if marker:
+        if marker not in text:
+            die(f'{path}: scope marker {marker!r} not found')
+        head, body = text.split(marker, 1)
+    else:
+        head, body = '', text
+    n = body.count(old)
+    if n > 1:
+        die(f'{path}: {old!r} appears {n} times in scope; refusing')
+    if n == 0:
+        return False
+    body = body.replace(old, new)
+    if not dry:
+        path.write_text(head + (marker or '') + body, encoding='utf-8')
+    return True
 
 
 def main() -> int:
@@ -326,8 +148,8 @@ def main() -> int:
     styles_py = root / 'utils' / 'dialog_styles.py'
     init_py = root / 'utils' / '__init__.py'
 
-    print(f"\n{BOLD}Every hex behind a named constant{OFF}")
-    print(f"{DIM}45 literals, 108 occurrences, four groups, no value changes{OFF}")
+    print(f"\n{BOLD}Palette consolidation — nine entries move, nothing else{OFF}")
+    print(f"{DIM}4 greys merged, 2 dark golds derived{OFF}")
     if dry:
         print(f"{YELLOW}DRY RUN{OFF}")
 
@@ -336,151 +158,162 @@ def main() -> int:
         if not f.exists():
             die(f'{f} not found -- run from the repository root')
     ctext = colors_py.read_text(encoding='utf-8')
-    if 'BRAND_DARK_GOLD_DEEP' not in ctext:
-        die('the deep-gold pass has not been applied; run that first')
-    ok('repository recognised')
+    if 'GREY_F5' not in ctext:
+        die('apply_color_constants.py has not been run -- run that first.\n'
+            '  It is naming-only and asserts the stylesheets are byte-identical;\n'
+            '  this pass changes values and needs that proof to stand separately.')
+    ok('constants pass detected')
 
-    stext = styles_py.read_text(encoding='utf-8')
-    found = sorted({m.group(1).lower() for m in
-                    re.finditer(r"['\"](#[0-9A-Fa-f]{6})['\"]", stext)})
-    already = MARKER in ctext
-    if not already and len(found) != 45:
-        die(f'expected 45 distinct hex literals in dialog_styles.py, found '
-            f'{len(found)} -- the file is not in the state this script expects')
-    ok(f'{len(found)} distinct hex literal(s) in dialog_styles.py')
-
-    # snapshot the rendered stylesheets BEFORE, to prove nothing moved
-    before_css = {}
+    before = {}
     if not dry:
         sys.path.insert(0, str(root))
-        for mod in [m for m in sys.modules if m.startswith('utils')]:
-            del sys.modules[mod]
+        for m in [m for m in sys.modules if m.startswith('utils')]:
+            del sys.modules[m]
         from utils.dialog_styles import DialogStyleManager as _D
-        comps = ('splitter', 'menu', 'table', 'tab', 'spinbox', 'slider',
-                 'list', 'progressbar', 'tree')
-        for is_dark in (True, False):
-            before_css[is_dark] = _D.get_extended_stylesheet(is_dark, 'Arial', *comps)
-        ok('captured both rendered stylesheets for the byte-identity check')
+        for t in ('DARK', 'LIGHT'):
+            before[t] = dict(getattr(_D, t))
+        ok('captured both palettes for the "only these six" check')
 
-    step('1', 'utils/colors.py -- four named groups')
-    if already:
+    step('1', 'utils/colors.py -- retire four greys, derive two golds')
+    if 'lighten(BRAND_GOLD, 13)' in ctext:
         skip('colors.py')
     else:
-        anchor = '# ==================== ALPHA HELPER ===================='
-        if ctext.count(anchor) != 1:
-            die('cannot locate the alpha-helper anchor in colors.py')
-        ctext = ctext.replace(anchor, build_block() + anchor)
-        old_all = re.search(r"__all__ = \[(.*?)\]", ctext, re.S)
-        if not old_all:
-            die('cannot locate __all__ in colors.py')
-        names = "\n".join(f"    '{n}'," for n in ALL_NAMES)
-        ctext = ctext.replace(
-            old_all.group(0),
-            old_all.group(0)[:-1].rstrip() + '\n' + names + '\n]')
+        for name in RETIRED:
+            pat = re.compile(rf"^{name}: Final\[str\] = '#[0-9a-f]{{6}}'\n", re.M)
+            if not pat.search(ctext):
+                die(f'{name} definition not found in colors.py')
+            ctext = pat.sub('', ctext)
+            ctext = re.sub(rf"^    '{name}',\n", '', ctext, flags=re.M)
+        ok(f'{len(RETIRED)} retired: {", ".join(RETIRED)}')
+
+        old_gold = re.search(
+            r"#: dark-mode hover.*?GOLD_PRESSED: Final\[str\] = '#[0-9a-f]{6}'",
+            ctext, re.S)
+        if not old_gold:
+            die('cannot locate the GOLD_HOVER / GOLD_PRESSED block')
+        ctext = ctext.replace(old_gold.group(0), GOLD_BLOCK)
+        ok(f'GOLD_HOVER -> lighten(BRAND_GOLD, {HOVER_STEP})  = {NEW_HOVER}')
+        ok(f'GOLD_PRESSED -> lighten(BRAND_GOLD, {PRESSED_STEP}) = {NEW_PRESSED}')
         if not dry:
             colors_py.write_text(ctext, encoding='utf-8')
-        ok(f'{len(REGISTER)} register + {len(GOLD_MOD)} gold modulation + '
-           f'{len(RAMP)} ramp + {len(SEMANTIC)} semantic + regex palette')
 
-    step('2', 'utils/dialog_styles.py -- point 108 literals at the names')
-    if 'APP_BORDER' in stext:
+    step('2', 'utils/dialog_styles.py -- repoint the merged keys')
+    applied = 0
+    for label, marker, old, new in REPOINTS:
+        if scoped_sub(styles_py, marker, old, new, dry):
+            ok(label)
+            applied += 1
+    # diff_html_header_bg is GREY_F0 in BOTH palettes and both go to GREY_EE
+    stext = styles_py.read_text(encoding='utf-8')
+    n = stext.count("'diff_html_header_bg': GREY_F0,")
+    if n:
+        stext = stext.replace("'diff_html_header_bg': GREY_F0,",
+                              "'diff_html_header_bg': GREY_EE,")
+        applied += n
+        ok(f'diff_html_header_bg -> GREY_EE ({n} palettes)')
+    for name in RETIRED:
+        stext = re.sub(rf'^    {name},\n', '', stext, flags=re.M)
+    if not dry:
+        styles_py.write_text(stext, encoding='utf-8')
+    if applied == 0:
         skip('dialog_styles.py')
-    else:
-        imports = ',\n    '.join(ALL_NAMES)
-        stext = stext.replace(
-            'from utils.colors import (\n    BRAND_GOLD,',
-            f'from utils.colors import (\n    {imports},\n    BRAND_GOLD,')
-        replaced = 0
-        for name, value in sorted(VALUE_OF.items(), key=lambda kv: kv[0]):
-            for q in ("'", '"'):
-                pat = f'{q}{value}{q}'
-                n = stext.count(pat)
-                if n:
-                    stext = stext.replace(pat, name)
-                    replaced += n
-        # the capture-group list becomes the named tuple
-        stext = re.sub(
-            r'REGEX_GROUP_COLORS: ClassVar\[list\[str\]\] = \[[^\]]*\]',
-            'REGEX_GROUP_COLORS: ClassVar[list[str]] = list(REGEX_GROUP_PALETTE)',
-            stext)
-        replaced += len(REGEX_GROUPS)
-        if not dry:
-            styles_py.write_text(stext, encoding='utf-8')
-        ok(f'{replaced} literal occurrence(s) repointed')
-        if replaced != 108:
-            die(f'expected 108, repointed {replaced}')
 
-    step('3', 'utils/__init__.py -- export')
+    step('3', 'utils/__init__.py')
     itext = init_py.read_text(encoding='utf-8')
-    if 'APP_BORDER' in itext:
-        skip('exports')
-    else:
-        itext = itext.replace(
-            'from utils.colors import (\n    BRAND_GOLD,',
-            'from utils.colors import (\n    ' + ',\n    '.join(ALL_NAMES)
-            + ',\n    BRAND_GOLD,')
-        itext = itext.replace(
-            "__all__ = [\n    # Brand Colors\n    'BRAND_GOLD',",
-            "__all__ = [\n    # Brand Colors\n"
-            + '\n'.join(f"    '{n}'," for n in ALL_NAMES)
-            + "\n    'BRAND_GOLD',")
+    hits = sum(len(re.findall(rf"^    '?{n}'?,\n", itext, re.M)) for n in RETIRED)
+    if hits:
+        for name in RETIRED:
+            itext = re.sub(rf"^    '?{name}'?,\n", '', itext, flags=re.M)
         if not dry:
             init_py.write_text(itext, encoding='utf-8')
-        ok(f'{len(ALL_NAMES)} name(s) exported')
-
-    step('4', 'tests/test_brand_mirror.py -- the guard')
-    guard = root / 'tests' / 'test_brand_mirror.py'
-    if guard.exists():
-        skip('guard')
+        ok(f'{hits} reference(s) removed')
     else:
-        if not dry:
-            guard.write_text(GUARD, encoding='utf-8')
-        ok('no-bare-literal check + register mirror check (skips if rnv-brand absent)')
+        skip('exports')
 
     if dry:
         print(f"\n{GREEN}{BOLD}Dry run complete.{OFF}")
         return 0
 
+    step('4', 'snapshots')
+    r = sh([sys.executable, '-m', 'pytest', 'tests/', '--snapshot-update', '-q',
+            '--benchmark-disable'])
+    rep = [l.strip() for l in (r.stdout or '').splitlines()
+           if 'snapshot' in l.lower() and ('updated' in l or 'passed' in l)]
+    failed = [l for l in (r.stdout or '').splitlines() if l.startswith('FAILED ')]
+    ours = [f for f in failed if any(t in f.lower() for t in
+            ('contrast', 'snapshot', 'style', 'colour', 'color', 'brand', 'mirror'))]
+    if ours:
+        print((r.stdout or '')[-2000:]); die(f'colour tests failed: {ours}')
+    if not rep:
+        print((r.stdout or '')[-1500:]); die('no snapshot report -- regeneration did not run')
+    ok(f'regenerated — {rep[0]}')
+    if failed:
+        warn(f'{len(failed)} unrelated failure(s), left alone')
+
     step('V', 'verification')
-    for mod in [m for m in sys.modules if m.startswith('utils')]:
-        del sys.modules[mod]
+    for m in [m for m in sys.modules if m.startswith('utils')]:
+        del sys.modules[m]
     from utils.dialog_styles import DialogStyleManager as D2
-    comps = ('splitter', 'menu', 'table', 'tab', 'spinbox', 'slider',
-             'list', 'progressbar', 'tree')
-    for is_dark, name in ((True, 'DARK'), (False, 'LIGHT')):
-        after = D2.get_extended_stylesheet(is_dark, 'Arial', *comps)
-        if after != before_css[is_dark]:
-            die(f'{name} stylesheet changed -- this pass must be naming only')
-        ok(f'{name} stylesheet byte-identical')
+    from utils import colors as C
 
-    left = [m.group(1) for m in
-            re.finditer(r"['\"](#[0-9A-Fa-f]{6})['\"]",
-                        styles_py.read_text(encoding='utf-8'))]
-    if left:
-        die(f'{len(left)} hex literal(s) still in dialog_styles.py: {sorted(set(left))[:6]}')
-    ok('0 hex literals left in dialog_styles.py')
+    def lum(h):
+        c = [int(h[i:i+2], 16) / 255 for i in (1, 3, 5)]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 
+    def cr(a, b):
+        la, lb = lum(a), lum(b)
+        hi, lo = max(la, lb), min(la, lb)
+        return (hi + 0.05) / (lo + 0.05)
+
+    moved = []
+    for t in ('DARK', 'LIGHT'):
+        after = getattr(D2, t)
+        for k, v in before[t].items():
+            if after[k] != v:
+                moved.append(f'{t}.{k}  {v} -> {after[k]}')
+    # 7 grey repoints (diff_html_header_bg is in BOTH palettes) + 2 golds.
+    EXPECTED = 9
+    print(f'{DIM}    palette entries that moved:{OFF}')
+    for m in moved:
+        print(f'      {m}')
+    if len(moved) != EXPECTED:
+        die(f'expected {EXPECTED} palette entries to move, {len(moved)} did')
+    ok(f'exactly {EXPECTED} entries moved, as designed')
+
+    if C.GOLD_HOVER != NEW_HOVER or C.GOLD_PRESSED != NEW_PRESSED:
+        die(f'gold derivation wrong: {C.GOLD_HOVER} / {C.GOLD_PRESSED}')
+    ok(f'golds derived: {C.GOLD_HOVER} / {C.GOLD_PRESSED}')
+    for name in RETIRED:
+        if hasattr(C, name):
+            die(f'{name} still defined in colors.py')
+    ok(f'{len(RETIRED)} retired constants gone')
+
+    L, K = D2.get_colors(False), D2.get_colors(True)
+    checks = [
+        ('LIGHT gutter number', L['line_number_fg'], L['line_number_bg'], 2.50),
+        ('DARK  gutter number', K['line_number_fg'], K['line_number_bg'], 3.03),
+    ]
+    for label, fg, bg, was in checks:
+        now = cr(fg, bg)
+        ok(f'{label}: {was:.2f} -> {now:.2f} {"PASS" if now >= 4.5 else "still below 4.5"}')
+
+    if args.skip_tests:
+        return 0
     for suite, cmd in (('pytest', [sys.executable, '-m', 'pytest', 'tests/', '-q',
                                    '--benchmark-disable']),
                        ('unittest', [sys.executable, '-m', 'unittest',
                                      'test_rnv_text_transformer'])):
-        if args.skip_tests:
-            break
-        print(f"{DIM}    {suite} ...{OFF}")
+        print(f'{DIM}    {suite} ...{OFF}')
         r = sh(cmd)
         out = (r.stdout or '') + (r.stderr or '')
         if r.returncode != 0:
-            print(out[-2500:])
-            die(f'{suite} failed')
+            print(out[-2500:]); die(f'{suite} failed')
         tail = [l for l in out.strip().splitlines()
                 if l.startswith(('Ran ', 'OK')) or 'passed' in l]
         ok(f'{suite}: {tail[-1] if tail else "passed"}')
 
-    print(f"\n{GREEN}{BOLD}Done.{OFF} Naming only — no rendered byte moved. "
-          f"Nothing committed.")
-    warn('Dark-mode GOLD_HOVER / GOLD_PRESSED are named but still minted.\n'
-         '      The register says a surface derives its golds rather than minting\n'
-         '      them. Closing that changes their values, so it is a separate pass.')
+    print(f"\n{GREEN}{BOLD}Done.{OFF} Nothing committed — review with `git diff`.")
     return 0
 
 
