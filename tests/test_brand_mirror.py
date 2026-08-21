@@ -199,3 +199,124 @@ def test_every_palette_colour_is_a_known_constant():
 def test_regex_group_palette_is_named():
     assert tuple(DialogStyleManager.REGEX_GROUP_COLORS) == \
         tuple(colors.REGEX_GROUP_PALETTE)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# TWO GOLDS PER MODE
+# ══════════════════════════════════════════════════════════════════════════
+#
+# RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN
+#
+# The brand registers two golds -- BRAND_GOLD for dark grounds,
+# BRAND_DARK_GOLD for light -- and derives the rest when needed. "When
+# needed" is load-bearing: a mode gets ONE derivative, and every other gold
+# role reuses the accent or that derivative. Four values across the app,
+# two rendered per mode.
+#
+# Light spends its derivative on BRAND_DARK_GOLD_DEEP, and that one is
+# structural: gold as text on any light surface below white needs a darker
+# value than gold as a fill under black text, and those two luminance bands
+# do not overlap.
+#
+# Dark spends its derivative on hover, which lifts away from the dark
+# ground. Pressed returns to the accent in both modes -- that is what holds
+# the count at two.
+#
+# Why count at all, when every pairing already gets a contrast check: an
+# extra gold is usually perfectly legible. rnv-color-picker carried
+# #c4a458 for months, a tint of a gold that had already been retired,
+# rendering on one key with nothing anywhere to notice. Contrast tests
+# cannot see that. Counting can.
+
+GOLD_CONSTANTS = ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_DARK_GOLD_DEEP',
+                  'GOLD_HOVER', 'GOLD_PRESSED', 'BRAND_DARK_GOLD_PRESSED')
+
+
+def _theme_dicts() -> dict[str, dict]:
+    """The two theme dicts, resolved from source.
+
+    Read through the AST rather than imported because the dicts are built
+    inline in dialog_styles and there is no accessor that hands them over.
+    """
+    src = STYLES.read_text(encoding='utf-8')
+    out = {}
+    for node in ast.walk(ast.parse(src)):
+        if not isinstance(node, ast.Dict) or len(node.keys) <= 30:
+            continue
+        d = {}
+        for k, v in zip(node.keys, node.values):
+            if not isinstance(k, ast.Constant):
+                continue
+            if isinstance(v, ast.Constant):
+                d[k.value] = v.value
+            elif isinstance(v, ast.Name):
+                d[k.value] = getattr(colors, v.id, None)
+        name = ('dark' if str(d.get('accent', '')).lower()
+                == colors.BRAND_GOLD.lower() else 'light')
+        out[name] = d
+    return out
+
+
+def test_both_theme_dicts_were_found():
+    """Guard the guard. If the AST walk stops matching, every count below
+    passes by measuring nothing."""
+    themes = _theme_dicts()
+    assert set(themes) == {'dark', 'light'}, (
+        f'expected a dark and a light theme dict, found {sorted(themes)}')
+    for name, d in themes.items():
+        assert len(d) > 30, f'{name} theme resolved only {len(d)} keys'
+
+
+@pytest.mark.parametrize('mode', ['dark', 'light'])
+def test_two_golds_per_mode(mode):
+    """The rule, made machine-checkable."""
+    golds = {getattr(colors, n).lower() for n in GOLD_CONSTANTS}
+    d = _theme_dicts()[mode]
+    used = {}
+    for key, value in d.items():
+        if isinstance(value, str) and value.lower() in golds:
+            used.setdefault(value.lower(), []).append(key)
+    assert len(used) <= 2, '\n  '.join(
+        [f'{mode} theme holds {len(used)} distinct golds; the brand allows '
+         f'two -- the registered one and one derived from it:']
+        + [f'{v}  ({len(ks)} keys)  {", ".join(sorted(ks)[:5])}'
+           for v, ks in sorted(used.items())])
+
+
+@pytest.mark.parametrize('mode,base', [('dark', 'BRAND_GOLD'),
+                                       ('light', 'BRAND_DARK_GOLD')])
+def test_the_registered_gold_is_one_of_the_two(mode, base):
+    """Two golds neither of which is registered would satisfy a bare count
+    while being entirely off-brand."""
+    d = _theme_dicts()[mode]
+    want = getattr(colors, base).lower()
+    present = {v.lower() for v in d.values()
+               if isinstance(v, str) and v.lower() == want}
+    assert present, (f'{mode} theme never uses {base} ({want}), the '
+                     f'registered gold for this mode')
+
+
+def test_pressed_returns_to_the_accent_in_both_modes():
+    """What keeps the count at two. Before this pass GOLD_PRESSED was
+    #bba57c -- a third gold whose only job was a 2px tab underline."""
+    assert colors.GOLD_PRESSED == colors.BRAND_GOLD
+    assert colors.BRAND_DARK_GOLD_PRESSED == colors.BRAND_DARK_GOLD
+
+
+def test_no_theme_key_is_defined_twice():
+    """A duplicate key is silently won by the last one.
+
+    Both theme dicts listed 'accent_ink' twice. Same value each time, so it
+    changed nothing -- but the day the two lines differ, the first is dead
+    code that reads as live.
+    """
+    src = STYLES.read_text(encoding='utf-8')
+    dupes = []
+    for node in ast.walk(ast.parse(src)):
+        if not isinstance(node, ast.Dict):
+            continue
+        keys = [k.value for k in node.keys if isinstance(k, ast.Constant)]
+        for k in sorted({k for k in keys if keys.count(k) > 1}):
+            dupes.append(f'utils/dialog_styles.py:{node.lineno}: '
+                         f'{k!r} defined {keys.count(k)} times')
+    assert not dupes, '\n  '.join(dupes)

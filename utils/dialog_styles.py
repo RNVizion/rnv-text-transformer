@@ -159,7 +159,6 @@ class DialogStyleManager:
         'accent_hover': GOLD_HOVER,
         'accent_pressed': GOLD_PRESSED,
         'accent_ink': BRAND_GOLD,  # Accent when it carries text
-        'accent_ink': BRAND_GOLD,  # Accent when it carries text
         'accent_text': TRUE_BLACK,  # Text on accent background
         
         # Semantic colors
@@ -257,7 +256,6 @@ class DialogStyleManager:
         'accent': BRAND_DARK_GOLD,
         'accent_hover': BRAND_DARK_GOLD_DEEP,
         'accent_pressed': BRAND_DARK_GOLD_PRESSED,
-        'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
         'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
         'accent_text': WHITE,  # Text on accent background
         

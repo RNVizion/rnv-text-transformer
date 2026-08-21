@@ -198,9 +198,9 @@ STATUS_ERROR: Final[str] = '#dc3545'
 # move nor a white/black mix lands on them exactly. Inventing a formula
 # that happens to hit a hand-picked number is a literal in disguise.
 #
-# The light-mode equivalents ARE derived (BRAND_DARK_GOLD_DEEP). Dark
-# mode is the half still minting, and a future pass should close it --
-# which would change these values, so it is not this pass.
+# That future pass is this one. Dark mode now runs on two golds:
+# BRAND_GOLD and GOLD_HOVER derived from it. GOLD_PRESSED returned
+# to the accent, which is where the third value went.
 
 #: dark-mode hover. DERIVED, not minted -- the register rules that a surface
 #: needing a lighter or darker gold derives it. Held closest to the value it
@@ -209,11 +209,23 @@ STATUS_ERROR: Final[str] = '#dc3545'
 #: BRAND_GOLD's 39.0 degrees exactly; the minted value had drifted to 40.0.
 GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)
 
-#: dark-mode pressed. Same derivation, same reasoning (replaces #b7a480,
-#: RGB distance 3.3, hue drift 39.3 -> 39.0). Dark mode has room for a distinct
-#: pressed state; light mode does not, which is why BRAND_DARK_GOLD_PRESSED is
-#: the accent itself and this is not.
-GOLD_PRESSED: Final[str] = lighten(BRAND_GOLD, -23)
+#: dark-mode pressed. It IS the accent, mirroring light mode.
+#:
+#: The brand registers two golds and derives the rest when needed. Each mode
+#: gets the registered gold and ONE derivative -- light spends its on
+#: BRAND_DARK_GOLD_DEEP, dark spends its on GOLD_HOVER -- and every other gold
+#: role reuses one of the two. Pressed returning to rest is what holds the
+#: count there, and tests/test_brand_mirror.py asserts the count.
+#:
+#: This replaced lighten(BRAND_GOLD, -23) = #bba57c, a third gold whose only
+#: consumer was a 2px tab underline. On the dark hover ground #3a3a3a that
+#: underline moves 4.7589 -> 6.1503, both above the 3.0 component floor, so
+#: nothing was failing -- which is the point. An extra gold is usually
+#: perfectly legible, so only counting finds it.
+#:
+#: The interaction still reads: rest at the accent, hover lifts away from the
+#: dark ground, pressed drops back to rest.
+GOLD_PRESSED: Final[str] = BRAND_GOLD
 
 
 # ============ THE APP'S NEUTRAL RAMP ============

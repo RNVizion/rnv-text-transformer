@@ -1388,7 +1388,7 @@
               QTabBar::tab:hover:!selected {
                   background-color: #3a3a3a;
                   color: #d2bc93;
-                  border-bottom: 2px solid #bba57c;
+                  border-bottom: 2px solid #d2bc93;
               }
           
   
@@ -2119,7 +2119,7 @@
     "accent": "#d2bc93",
     "accent_hover": "#dfc9a0",
     "accent_ink": "#d2bc93",
-    "accent_pressed": "#bba57c",
+    "accent_pressed": "#d2bc93",
     "accent_text": "#000000",
     "bg": "#1a1a1a",
     "bg_hover": "#3a3a3a",
