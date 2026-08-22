@@ -2220,7 +2220,7 @@
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
     "diff_removed_bg": "#f8d7da",
-    "error": "#dc3545",
+    "error": "#c82131",
     "image_dropdown_bg": "rgba(0, 0, 0, 131)",
     "image_dropdown_border": "rgba(51, 51, 51, 150)",
     "image_dropdown_selection": "rgba(51, 51, 51, 200)",
@@ -2281,7 +2281,7 @@
   description: color: #666666; font-size: 9pt;
   tip:         color: #7e6529; font-style: italic;
   status(success): color: #28a745;
-  status(error): color: #dc3545;
+  status(error): color: #c82131;
   status(warning): color: #ffc107;
   status(muted): color: #666666;
   status(info): color: #7e6529;

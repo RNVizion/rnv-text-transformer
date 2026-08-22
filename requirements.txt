@@ -1,7 +1,7 @@
 # RNV Text Transformer — runtime dependencies
 # Install with: pip install -r requirements.txt
 #
-# For development and testing dependencies, see requirements-dev.txt
+# For development and testing dependencies, see tests/requirements-dev.txt
 
 # GUI framework
 PyQt6>=6.6.0

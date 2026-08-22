@@ -46,6 +46,7 @@ from utils.colors import (
     STATUS_SUCCESS,
     STATUS_WARNING,
     STATUS_ERROR,
+    STATUS_ERROR_LIGHT,
     GOLD_HOVER,
     GOLD_PRESSED,
     GREY_3A,
@@ -261,7 +262,7 @@ class DialogStyleManager:
         
         # Semantic colors
         'success': STATUS_SUCCESS,
-        'error': STATUS_ERROR,
+        'error': STATUS_ERROR_LIGHT,
         'warning': STATUS_WARNING,
         'info': BRAND_DARK_GOLD_DEEP,
         

@@ -182,6 +182,26 @@ STATUS_WARNING: Final[str] = '#ffc107'
 #: engine/brand.py STATUS["error"]
 STATUS_ERROR: Final[str] = '#dc3545'
 
+#: Derived. Error TEXT on a light dialog ground.
+#:
+#: No red carries text at 4.5:1 on a real light panel: STATUS_ERROR clears
+#: only pure white, at 4.5275, and reads 4.1528 on this app's #f5f5f5 dialog
+#: background. Light therefore spends a derivative on TEXT for exactly the
+#: reason the gold does -- the fill and text jobs occupy non-overlapping
+#: luminance bands.
+#:
+#: 5.1811 on #f5f5f5, 4.8685 on #eeeeee, 4.6100 on #e8e8e8 -- the same
+#: coverage boundary BRAND_DARK_GOLD_DEEP publishes. Below #e8e8e8 red does
+#: not carry text, which is a ruling rather than a gap.
+#:
+#: Derived, not written down, so it cannot orphan the way #c4a458 did when
+#: the gold it was a tint of was retired. A uniform per-channel step holds
+#: hue at 354.25 degrees, identical to STATUS_ERROR.
+#:
+#: DARK is deliberately not given one. See test_dark_error_text_is_short,
+#: which records the shortfall in both directions.
+STATUS_ERROR_LIGHT: Final[str] = lighten(STATUS_ERROR, -20)   # -> #c82131
+
 
 # ============ HAND-PICKED GOLD MODULATIONS ============
 #
@@ -378,6 +398,7 @@ PROVENANCE: Final[dict[str, str]] = {
     'STATUS_WARNING': 'register',
     'STATUS_ERROR': 'register',
     # -- derived
+    'STATUS_ERROR_LIGHT': 'derived',
     'BRAND_DARK_GOLD_DEEP': 'derived',
     'BRAND_DARK_GOLD_PRESSED': 'derived',
     'GOLD_HOVER': 'derived',
@@ -426,6 +447,7 @@ __all__ = [
     'STATUS_SUCCESS',
     'STATUS_WARNING',
     'STATUS_ERROR',
+    'STATUS_ERROR_LIGHT',
     'GOLD_HOVER',
     'GOLD_PRESSED',
     'GREY_3A',

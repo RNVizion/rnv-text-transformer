@@ -63,9 +63,14 @@ class StepEditorWidget(QWidget):
         'delimiter_input'
     )
     
-    def __init__(self, step: PresetStep, parent: QWidget | None = None) -> None:
+    def __init__(self, step: PresetStep, parent: QWidget | None = None,
+                 *, is_dark: bool = True) -> None:
         super().__init__(parent)
         self.step = step
+        # Defaults to True so the existing callers and tests that build
+        # this widget directly keep the dark styling they assert. The
+        # dialog that owns it passes its own mode.
+        self._is_dark = is_dark
         self._setup_ui()
         self._load_step_data()
     
@@ -112,7 +117,8 @@ class StepEditorWidget(QWidget):
         delete_btn = QPushButton("✕")
         delete_btn.setToolTip("Delete this step")
         delete_btn.setFixedWidth(30)
-        delete_btn.setStyleSheet(f"color: {DialogStyleManager.DARK['error']};")
+        delete_btn.setStyleSheet(
+            f"color: {DialogStyleManager.get_colors(self._is_dark)['error']};")
         delete_btn.clicked.connect(self.delete_requested.emit)
         header_layout.addWidget(delete_btn)
         
@@ -643,7 +649,7 @@ class PresetDialog(BaseDialog):
     
     def _add_step_widget(self, step: PresetStep) -> None:
         """Add a step editor widget."""
-        widget = StepEditorWidget(step)
+        widget = StepEditorWidget(step, is_dark=self._is_dark)
         widget.step_changed.connect(self._update_preview)
         widget.delete_requested.connect(lambda: self._remove_step(widget))
         widget.move_up_requested.connect(lambda: self._move_step_up(widget))

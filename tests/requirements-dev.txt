@@ -1,5 +1,5 @@
 # RNV Text Transformer — development & test dependencies
-# Install with: pip install -r requirements-dev.txt
+# Install with: pip install -r tests/requirements-dev.txt
 
 # Core test runner
 pytest>=7.4

@@ -221,7 +221,6 @@ The project follows a clear four-package layout that separates concerns:
 rnv-text-transformer/
 ├── RNV_Text_Transformer.py       # GUI entry point
 ├── requirements.txt
-├── requirements-dev.txt
 ├── pyproject.toml
 ├── LICENSE
 ├── README.md
@@ -268,6 +267,7 @@ rnv-text-transformer/
 │   └── rnv_transform.py
 │
 ├── tests/                         # Pytest suite
+│   ├── requirements-dev.txt       # Test dependencies
 │   ├── conftest.py                # Shared fixtures
 │   ├── test_main_window.py        # MainWindow construction + interactions
 │   ├── test_*_dialog.py           # Per-dialog interaction tests
