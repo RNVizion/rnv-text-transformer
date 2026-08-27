@@ -850,6 +850,8 @@ class MainWindow(QMainWindow):
                 bg, color, hover_bg = _d['button_bg'], _d['text'], _d['button_hover_bg']
             border = _d['border']
             hover_color = color
+            pressed_bg = _d['button_pressed_bg']
+            pressed_color = _d['button_pressed_text']
         else:
             # Dark/Light mode colors from theme
             theme = self.theme_manager.colors
@@ -862,6 +864,8 @@ class MainWindow(QMainWindow):
             else:
                 color = theme['button_text']
                 hover_color = theme['button_text']
+            pressed_bg = theme['button_pressed_bg']
+            pressed_color = theme['button_pressed_text']
         
         return f"""
             QPushButton {{
@@ -877,6 +881,10 @@ class MainWindow(QMainWindow):
             QPushButton:hover {{
                 background-color: {hover_bg};
                 color: {hover_color};
+            }}
+            QPushButton:pressed {{
+                background-color: {pressed_bg};
+                color: {pressed_color};
             }}
         """
     

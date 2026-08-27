@@ -351,6 +351,10 @@ class ImageButton(QPushButton):
             QPushButton:hover {{
                 background-color: {theme['button_hover_bg']};
             }}
+            QPushButton:pressed {{
+                background-color: {theme['button_pressed_bg']};
+                color: {theme['button_pressed_text']};
+            }}
         """
     
     def _get_font_family(self) -> str:
