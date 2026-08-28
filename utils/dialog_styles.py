@@ -47,8 +47,8 @@ from utils.colors import (
     STATUS_WARNING,
     STATUS_ERROR,
     STATUS_ERROR_LIGHT,
-    GOLD_HOVER,
-    GOLD_PRESSED,
+    BRAND_GOLD_HOVER,
+    BRAND_GOLD_PRESSED,
     GREY_3A,
     GREY_44,
     GREY_55,
@@ -57,6 +57,7 @@ from utils.colors import (
     GREY_88,
     GREY_CC,
     GREY_DD,
+    GREY_E0,
     GREY_E8,
     GREY_EE,
     GREY_F5,
@@ -157,8 +158,8 @@ class DialogStyleManager:
         
         # Accent colors
         'accent': BRAND_GOLD,
-        'accent_hover': GOLD_HOVER,
-        'accent_pressed': GOLD_PRESSED,
+        'accent_hover': BRAND_GOLD_HOVER,
+        'accent_pressed': BRAND_GOLD_PRESSED,
         'accent_ink': BRAND_GOLD,  # Accent when it carries text
         'accent_text': TRUE_BLACK,  # Text on accent background
         
@@ -270,7 +271,7 @@ class DialogStyleManager:
         # Special
         'selection_bg': BRAND_DARK_GOLD,
         'selection_text': WHITE,
-        'scrollbar_bg': APP_TEXT,
+        'scrollbar_bg': GREY_E0,
         'scrollbar_handle': APP_TEXT_DIM,
         'scrollbar_handle_hover': GREY_88,
         'scrollbar_handle_main': APP_TEXT_DIM,

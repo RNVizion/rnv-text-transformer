@@ -112,10 +112,34 @@ def test_register_values_match_rnv_brand():
     assert not drift, 'the mirror has drifted:\n  ' + '\n  '.join(drift)
 
 
-def test_app_owned_values_are_not_register_values():
-    """Something app-owned that IS a brand value is misclassified."""
-    brand = pytest.importorskip(
-        'engine.brand', reason='rnv-brand not importable here')
+#: App-owned values that DELIBERATELY share a hex with a register entry.
+#:
+#: Publishing the ink grid made this possible for the first time: an app ramp
+#: step and a register value can land on the same grid position while doing
+#: different jobs. Sharing a VALUE is not the same as playing the same ROLE,
+#: and the check below can only read the value -- so the intentional ones are
+#: named here, with what they share and why they must NOT follow if the
+#: register moves.
+#:
+#: This is an exemption, so it is asserted in BOTH directions below: a named
+#: coincidence that stops coinciding fails, and so does one that names a
+#: mirrored constant.
+#:
+#: name -> (register entry, why it is not the same role)
+COINCIDENT: dict[str, tuple[str, str]] = {
+    'GREY_DD': (
+        'APP["text"]',
+        'grey(13) does two jobs. In the register it is the DARK ink; here it '
+        'is border_light in the LIGHT palette -- one step softer than '
+        'border: GREY_CC -- plus the always-light-styled diff export border. '
+        'Different mode, different role. If APP["text"] moves off grey(13) '
+        'this must NOT follow it, which is exactly why it is named here '
+        'rather than mirrored.'),
+}
+
+
+def _register_values(brand) -> dict:
+    """Every value the register holds, hex -> where it is held."""
     named = {}
     for attr in ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_BLACK',
                  'TRUE_BLACK', 'WHITE', 'WEB_BLACK'):
@@ -124,10 +148,18 @@ def test_app_owned_values_are_not_register_values():
         for key, value in getattr(brand, dict_name).items():
             if isinstance(value, str) and value.startswith('#'):
                 named.setdefault(value.lower(), f'{dict_name}["{key}"]')
+    return named
+
+
+def test_app_owned_values_are_not_register_values():
+    """Something app-owned that IS a brand value is misclassified."""
+    brand = pytest.importorskip(
+        'engine.brand', reason='rnv-brand not importable here')
+    named = _register_values(brand)
 
     wrong = []
     for name, group in colors.PROVENANCE.items():
-        if not group.startswith('app-'):
+        if not group.startswith('app-') or name in COINCIDENT:
             continue
         value = getattr(colors, name)
         for v in (value,) if isinstance(value, str) else value:
@@ -135,6 +167,46 @@ def test_app_owned_values_are_not_register_values():
                 wrong.append(f'{name} = {v} is {named[v.lower()]} in the register, '
                              f'but marked {group}')
     assert not wrong, 'misclassified as app-owned:\n  ' + '\n  '.join(wrong)
+
+
+def test_every_coincidence_still_coincides():
+    """The other direction. A named coincidence that no longer shares a value
+    is a dead exemption, and a dead exemption is a licence waiting for a
+    defect: it would let a genuinely misclassified value hide behind it."""
+    brand = pytest.importorskip(
+        'engine.brand', reason='rnv-brand not importable here')
+    named = _register_values(brand)
+    stale = []
+    for name, (entry, _why) in COINCIDENT.items():
+        if not hasattr(colors, name):
+            stale.append(f'{name}: no longer defined in utils/colors.py')
+            continue
+        value = getattr(colors, name).lower()
+        if value not in named:
+            stale.append(f'{name} = {value} no longer matches any register value')
+        elif named[value] != entry:
+            stale.append(f'{name} = {value} is now {named[value]}, not {entry}')
+    assert not stale, (
+        'COINCIDENT entries that no longer describe reality:\n  '
+        + '\n  '.join(stale)
+        + '\n\nDelete the entry or correct it -- do not leave it standing.')
+
+
+def test_every_coincidence_is_app_owned():
+    """Guard the guard. The exemption is only for app-owned values; naming a
+    mirrored constant here would quietly exempt it from the mirror itself."""
+    for name in COINCIDENT:
+        group = colors.PROVENANCE.get(name)
+        assert group and group.startswith('app-'), (
+            f'{name} is marked {group!r}. COINCIDENT is only for app-owned '
+            f'values -- using it on a mirrored one would hide real drift.')
+
+
+def test_every_coincidence_says_why():
+    """An exemption with no reason is one nobody can review."""
+    for name, (entry, why) in COINCIDENT.items():
+        assert entry and len(why) > 40, (
+            f'{name} has no usable reason recorded')
 
 
 # ------------------------------------------------------------------- derived
@@ -229,7 +301,7 @@ def test_regex_group_palette_is_named():
 # cannot see that. Counting can.
 
 GOLD_CONSTANTS = ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_DARK_GOLD_DEEP',
-                  'GOLD_HOVER', 'GOLD_PRESSED', 'BRAND_DARK_GOLD_PRESSED')
+                  'BRAND_GOLD_HOVER', 'BRAND_GOLD_PRESSED', 'BRAND_DARK_GOLD_PRESSED')
 
 
 def _theme_dicts() -> dict[str, dict]:
@@ -297,9 +369,9 @@ def test_the_registered_gold_is_one_of_the_two(mode, base):
 
 
 def test_pressed_returns_to_the_accent_in_both_modes():
-    """What keeps the count at two. Before this pass GOLD_PRESSED was
+    """What keeps the count at two. Before this pass BRAND_GOLD_PRESSED was
     #bba57c -- a third gold whose only job was a 2px tab underline."""
-    assert colors.GOLD_PRESSED == colors.BRAND_GOLD
+    assert colors.BRAND_GOLD_PRESSED == colors.BRAND_GOLD
     assert colors.BRAND_DARK_GOLD_PRESSED == colors.BRAND_DARK_GOLD
 
 

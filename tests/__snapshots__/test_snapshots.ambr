@@ -5,13 +5,13 @@
               /* ===== BASE DIALOG ===== */
               QDialog {
                   background-color: #1a1a1a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   font-family: 'Arial';
               }
               
               /* ===== LABELS ===== */
               QLabel {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   background-color: transparent;
               }
               
@@ -33,7 +33,7 @@
               /* ===== LINE EDIT ===== */
               QLineEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px;
                   border-radius: 4px;
@@ -54,7 +54,7 @@
               /* ===== TEXT EDIT / PLAIN TEXT EDIT ===== */
               QTextEdit, QPlainTextEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   border-radius: 4px;
                   padding: 4px;
@@ -72,7 +72,7 @@
               /* ===== COMBO BOX ===== */
               QComboBox {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 5px 10px;
                   border-radius: 4px;
@@ -91,7 +91,7 @@
               }
               QComboBox QAbstractItemView {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   selection-background-color: #d2bc93;
                   selection-color: #000000;
                   border: 1px solid #333333;
@@ -116,7 +116,7 @@
               
               /* ===== CHECK BOX ===== */
               QCheckBox {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QCheckBox::indicator {
@@ -139,7 +139,7 @@
               
               /* ===== RADIO BUTTON ===== */
               QRadioButton {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QRadioButton::indicator {
@@ -163,7 +163,7 @@
               /* ===== PUSH BUTTON ===== */
               QPushButton {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px 16px;
                   border-radius: 4px;
@@ -193,7 +193,7 @@
                   border: 1px solid #333333;
                   border-radius: 4px;
                   text-align: center;
-                  color: #e0e0e0;
+                  color: #dddddd;
               }
               QProgressBar::chunk {
                   background-color: #d2bc93;
@@ -276,13 +276,13 @@
               /* ===== BASE DIALOG ===== */
               QDialog {
                   background-color: #1a1a1a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   font-family: 'Montserrat';
               }
               
               /* ===== LABELS ===== */
               QLabel {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   background-color: transparent;
               }
               
@@ -304,7 +304,7 @@
               /* ===== LINE EDIT ===== */
               QLineEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px;
                   border-radius: 4px;
@@ -325,7 +325,7 @@
               /* ===== TEXT EDIT / PLAIN TEXT EDIT ===== */
               QTextEdit, QPlainTextEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   border-radius: 4px;
                   padding: 4px;
@@ -343,7 +343,7 @@
               /* ===== COMBO BOX ===== */
               QComboBox {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 5px 10px;
                   border-radius: 4px;
@@ -362,7 +362,7 @@
               }
               QComboBox QAbstractItemView {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   selection-background-color: #d2bc93;
                   selection-color: #000000;
                   border: 1px solid #333333;
@@ -387,7 +387,7 @@
               
               /* ===== CHECK BOX ===== */
               QCheckBox {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QCheckBox::indicator {
@@ -410,7 +410,7 @@
               
               /* ===== RADIO BUTTON ===== */
               QRadioButton {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QRadioButton::indicator {
@@ -434,7 +434,7 @@
               /* ===== PUSH BUTTON ===== */
               QPushButton {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px 16px;
                   border-radius: 4px;
@@ -464,7 +464,7 @@
                   border: 1px solid #333333;
                   border-radius: 4px;
                   text-align: center;
-                  color: #e0e0e0;
+                  color: #dddddd;
               }
               QProgressBar::chunk {
                   background-color: #d2bc93;
@@ -1089,13 +1089,13 @@
               /* ===== BASE DIALOG ===== */
               QDialog {
                   background-color: #1a1a1a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   font-family: 'Arial';
               }
               
               /* ===== LABELS ===== */
               QLabel {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   background-color: transparent;
               }
               
@@ -1117,7 +1117,7 @@
               /* ===== LINE EDIT ===== */
               QLineEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px;
                   border-radius: 4px;
@@ -1138,7 +1138,7 @@
               /* ===== TEXT EDIT / PLAIN TEXT EDIT ===== */
               QTextEdit, QPlainTextEdit {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   border-radius: 4px;
                   padding: 4px;
@@ -1156,7 +1156,7 @@
               /* ===== COMBO BOX ===== */
               QComboBox {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 5px 10px;
                   border-radius: 4px;
@@ -1175,7 +1175,7 @@
               }
               QComboBox QAbstractItemView {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   selection-background-color: #d2bc93;
                   selection-color: #000000;
                   border: 1px solid #333333;
@@ -1200,7 +1200,7 @@
               
               /* ===== CHECK BOX ===== */
               QCheckBox {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QCheckBox::indicator {
@@ -1223,7 +1223,7 @@
               
               /* ===== RADIO BUTTON ===== */
               QRadioButton {
-                  color: #e0e0e0;
+                  color: #dddddd;
                   spacing: 8px;
               }
               QRadioButton::indicator {
@@ -1247,7 +1247,7 @@
               /* ===== PUSH BUTTON ===== */
               QPushButton {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 8px 16px;
                   border-radius: 4px;
@@ -1277,7 +1277,7 @@
                   border: 1px solid #333333;
                   border-radius: 4px;
                   text-align: center;
-                  color: #e0e0e0;
+                  color: #dddddd;
               }
               QProgressBar::chunk {
                   background-color: #d2bc93;
@@ -1394,7 +1394,7 @@
   
               QTableWidget {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   gridline-color: #333333;
                   border-radius: 4px;
@@ -1412,7 +1412,7 @@
               }
               QHeaderView::section {
                   background-color: #333333;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: none;
                   border-right: 1px solid #333333;
                   border-bottom: 1px solid #333333;
@@ -1427,7 +1427,7 @@
   
               QListWidget {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   border-radius: 4px;
                   outline: none;
@@ -1448,7 +1448,7 @@
   
               QTreeWidget {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   border-radius: 4px;
                   outline: none;
@@ -1472,7 +1472,7 @@
               }
               QHeaderView::section {
                   background-color: #333333;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: none;
                   border-right: 1px solid #333333;
                   border-bottom: 1px solid #333333;
@@ -1521,7 +1521,7 @@
   
               QSpinBox, QDoubleSpinBox {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 5px;
                   border-radius: 4px;
@@ -1547,7 +1547,7 @@
   
               QMenu {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 4px;
               }
@@ -1588,7 +1588,7 @@
                   border: 1px solid #333333;
                   border-radius: 4px;
                   text-align: center;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   height: 20px;
               }
               QProgressBar::chunk {
@@ -2133,7 +2133,7 @@
     "button_hover_bg": "#333333",
     "button_pressed_bg": "#444444",
     "button_pressed_text": "#000000",
-    "button_text": "#e0e0e0",
+    "button_text": "#dddddd",
     "checkbox_border": "#555555",
     "checkbox_indicator_bg": "#1a1a1a",
     "diff_added_bg": "#1a4d1a",
@@ -2160,9 +2160,9 @@
     "info": "#d2bc93",
     "input_bg": "#1a1a1a",
     "input_border": "#333333",
-    "input_text": "#e0e0e0",
+    "input_text": "#dddddd",
     "label_bg": "#000000",
-    "label_text": "#e0e0e0",
+    "label_text": "#dddddd",
     "line_number_bg": "#1a1a1a",
     "line_number_current_bg": "#2a2a2a",
     "line_number_current_fg": "#d2bc93",
@@ -2178,8 +2178,8 @@
     "selection_bg": "#d2bc93",
     "selection_text": "#000000",
     "success": "#28a745",
-    "text": "#e0e0e0",
-    "text_color": "#e0e0e0",
+    "text": "#dddddd",
+    "text_color": "#dddddd",
     "text_disabled": "#555555",
     "text_muted": "#888888",
     "tooltip_border": "#d2bc93",
@@ -2266,7 +2266,7 @@
 # name: TestDialogStyleSnapshots.test_inline_styles_combined
   '''
   === dark ===
-  header:      font-size: 14pt; font-weight: bold; color: #e0e0e0;
+  header:      font-size: 14pt; font-weight: bold; color: #dddddd;
   subtitle:    color: #888888; margin-bottom: 10px;
   description: color: #888888; font-size: 9pt;
   tip:         color: #d2bc93; font-style: italic;
@@ -2296,7 +2296,7 @@
   
               QMenu {
                   background-color: #2a2a2a;
-                  color: #e0e0e0;
+                  color: #dddddd;
                   border: 1px solid #333333;
                   padding: 4px;
               }
@@ -2423,7 +2423,7 @@
               font-family: Arial, sans-serif;
               font-size: 11pt;
               line-height: 1.6;
-              color: #e0e0e0;
+              color: #dddddd;
               background-color: #1a1a1a;
               padding: 20px;
           }

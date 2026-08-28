@@ -168,7 +168,7 @@ APP_CARD: Final[str] = '#2a2a2a'
 APP_BORDER: Final[str] = '#333333'
 
 #: engine/brand.py APP["text"]
-APP_TEXT: Final[str] = '#e0e0e0'
+APP_TEXT: Final[str] = '#dddddd'
 
 #: engine/brand.py APP["text-dim"]
 APP_TEXT_DIM: Final[str] = '#aaaaaa'
@@ -219,7 +219,7 @@ STATUS_ERROR_LIGHT: Final[str] = lighten(STATUS_ERROR, -20)   # -> #c82131
 # that happens to hit a hand-picked number is a literal in disguise.
 #
 # That future pass is this one. Dark mode now runs on two golds:
-# BRAND_GOLD and GOLD_HOVER derived from it. GOLD_PRESSED returned
+# BRAND_GOLD and BRAND_GOLD_HOVER derived from it. BRAND_GOLD_PRESSED returned
 # to the accent, which is where the third value went.
 
 #: dark-mode hover. DERIVED, not minted -- the register rules that a surface
@@ -227,13 +227,13 @@ STATUS_ERROR_LIGHT: Final[str] = lighten(STATUS_ERROR, -20)   # -> #c82131
 #: replaces (#dcc9a3, RGB distance 2.4) rather than to a tidy step, because the
 #: brief was to change the provenance and not the appearance. Hue snaps back to
 #: BRAND_GOLD's 39.0 degrees exactly; the minted value had drifted to 40.0.
-GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)
+BRAND_GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)
 
 #: dark-mode pressed. It IS the accent, mirroring light mode.
 #:
 #: The brand registers two golds and derives the rest when needed. Each mode
 #: gets the registered gold and ONE derivative -- light spends its on
-#: BRAND_DARK_GOLD_DEEP, dark spends its on GOLD_HOVER -- and every other gold
+#: BRAND_DARK_GOLD_DEEP, dark spends its on BRAND_GOLD_HOVER -- and every other gold
 #: role reuses one of the two. Pressed returning to rest is what holds the
 #: count there, and tests/test_brand_mirror.py asserts the count.
 #:
@@ -245,7 +245,7 @@ GOLD_HOVER: Final[str] = lighten(BRAND_GOLD, 13)
 #:
 #: The interaction still reads: rest at the accent, hover lifts away from the
 #: dark ground, pressed drops back to rest.
-GOLD_PRESSED: Final[str] = BRAND_GOLD
+BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 
 
 # ============ THE APP'S NEUTRAL RAMP ============
@@ -274,6 +274,11 @@ GREY_66: Final[str] = '#666666'
 GREY_88: Final[str] = '#888888'
 GREY_CC: Final[str] = '#cccccc'
 GREY_DD: Final[str] = '#dddddd'
+GREY_E0: Final[str] = '#e0e0e0'
+#: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
+#: moved to grey(13) and this did not follow -- it is a surface, and the
+#: published grid governs inks and edges only. rnv-color-picker and
+#: rnv-icon-builder both carry this same track at this same value.
 GREY_E8: Final[str] = '#e8e8e8'
 GREY_EE: Final[str] = '#eeeeee'
 GREY_F5: Final[str] = '#f5f5f5'
@@ -401,8 +406,8 @@ PROVENANCE: Final[dict[str, str]] = {
     'STATUS_ERROR_LIGHT': 'derived',
     'BRAND_DARK_GOLD_DEEP': 'derived',
     'BRAND_DARK_GOLD_PRESSED': 'derived',
-    'GOLD_HOVER': 'derived',
-    'GOLD_PRESSED': 'derived',
+    'BRAND_GOLD_HOVER': 'derived',
+    'BRAND_GOLD_PRESSED': 'derived',
     # -- app-ramp
     'GREY_3A': 'app-ramp',
     'GREY_44': 'app-ramp',
@@ -412,6 +417,7 @@ PROVENANCE: Final[dict[str, str]] = {
     'GREY_88': 'app-ramp',
     'GREY_CC': 'app-ramp',
     'GREY_DD': 'app-ramp',
+    'GREY_E0': 'app-ramp',
     'GREY_E8': 'app-ramp',
     'GREY_EE': 'app-ramp',
     'GREY_F5': 'app-ramp',
@@ -448,8 +454,8 @@ __all__ = [
     'STATUS_WARNING',
     'STATUS_ERROR',
     'STATUS_ERROR_LIGHT',
-    'GOLD_HOVER',
-    'GOLD_PRESSED',
+    'BRAND_GOLD_HOVER',
+    'BRAND_GOLD_PRESSED',
     'GREY_3A',
     'GREY_44',
     'GREY_55',
@@ -458,6 +464,7 @@ __all__ = [
     'GREY_88',
     'GREY_CC',
     'GREY_DD',
+    'GREY_E0',
     'GREY_E8',
     'GREY_EE',
     'GREY_F5',
