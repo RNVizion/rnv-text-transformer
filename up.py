@@ -2,257 +2,287 @@
 """
 RNV-GOLD-ALIGNMENT-TOOL-DO-NOT-SWEEP
 
-Move rnv-text-transformer's ink onto the grid, split the light surface out
-from under its name, and finish the gold rename.
+Move three rnv-text-transformer ramp steps into the register mirror, and split
+one hex that was doing two jobs under one name.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
     python up.py --verify    # run the suites only, change nothing
     python up.py --finish    # delete this file
 
-THE FIND THAT SHAPED THIS PASS
+WHAT MOVES: NOTHING. Not one rendered pixel.
 
-APP_TEXT was #e0e0e0, and six palette entries were spelled with it -- five in
-dark, and ONE IN LIGHT:
+Three values this app owned are now the register's, so they stop being ramp
+steps and become mirrors:
 
-    utils/dialog_styles.py:273    'scrollbar_bg': APP_TEXT,      <- light
+    GREY_3A  #3a3a3a  ->  APP_PANEL_HOVER          APP["panel-hover"]  rev 22
+    GREY_E8  #e8e8e8  ->  GOLD_TEXT_GROUND_FLOOR   module constant     rev 24
+    GREY_EE  #eeeeee  ->  APP_HOVER_LIGHT          APP["hover-light"]  rev 23
+                          ... for ONE of its four uses. See below.
 
-That is #e0e0e0's other half wearing the ink's name. The light scrollbar track
-is a SURFACE, and the published grid governs inks and edges and deliberately
-not surfaces. Moving APP_TEXT with that entry still pointing at it would have
-dragged a surface onto the ink grid and silently changed a light-mode track
-that rnv-color-picker and rnv-icon-builder both keep at #e0e0e0.
+THE LATENT FAILURE THIS CLOSES
 
-The other four apps carry the same split as two DIFFERENT keys holding the
-same hex, which is visible in a census. Here it was ONE NAME holding two
-roles, which is not -- it was found only by checking which side of the light
-palette boundary each use sat on.
+tests/test_brand_mirror.py has test_app_owned_values_are_not_register_values,
+which fails when something classified app-owned turns out to BE a register
+value. It skips where rnv-brand is not importable, and CI here does not have
+it, so all three of these have been silently misclassified since the register
+ruled them. Running the suite with the brand on the path is the proving run,
+and it is red today. This makes it green honestly rather than by widening an
+exemption.
 
-WHAT MOVES
+GREY_EE IS SPLIT, NOT RENAMED
 
-  APP_TEXT                              #e0e0e0 -> #dddddd   grey(13)
-  GREY_E0  (new)                        #e0e0e0              the light track
-  LIGHT scrollbar_bg    APP_TEXT -> GREY_E0                  value unchanged
+Four entries hold #eeeeee, and only one of them is the register's role:
 
-  DARK text, button_text, input_text, label_text, text_color follow APP_TEXT.
+    bg_hover              light dialog palette   -> APP_HOVER_LIGHT
+    diff_html_header_bg   dark and light         -> stays GREY_EE
+    line_number_bg        light gutter, at rest  -> stays GREY_EE
 
-  GOLD_HOVER   -> BRAND_GOLD_HOVER      10 sites
-  GOLD_PRESSED -> BRAND_GOLD_PRESSED    11 sites
+An interaction plate is not a resting ground. Wiring all four would claim a
+role for three surfaces on the strength of a shared hex -- which is the mistake
+the register warned about when it registered #e8e8e8, pointed the other way.
+So GREY_EE survives as a ramp step for the three, and the coincidence between
+it and APP["hover-light"] is recorded in COINCIDENT and asserted in both
+directions: one that stops coinciding fails, and so does one that turns out to
+be mirrored after all. This is the same shape as GREY_DD and APP["text"],
+already in that table.
 
-THE GOLD RENAME IS THE LAST OF THE v1.49 RULING
+WHY #e8e8e8 GOT A REGISTER ENTRY AT ALL, AND WHY THIS FILE CAUSED IT
 
-Upstream reopened and corrected the naming ruling at rnv-brand@faf1fd6,
-restoring BRAND_GOLD_HOVER as a state. Four of the five apps already spelled
-it that way; this one did not. Renaming it here closes that out.
+BRAND_DARK_GOLD_DEEP is defined in utils/colors.py as the smallest uniform
+per-channel step that clears #e8e8e8: -14 gives 4.5334, and -13 gives 4.4675
+and fails. That derivative is published, checked, mirrored and pinned in five
+repositories -- and its INPUT was app-owned, so nothing anywhere could mirror
+the constraint the whole derivation rests on. The register named it
+GOLD_TEXT_GROUND_FLOOR on 2026-08-30 and added an import-time guard coupling
+the two.
 
-The replacement is ANCHORED, not a plain substring swap: BRAND_DARK_GOLD_PRESSED
-contains GOLD_PRESSED, and a naive replace would produce
-BRAND_DARK_BRAND_GOLD_PRESSED. The regex refuses a match preceded by an
-uppercase letter or underscore. It deliberately DOES match inside quotes,
-because the names appear as strings in PROVENANCE and __all__.
+A MISPLACED COMMENT, MOVED
 
-THE SNAPSHOTS ARE HAND-EDITED, AND THE SPLIT IS WHY THAT MATTERS
+The `#:` block describing "the LIGHT scrollbar track ... held by APP_TEXT until
+2026-08-28" sat directly above GREY_E8, so it documented GREY_E8 while
+describing GREY_E0 -- the track is #e0e0e0 (dialog_styles 'scrollbar_bg'), and
+#e0e0e0 is what APP["text"] held before the ink moved. Harmless while both were
+anonymous ramp steps; not harmless when one of them becomes a register mirror,
+because a wrong fact then acquires the authority of a checked one. This
+programme has already shipped one guard whose docstring described a different
+app's history and passed every test, since nothing checks prose. The comment
+moves up one constant.
 
-tests/__snapshots__/test_snapshots.ambr holds 53 occurrences of #e0e0e0.
-Exactly 46 are the dark ink and exactly 7 are the light scrollbar track. A
-blanket replace would move all 53 and change light mode. Regenerating would
-make the snapshots agree with whatever the code now emits, destroying the only
-evidence that nothing else moved.
+WHAT THIS SCRIPT DOES NOT DO
 
-So the edit is scoped per snapshot block, and every block's count is asserted
-against a map derived by reading the file rather than assumed:
-
-    dark_arial 10   dark_montserrat 10   extended_dark_full 18
-    get_colors_dark 5   inline_styles_combined 1   menu_stylesheet_dark 1
-    export_html_dark_basic 1                       -> 46 move
-
-    light_arial 2   light_montserrat 2   extended_light_full 2
-    get_colors_light 1                             ->  7 stay
-
-inline_styles_combined carries both a dark and a light section in one block;
-its single occurrence is in the dark half, checked rather than assumed.
+It does not touch ui/about_dialog.py. Confirming what bg_tertiary paints turned
+up a separate defect -- gold-family text drawn in c['accent'] where the palette
+defines c['accent_ink'] for text, failing the 4.5 floor in light mode at more
+than one site. That is a value change of a different kind and it gets its own
+script, so that this diff stays readable as what it is: a provenance pass.
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import os
 import re
+import io
 import subprocess
 import sys
 import tempfile
+import tokenize
 from pathlib import Path
 
 REPO = "rnv-text-transformer"
-DESCRIPTION = "move the ink, split out the light surface, finish the gold rename"
+DESCRIPTION = "move three ramp steps into the register mirror"
 SENTINEL_FILE = "utils/colors.py"
-SENTINEL = "APP_TEXT: Final[str] = '#dddddd'"
-GUARD = "tests/test_app_mirror.py"
-SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py",
-           "dialog_styles.py"}
-
+SENTINEL = "GOLD_TEXT_GROUND_FLOOR: Final[str]"
 STYLES = "utils/dialog_styles.py"
 INIT = "utils/__init__.py"
-MIRROR_TEST = "tests/test_brand_mirror.py"
-AMBR = "tests/__snapshots__/test_snapshots.ambr"
-
-MIRROR_OLD = 'def test_app_owned_values_are_not_register_values():\n    """Something app-owned that IS a brand value is misclassified."""\n    brand = pytest.importorskip(\n        \'engine.brand\', reason=\'rnv-brand not importable here\')\n    named = {}\n    for attr in (\'BRAND_GOLD\', \'BRAND_DARK_GOLD\', \'BRAND_BLACK\',\n                 \'TRUE_BLACK\', \'WHITE\', \'WEB_BLACK\'):\n        named[getattr(brand, attr).lower()] = attr\n    for dict_name in (\'APP\', \'STATUS\'):\n        for key, value in getattr(brand, dict_name).items():\n            if isinstance(value, str) and value.startswith(\'#\'):\n                named.setdefault(value.lower(), f\'{dict_name}["{key}"]\')\n\n    wrong = []\n    for name, group in colors.PROVENANCE.items():\n        if not group.startswith(\'app-\'):\n            continue\n        value = getattr(colors, name)\n        for v in (value,) if isinstance(value, str) else value:\n            if v.lower() in named:\n                wrong.append(f\'{name} = {v} is {named[v.lower()]} in the register, \'\n                             f\'but marked {group}\')\n    assert not wrong, \'misclassified as app-owned:\\n  \' + \'\\n  \'.join(wrong)\n'
-MIRROR_NEW = '#: App-owned values that DELIBERATELY share a hex with a register entry.\n#:\n#: Publishing the ink grid made this possible for the first time: an app ramp\n#: step and a register value can land on the same grid position while doing\n#: different jobs. Sharing a VALUE is not the same as playing the same ROLE,\n#: and the check below can only read the value -- so the intentional ones are\n#: named here, with what they share and why they must NOT follow if the\n#: register moves.\n#:\n#: This is an exemption, so it is asserted in BOTH directions below: a named\n#: coincidence that stops coinciding fails, and so does one that names a\n#: mirrored constant.\n#:\n#: name -> (register entry, why it is not the same role)\nCOINCIDENT: dict[str, tuple[str, str]] = {\n    \'GREY_DD\': (\n        \'APP["text"]\',\n        \'grey(13) does two jobs. In the register it is the DARK ink; here it \'\n        \'is border_light in the LIGHT palette -- one step softer than \'\n        \'border: GREY_CC -- plus the always-light-styled diff export border. \'\n        \'Different mode, different role. If APP["text"] moves off grey(13) \'\n        \'this must NOT follow it, which is exactly why it is named here \'\n        \'rather than mirrored.\'),\n}\n\n\ndef _register_values(brand) -> dict:\n    """Every value the register holds, hex -> where it is held."""\n    named = {}\n    for attr in (\'BRAND_GOLD\', \'BRAND_DARK_GOLD\', \'BRAND_BLACK\',\n                 \'TRUE_BLACK\', \'WHITE\', \'WEB_BLACK\'):\n        named[getattr(brand, attr).lower()] = attr\n    for dict_name in (\'APP\', \'STATUS\'):\n        for key, value in getattr(brand, dict_name).items():\n            if isinstance(value, str) and value.startswith(\'#\'):\n                named.setdefault(value.lower(), f\'{dict_name}["{key}"]\')\n    return named\n\n\ndef test_app_owned_values_are_not_register_values():\n    """Something app-owned that IS a brand value is misclassified."""\n    brand = pytest.importorskip(\n        \'engine.brand\', reason=\'rnv-brand not importable here\')\n    named = _register_values(brand)\n\n    wrong = []\n    for name, group in colors.PROVENANCE.items():\n        if not group.startswith(\'app-\') or name in COINCIDENT:\n            continue\n        value = getattr(colors, name)\n        for v in (value,) if isinstance(value, str) else value:\n            if v.lower() in named:\n                wrong.append(f\'{name} = {v} is {named[v.lower()]} in the register, \'\n                             f\'but marked {group}\')\n    assert not wrong, \'misclassified as app-owned:\\n  \' + \'\\n  \'.join(wrong)\n\n\ndef test_every_coincidence_still_coincides():\n    """The other direction. A named coincidence that no longer shares a value\n    is a dead exemption, and a dead exemption is a licence waiting for a\n    defect: it would let a genuinely misclassified value hide behind it."""\n    brand = pytest.importorskip(\n        \'engine.brand\', reason=\'rnv-brand not importable here\')\n    named = _register_values(brand)\n    stale = []\n    for name, (entry, _why) in COINCIDENT.items():\n        if not hasattr(colors, name):\n            stale.append(f\'{name}: no longer defined in utils/colors.py\')\n            continue\n        value = getattr(colors, name).lower()\n        if value not in named:\n            stale.append(f\'{name} = {value} no longer matches any register value\')\n        elif named[value] != entry:\n            stale.append(f\'{name} = {value} is now {named[value]}, not {entry}\')\n    assert not stale, (\n        \'COINCIDENT entries that no longer describe reality:\\n  \'\n        + \'\\n  \'.join(stale)\n        + \'\\n\\nDelete the entry or correct it -- do not leave it standing.\')\n\n\ndef test_every_coincidence_is_app_owned():\n    """Guard the guard. The exemption is only for app-owned values; naming a\n    mirrored constant here would quietly exempt it from the mirror itself."""\n    for name in COINCIDENT:\n        group = colors.PROVENANCE.get(name)\n        assert group and group.startswith(\'app-\'), (\n            f\'{name} is marked {group!r}. COINCIDENT is only for app-owned \'\n            f\'values -- using it on a mirrored one would hide real drift.\')\n\n\ndef test_every_coincidence_says_why():\n    """An exemption with no reason is one nobody can review."""\n    for name, (entry, why) in COINCIDENT.items():\n        assert entry and len(why) > 40, (\n            f\'{name} has no usable reason recorded\')\n'
+BRAND_MIRROR = "tests/test_brand_mirror.py"
+GUARD = "tests/test_ladder_and_plate.py"
+SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
 
 SUITES = [
-    ("pytest tests/ (about 3 minutes)",
-     [sys.executable, "-m", "pytest", "tests/", "-q", "-p", "no:cacheprovider",
-      "--benchmark-disable"]),
-    ("unittest suite",
+    ('pytest tests/',
+     [sys.executable, "-m", "pytest", "tests/", "-q", "-p", "no:cacheprovider"]),
+    ('unittest suite',
      [sys.executable, "-m", "unittest", "test_rnv_text_transformer"]),
 ]
 
-# Snapshot blocks whose #e0e0e0 is the dark ink, and how many each holds.
-INK_BLOCKS = {
-    "TestDialogStyleSnapshots.test_dialog_stylesheet_dark_arial": 10,
-    "TestDialogStyleSnapshots.test_dialog_stylesheet_dark_montserrat": 10,
-    "TestDialogStyleSnapshots.test_extended_stylesheet_dark_full": 18,
-    "TestDialogStyleSnapshots.test_get_colors_dark": 5,
-    "TestDialogStyleSnapshots.test_inline_styles_combined": 1,
-    "TestDialogStyleSnapshots.test_menu_stylesheet_dark": 1,
-    "TestExportSnapshots.test_export_html_dark_basic": 1,
+NEW_CONSTANTS = '\n#: engine/brand.py APP["panel-hover"]. The dark interaction plate, and the n=+2\n#: rung of the dark surface ladder BRAND_BLACK + n*0x10, n in -1..+2:\n#: #0a0a0a canvas, #1a1a1a panel, #2a2a2a card, #3a3a3a panel-hover.\n#:\n#: WAS GREY_3A, A RAMP STEP, until rnv-brand rev 22 registered it on\n#: 2026-08-29. The register had called the ladder "two-thirds specified"\n#: because APP_BORDER #333333 is not #3a3a3a and so looked like a missing rung.\n#: It is not a rung at all: #333333 is grey(3) on the INK grid, which governs\n#: inks and EDGES, and a border is an edge. Two families compared to each\n#: other. The ladder was complete the whole time.\nAPP_PANEL_HOVER: Final[str] = \'#3a3a3a\'\n\n#: engine/brand.py APP["hover-light"]. grey(14). The light interaction plate --\n#: bg_hover in the light dialog palette.\n#:\n#: Registered 2026-08-29 as #e8e8e8 and moved here on 2026-08-30 in rev 23,\n#: before any app had been wired to it. #e8e8e8 is the ground\n#: BRAND_DARK_GOLD_DEEP is calibrated against -- see GOLD_TEXT_GROUND_FLOOR\n#: below -- so a hover plate on that value clears the 4.5 text floor by 0.0334\n#: and fails the moment the gold moves one step. This clears by 0.2875.\n#: A boundary is not a plate.\n#:\n#: GREY_EE HOLDS THE SAME HEX AND IS NOT THIS. Three static surfaces still use\n#: the ramp step; only the hover plate is the register\'s. Recorded as a\n#: coincidence in tests/test_brand_mirror.py and asserted in both directions.\nAPP_HOVER_LIGHT: Final[str] = \'#eeeeee\'\n\n#: engine/brand.py GOLD_TEXT_GROUND_FLOOR. The darkest light ground on which\n#: the gold family carries text.\n#:\n#: WAS GREY_E8, A RAMP STEP, until rnv-brand rev 24 registered it on\n#: 2026-08-30 -- and it was registered because this file showed it was doing\n#: register work with no register entry. BRAND_DARK_GOLD_DEEP is defined above\n#: as the smallest uniform step that clears #e8e8e8: -14 gives 4.5334, and -13\n#: gives 4.4675 and fails. That derivative is published, checked, mirrored and\n#: pinned in five repositories. Its INPUT was app-owned, so nothing could\n#: mirror the constraint the whole derivation rests on.\n#:\n#: Both uses here are grounds the gold family draws on: bg_tertiary, which\n#: carries the About dialog\'s tab labels, and line_number_current_bg, whose\n#: foreground is BRAND_DARK_GOLD_DEEP itself.\nGOLD_TEXT_GROUND_FLOOR: Final[str] = \'#e8e8e8\'\n'
+OLD_RAMP_TAIL = "GREY_E0: Final[str] = '#e0e0e0'\n#: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink\n#: moved to grey(13) and this did not follow -- it is a surface, and the\n#: published grid governs inks and edges only. rnv-color-picker and\n#: rnv-icon-builder both carry this same track at this same value.\nGREY_E8: Final[str] = '#e8e8e8'\nGREY_EE: Final[str] = '#eeeeee'"
+NEW_RAMP_TAIL = '#: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink\n#: moved to grey(13) and this did not follow -- it is a surface, and the\n#: published grid governs inks and edges only. rnv-color-picker and\n#: rnv-icon-builder both carry this same track at this same value.\n#:\n#: THIS COMMENT SAT ONE CONSTANT LOWER until 2026-08-30, where it documented\n#: GREY_E8 while describing GREY_E0\'s job: the scrollbar track is #e0e0e0\n#: (utils/dialog_styles.py \'scrollbar_bg\'), and #e0e0e0 is what APP["text"]\n#: held before the ink moved. Moved when GREY_E8 became a register mirror --\n#: carrying a docstring that describes a different value into a mirror is how\n#: a wrong fact acquires the authority of a checked one.\nGREY_E0: Final[str] = \'#e0e0e0\'\n#: grey(14). Three STATIC surfaces: the diff export header in both modes, and\n#: the line number gutter\'s resting ground. NOT the light hover plate, which is\n#: APP_HOVER_LIGHT and holds this same hex -- one value, two roles, and only\n#: one of them is the register\'s. See COINCIDENT in tests/test_brand_mirror.py.\nGREY_EE: Final[str] = \'#eeeeee\''
+OLD_COINCIDENT_TAIL = "        'rather than mirrored.'),\n}"
+NEW_COINCIDENT_TAIL = '        \'rather than mirrored.\'),\n    \'GREY_EE\': (\n        \'APP["hover-light"]\',\n        \'grey(14) does two jobs here, the same way grey(13) does. In the \'\n        \'register it is the LIGHT INTERACTION PLATE -- what a control hovers \'\n        \'to in light mode, which this app mirrors as APP_HOVER_LIGHT. This \'\n        \'ramp step is three STATIC surfaces: the diff export header in both \'\n        \'modes, and the line number gutter at rest. A resting ground is not \'\n        \'an interaction state. If APP["hover-light"] moves off grey(14) these \'\n        \'three must NOT follow it, which is exactly why the hex is spelled by \'\n        \'two names rather than one.\'),\n}'
+EDITS = [('utils/colors.py', "    'GREY_3A': 'app-ramp',\n", '', 1), ('utils/colors.py', "    'GREY_E8': 'app-ramp',\n", '', 1), ('utils/colors.py', "    'APP_TEXT_DIM': 'register',\n", "    'APP_TEXT_DIM': 'register',\n    'APP_PANEL_HOVER': 'register',\n    'APP_HOVER_LIGHT': 'register',\n    'GOLD_TEXT_GROUND_FLOOR': 'register',\n", 1), ('utils/colors.py', "    'GREY_3A',\n", '', 1), ('utils/colors.py', "    'GREY_E8',\n", '', 1), ('utils/colors.py', "    'APP_TEXT_DIM',\n", "    'APP_TEXT_DIM',\n    'APP_PANEL_HOVER',\n    'APP_HOVER_LIGHT',\n    'GOLD_TEXT_GROUND_FLOOR',\n", 1), ('utils/colors.py', "GREY_3A: Final[str] = '#3a3a3a'\n", '', 1), ('utils/__init__.py', '    GREY_3A,\n', '', 1), ('utils/__init__.py', '    GREY_E8,\n', '', 1), ('utils/__init__.py', '    GREY_EE,\n', '    GREY_EE,\n    APP_PANEL_HOVER,\n    APP_HOVER_LIGHT,\n    GOLD_TEXT_GROUND_FLOOR,\n', 1), ('utils/__init__.py', "    'GREY_3A',\n", '', 1), ('utils/__init__.py', "    'GREY_E8',\n", '', 1), ('utils/__init__.py', "    'GREY_EE',\n", "    'GREY_EE',\n    'APP_PANEL_HOVER',\n    'APP_HOVER_LIGHT',\n    'GOLD_TEXT_GROUND_FLOOR',\n", 1), ('utils/dialog_styles.py', '    GREY_3A,\n', '', 1), ('utils/dialog_styles.py', '    GREY_E8,\n', '', 1), ('utils/dialog_styles.py', '    GREY_EE,\n', '    GREY_EE,\n    APP_PANEL_HOVER,\n    APP_HOVER_LIGHT,\n    GOLD_TEXT_GROUND_FLOOR,\n', 1), ('utils/dialog_styles.py', "        'bg_hover': GREY_3A,", "        'bg_hover': APP_PANEL_HOVER,", 1), ('utils/dialog_styles.py', "        'bg_tertiary': GREY_E8,", "        'bg_tertiary': GOLD_TEXT_GROUND_FLOOR,", 1), ('utils/dialog_styles.py', "        'bg_hover': GREY_EE,", "        'bg_hover': APP_HOVER_LIGHT,", 1), ('utils/dialog_styles.py', "        'line_number_current_bg': GREY_E8,", "        'line_number_current_bg': GOLD_TEXT_GROUND_FLOOR,", 1), ('tests/test_brand_mirror.py', 'import ast\nimport pathlib\n', 'import ast\nimport pathlib\nimport re\n', 1), ('tests/test_brand_mirror.py', 'def _register_values(brand) -> dict:\n    """Every value the register holds, hex -> where it is held."""\n    named = {}\n    for attr in (\'BRAND_GOLD\', \'BRAND_DARK_GOLD\', \'BRAND_BLACK\',\n                 \'TRUE_BLACK\', \'WHITE\', \'WEB_BLACK\'):\n        named[getattr(brand, attr).lower()] = attr\n    for dict_name in (\'APP\', \'STATUS\'):\n        for key, value in getattr(brand, dict_name).items():\n            if isinstance(value, str) and value.startswith(\'#\'):\n                named.setdefault(value.lower(), f\'{dict_name}["{key}"]\')\n    return named', 'HEX = re.compile(r\'#[0-9a-fA-F]{6}$\')\n\n\ndef _register_values(brand) -> dict:\n    """Every value the register holds, hex -> where it is held.\n\n    ENUMERATED, NOT LISTED. Until 2026-08-30 this read six attribute names and\n    two dicts, written down. A value the register added afterwards was\n    therefore invisible to the test below, which is the only thing standing\n    between an app-owned label and a register value wearing it.\n\n    That is not hypothetical. rev 24 added GOLD_TEXT_GROUND_FLOOR #e8e8e8 as a\n    module constant, and this app held #e8e8e8 as GREY_E8, marked app-ramp. The\n    check ran, found nothing, and reported clean -- because the name of the\n    thing it needed to look at was not on its list. A list of what to check\n    goes stale behind the thing it checks; walking the module does not.\n    """\n    named = {}\n    for attr in sorted(dir(brand)):\n        if attr.startswith(\'_\'):\n            continue\n        value = getattr(brand, attr)\n        if isinstance(value, str) and HEX.match(value):\n            named.setdefault(value.lower(), attr)\n        elif isinstance(value, dict):\n            for key, item in value.items():\n                if isinstance(item, str) and HEX.match(item):\n                    named.setdefault(item.lower(), f\'{attr}["{key}"]\')\n    return named\n\n\ndef test_the_register_enumeration_is_not_empty():\n    """Guard the guard. Every misclassification check below asks whether a\n    value is in this map. An empty map answers no to everything and passes."""\n    brand = pytest.importorskip(\'engine.brand\', reason=\'rnv-brand not importable\')\n    named = _register_values(brand)\n    assert len(named) >= 20, (\n        f\'only {len(named)} register values enumerated. The sweeps that read \'\n        f\'this map pass trivially when it is small.\')\n    for expected in (brand.BRAND_GOLD, brand.APP[\'text\'],\n                     brand.GOLD_TEXT_GROUND_FLOOR):\n        assert expected.lower() in named, f\'{expected} is not enumerated\' ', 1)]
+
+#: The four palette entries that must resolve to exactly what they resolved to
+#: before. This pass renames the constants holding them; if a rename landed on
+#: the wrong name the value changes, and this is what says so.
+PINNED_ENTRIES = {
+    ("DARK", "bg_hover"): "#3a3a3a",
+    ("LIGHT", "bg_hover"): "#eeeeee",
+    ("LIGHT", "bg_tertiary"): "#e8e8e8",
+    ("LIGHT", "line_number_current_bg"): "#e8e8e8",
 }
-# Blocks whose #e0e0e0 is the light scrollbar track, and must NOT move.
-SURFACE_BLOCKS = {
-    "TestDialogStyleSnapshots.test_dialog_stylesheet_light_arial": 2,
-    "TestDialogStyleSnapshots.test_dialog_stylesheet_light_montserrat": 2,
-    "TestDialogStyleSnapshots.test_extended_stylesheet_light_full": 2,
-    "TestDialogStyleSnapshots.test_get_colors_light": 1,
-}
 
-GREY_E0 = """GREY_E0: Final[str] = '#e0e0e0'
-#: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
-#: moved to grey(13) and this did not follow -- it is a surface, and the
-#: published grid governs inks and edges only. rnv-color-picker and
-#: rnv-icon-builder both carry this same track at this same value.
-"""
-
-
-def _blocks(text: str) -> dict:
-    """Snapshot name -> (start, end) line indices."""
-    lines = text.splitlines(keepends=True)
-    marks = [(i, line[8:].strip()) for i, line in enumerate(lines)
-             if line.startswith("# name:")]
-    marks.append((len(lines), None))
-    return lines, {name: (st, marks[i + 1][0])
-                   for i, (st, name) in enumerate(marks[:-1])}
-
-
-def _rename(text: str, bare: str) -> tuple[str, int]:
-    """Anchored so BRAND_DARK_GOLD_PRESSED is not a bare GOLD_PRESSED. Matches
-    inside quotes on purpose -- these names appear as strings in PROVENANCE
-    and __all__."""
-    pattern = re.compile(rf"(?<![A-Z_]){bare}\b")
-    return pattern.subn("BRAND_" + bare, text)
+#: Names that must NOT survive anywhere, and names that must appear.
+GONE = ("GREY_3A", "GREY_E8")
+ARRIVED = ("APP_PANEL_HOVER", "APP_HOVER_LIGHT", "GOLD_TEXT_GROUND_FLOOR")
 
 
 def edits(tree) -> None:
-    # 1. the ink
-    tree.sub(SENTINEL_FILE, "APP_TEXT: Final[str] = '#e0e0e0'",
-             "APP_TEXT: Final[str] = '#dddddd'")
+    # The three new constants, in the register section beside the others.
+    tree.sub(SENTINEL_FILE, "APP_TEXT_DIM: Final[str] = '#aaaaaa'\n",
+             "APP_TEXT_DIM: Final[str] = '#aaaaaa'\n" + NEW_CONSTANTS)
+    # The ramp tail: GREY_E8 leaves, and the comment that was documenting it
+    # while describing GREY_E0 moves up to the constant it is about.
+    tree.sub(SENTINEL_FILE, OLD_RAMP_TAIL, NEW_RAMP_TAIL)
+    tree.sub(BRAND_MIRROR, OLD_COINCIDENT_TAIL, NEW_COINCIDENT_TAIL)
+    for rel, old, new, times in EDITS:
+        tree.sub(rel, old, new, times)
+    print(f"  applied {len(EDITS) + 3} anchored edits across 4 files")
 
-    # 2. the light surface gets its own step, in ramp order after GREY_DD
-    tree.sub(SENTINEL_FILE, "GREY_DD: Final[str] = '#dddddd'\n",
-             "GREY_DD: Final[str] = '#dddddd'\n" + GREY_E0)
-    tree.sub(SENTINEL_FILE, "    'GREY_DD': 'app-ramp',\n",
-             "    'GREY_DD': 'app-ramp',\n    'GREY_E0': 'app-ramp',\n")
-    # Two-line anchors. `    GREY_DD,\n` on its own also matches inside
-    # `'diff_html_border':    GREY_DD,` -- the alignment padding puts four
-    # spaces in front of the name there too. The next ramp step disambiguates.
-    tree.sub(SENTINEL_FILE, "    'GREY_DD',\n    'GREY_E8',\n",
-             "    'GREY_DD',\n    'GREY_E0',\n    'GREY_E8',\n")
-    tree.sub(INIT, "    GREY_DD,\n    GREY_E8,\n",
-             "    GREY_DD,\n    GREY_E0,\n    GREY_E8,\n")
-    tree.sub(INIT, "    'GREY_DD',\n    'GREY_E8',\n",
-             "    'GREY_DD',\n    'GREY_E0',\n    'GREY_E8',\n")
-    tree.sub(STYLES, "    GREY_DD,\n    GREY_E8,\n",
-             "    GREY_DD,\n    GREY_E0,\n    GREY_E8,\n")
-    tree.sub(STYLES, "        'scrollbar_bg': APP_TEXT,",
-             "        'scrollbar_bg': GREY_E0,")
 
-    # 3. the golds
-    for rel in (SENTINEL_FILE, STYLES, INIT, MIRROR_TEST):
-        text = tree.read(rel)
-        for bare, expected in (("GOLD_HOVER", None), ("GOLD_PRESSED", None)):
-            text, _ = _rename(text, bare)
-        tree.write(rel, text)
+def _palettes(source: str, colors: str) -> dict:
+    """DialogStyleManager's DARK and LIGHT, resolved to plain values through
+    the module constants, so a rename that lands on the wrong name shows up as
+    a value change rather than as a name this reader does not recognise.
 
-    # 4. the coincidence the ink move created
-    tree.sub(MIRROR_TEST, MIRROR_OLD, MIRROR_NEW)
+    The constants come from the EDITED colors.py, not the one on disk. Reading
+    disk here resolved every new name to nothing and reported four false
+    failures -- the edits live in the tree until the guards pass, which is the
+    whole point of rehearsing before writing."""
+    consts = {}
+    for node in ast.parse(colors.lstrip("\ufeff")).body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            target = node.targets[0] if isinstance(node, ast.Assign) else node.target
+            if isinstance(target, ast.Name) and isinstance(node.value, ast.Constant):
+                consts[target.id] = node.value.value
+    out = {}
+    for node in ast.walk(ast.parse(source.lstrip("\ufeff"))):
+        if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+            continue
+        target = node.targets[0] if isinstance(node, ast.Assign) else node.target
+        name = getattr(target, "id", None)
+        if name not in ("DARK", "LIGHT") or not isinstance(node.value, ast.Dict):
+            continue
+        palette = {}
+        for key, value in zip(node.value.keys, node.value.values):
+            if not isinstance(key, ast.Constant):
+                continue
+            if isinstance(value, ast.Constant):
+                palette[key.value] = value.value
+            elif isinstance(value, ast.Name):
+                palette[key.value] = consts.get(value.id, f"<{value.id}>")
+            else:
+                palette[key.value] = ast.unparse(value)
+        out[name] = palette
+    return out
 
-    # 5. the snapshots, per block
-    text = tree.read(AMBR)
-    lines, blocks = _blocks(text)
-    missing = set(INK_BLOCKS) | set(SURFACE_BLOCKS) - set(blocks)
-    missing = (set(INK_BLOCKS) | set(SURFACE_BLOCKS)) - set(blocks)
-    if missing:
-        raise SystemExit(f"snapshot blocks not found: {sorted(missing)}")
-    for name, count in {**INK_BLOCKS, **SURFACE_BLOCKS}.items():
-        st, en = blocks[name]
-        found = sum(lines[i].count("#e0e0e0") for i in range(st, en))
-        if found != count:
-            raise SystemExit(
-                f"{name}: expected {count} occurrence(s) of #e0e0e0, found "
-                f"{found}. The snapshot moved; re-derive this edit.")
-    for name in INK_BLOCKS:
-        st, en = blocks[name]
-        for i in range(st, en):
-            lines[i] = lines[i].replace("#e0e0e0", "#dddddd")
-    tree.write(AMBR, "".join(lines))
+
+def _identifiers(source: str) -> set:
+    """Every identifier a file actually USES, plus every string literal.
+
+    Read from the token stream so comments are excluded. A regex cannot tell a
+    use from a mention, and the comment this script writes to explain a rename
+    contains the very name it is checking has gone.
+    """
+    names = set()
+    for token in tokenize.generate_tokens(io.StringIO(source).readline):
+        if token.type == tokenize.NAME:
+            names.add(token.string)
+        elif token.type == tokenize.STRING:
+            names.add(token.string.strip("\"'"))
+    return names
 
 
 def checks(tree) -> None:
-    mirror = tree.read(MIRROR_TEST)
-    if "COINCIDENT" not in mirror or "def test_every_coincidence_still_coincides" not in mirror:
-        raise SystemExit("the COINCIDENT exemption and its reverse assertion "
-                         "were not installed")
-    if "'GREY_DD': (" not in mirror:
-        raise SystemExit("GREY_DD is not recorded as a coincidence")
+    edited_colors = tree.read(SENTINEL_FILE)
+    edited_styles = tree.read(STYLES)
 
-    src = tree.read(SENTINEL_FILE)
-    if src.count(SENTINEL) != 1:
-        raise SystemExit("APP_TEXT was not moved exactly once")
-    if "GREY_E0: Final[str] = '#e0e0e0'" not in src:
-        raise SystemExit("GREY_E0 was not defined")
+    # SHAPE. A rename that ate a line ending leaves every value identical and
+    # every test green while the file is quietly reflowed.
+    #
+    # The expected delta is COMPUTED FROM THE EDIT TABLE rather than written
+    # down. A hand-counted total is a second source of truth that goes stale
+    # the moment an edit is added, and it went wrong once while this script was
+    # being written.
+    expected = {}
+    for rel, old, new, times in EDITS:
+        expected[rel] = expected.get(rel, 0) + times * (
+            new.count("\n") - old.count("\n"))
+    expected[SENTINEL_FILE] = expected.get(SENTINEL_FILE, 0) + (
+        NEW_CONSTANTS.count("\n")
+        + NEW_RAMP_TAIL.count("\n") - OLD_RAMP_TAIL.count("\n"))
+    expected[BRAND_MIRROR] = expected.get(BRAND_MIRROR, 0) + (
+        NEW_COINCIDENT_TAIL.count("\n") - OLD_COINCIDENT_TAIL.count("\n"))
+    for rel, want in sorted(expected.items()):
+        before = (Path.cwd() / rel).read_text(encoding="utf-8-sig")
+        delta = tree.read(rel).count("\n") - before.count("\n")
+        if delta != want:
+            raise SystemExit(
+                f"{rel} changed shape by {delta} lines; the edit table adds up "
+                f"to exactly {want}.")
+
+    # The four entries must resolve to exactly what they resolved to before.
+    # This is what makes "nothing moved" checkable across a RENAME, where a
+    # value comparison alone would be reading the new name's value twice.
+    after = _palettes(edited_styles, edited_colors)
+    wrong = []
+    for (mode, key), want in PINNED_ENTRIES.items():
+        got = after.get(mode, {}).get(key)
+        if got != want:
+            wrong.append(f"{mode}[{key!r}] resolves to {got}, not {want}")
+    if wrong:
+        raise SystemExit("a rename landed on the wrong value:\n  " + "\n  ".join(wrong))
+
+    # Both directions, so a half-applied rename cannot pass -- and read from
+    # the TOKEN STREAM, not with a regex.
+    #
+    # A regex sweep for GREY_3A matches the `#:` comment this very script
+    # writes, which says "WAS GREY_3A, A RAMP STEP". That is a mention, not a
+    # use, and it failed the first time this check ran. Comments are skipped;
+    # NAME tokens are uses and STRING tokens catch the __all__ entries, which
+    # are the one place a name lives as a literal.
     for rel in (SENTINEL_FILE, STYLES, INIT):
-        text = tree.read(rel)
-        for bare in ("GOLD_HOVER", "GOLD_PRESSED"):
-            if re.search(rf"(?<![A-Z_]){bare}\b", text):
-                raise SystemExit(f"a bare {bare} survives in {rel}")
-        if "BRAND_DARK_BRAND_GOLD" in text:
-            raise SystemExit(
-                f"{rel}: the rename ate BRAND_DARK_GOLD_PRESSED -- the anchor "
-                f"failed and the substring trap fired")
-    styles = tree.read(STYLES)
-    if "'scrollbar_bg': APP_TEXT," in styles:
-        raise SystemExit("the light scrollbar track still reads APP_TEXT")
-    if styles.count("'scrollbar_bg': GREY_E0,") != 1:
-        raise SystemExit("the light scrollbar track does not read GREY_E0")
+        used = _identifiers(tree.read(rel))
+        for name in GONE:
+            if name in used:
+                raise SystemExit(
+                    f"{rel} still uses {name}. A rename is finished when the "
+                    f"old name is gone from every file, not merely unused in "
+                    f"one.")
+    defined = _identifiers(edited_colors)
+    for name in ARRIVED:
+        if name not in defined:
+            raise SystemExit(f"{name} was never defined in {SENTINEL_FILE}")
 
-    text = tree.read(AMBR)
-    lines, blocks = _blocks(text)
-    for name, count in SURFACE_BLOCKS.items():
-        st, en = blocks[name]
-        found = sum(lines[i].count("#e0e0e0") for i in range(st, en))
-        if found != count:
-            raise SystemExit(
-                f"{name}: the light track moved -- expected {count} "
-                f"occurrence(s) of #e0e0e0 to survive, found {found}")
-    for name in INK_BLOCKS:
-        st, en = blocks[name]
-        if any("#e0e0e0" in lines[i] for i in range(st, en)):
-            raise SystemExit(f"{name} still carries the retired ink")
-    if text.count("#e0e0e0") != sum(SURFACE_BLOCKS.values()):
+    # GREY_EE survives, and it must: three static surfaces still use it, and
+    # the whole point of the split is that they are not the plate.
+    if not re.search(r"\bGREY_EE\b", edited_styles):
         raise SystemExit(
-            f"expected exactly {sum(SURFACE_BLOCKS.values())} surviving "
-            f"#e0e0e0 in the snapshots, found {text.count('#e0e0e0')}")
+            "GREY_EE has no consumers left in the styles. This pass splits one "
+            "hex into two names; if every use moved to APP_HOVER_LIGHT, the "
+            "split did not happen and three static surfaces are now claiming "
+            "to be an interaction plate.")
+
+    # The comment that described the wrong constant must now sit above the
+    # right one, and it must still exist. A move that deleted it would pass a
+    # check that only looked for its absence from the old position.
+    track = "The LIGHT scrollbar track"
+    if track not in edited_colors:
+        raise SystemExit("the scrollbar-track comment was lost in the move")
+    where = edited_colors.index(track)
+    e0 = edited_colors.index("GREY_E0: Final[str]")
+    if not where < e0:
+        raise SystemExit(
+            "the scrollbar-track comment is still below GREY_E0, so it is "
+            "still documenting the wrong constant.")
+
+    if SENTINEL not in edited_colors:
+        raise SystemExit(f"expected {SENTINEL!r} in the edited file")
 
 
-GUARD_SOURCE = '"""\nThe ink moves, the light surface stays behind, and the golds finish their\nrename.\n\nTHE FIND THAT SHAPED THIS PASS. APP_TEXT was #e0e0e0 and this app spelled SIX\npalette entries with it -- five in dark, and ONE IN LIGHT:\n\n    utils/dialog_styles.py:273    \'scrollbar_bg\': APP_TEXT,      <- light\n\nThat is #e0e0e0\'s other half wearing the ink\'s name. The light scrollbar\ntrack is a SURFACE, and the published grid governs inks and edges and\ndeliberately not surfaces. Moving APP_TEXT with the light entry still pointing\nat it would have dragged a surface onto the ink grid and quietly changed a\nlight-mode track that rnv-color-picker and rnv-icon-builder both keep at\n#e0e0e0.\n\nSo the value split before it moved: APP_TEXT went to grey(13) and the light\ntrack got GREY_E0, named by its byte like every other step in this app\'s ramp.\n\nThe other four apps show the same split as two DIFFERENT keys holding the same\nhex. Here it was one name holding two roles, which is harder to see and was\nfound only by checking which side of the light palette boundary each use sat\non.\n\nTWO GUARDS, NOT ONE. test_brand_mirror.py guards the register with\nimportorskip(\'engine.brand\'), so where rnv-brand is not importable it reports\nclean and drift hides. APP_TEXT is pinned locally here as well.\n"""\nfrom __future__ import annotations\n\nimport pathlib\nimport re\n\nimport pytest\n\nfrom utils import colors\nfrom utils.dialog_styles import DialogStyleManager\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\nCOLORS = ROOT / \'utils\' / \'colors.py\'\nSTYLES = ROOT / \'utils\' / \'dialog_styles.py\'\n\nGRID_STEP = 0x11\n\nDARK = DialogStyleManager.get_colors(True)\nLIGHT = DialogStyleManager.get_colors(False)\n\n#: Dark-mode entries that carry the ink.\nINK_KEYS = (\'text\', \'button_text\', \'input_text\', \'label_text\', \'text_color\')\n\n#: The golds that finished their rename in this pass. Upstream settled on the\n#: BRAND_ prefix in rnv-brand@faf1fd6; four of the five apps already used it.\nRENAMED_GOLDS = (\'BRAND_GOLD_HOVER\', \'BRAND_GOLD_PRESSED\')\n\n\ndef grey(n: int) -> str:\n    v = n * GRID_STEP\n    return \'#%02x%02x%02x\' % (v, v, v)\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_the_keys_this_file_reads_still_exist():\n    for key in INK_KEYS:\n        assert key in DARK, f\'the dark palette has no {key}\'\n    assert \'scrollbar_bg\' in LIGHT\n    for name in (\'APP_TEXT\', \'GREY_E0\', \'TRUE_BLACK\') + RENAMED_GOLDS:\n        assert hasattr(colors, name), f\'utils.colors has no {name}\'\n\n\n# ------------------------------------------------------------------- the value\n\ndef test_the_ink_is_a_step_on_the_grid():\n    assert colors.APP_TEXT == grey(13) == \'#dddddd\', (\n        f\'APP_TEXT is {colors.APP_TEXT}, not grey(13).\')\n\n\ndef test_the_local_pin_holds_when_the_brand_is_absent():\n    """test_brand_mirror.py checks APP_TEXT against engine.brand and SKIPS when\n    rnv-brand is not importable. This is the half that always runs."""\n    assert colors.APP_TEXT == \'#dddddd\', (\n        \'APP_TEXT no longer holds the registered value. If the brand moved, \'\n        \'update this pin in the same commit that updates utils/colors.py.\')\n\n\ndef test_every_dark_ink_entry_carries_the_constant():\n    for key in INK_KEYS:\n        assert DARK[key] == colors.APP_TEXT, f\'dark {key!r} is {DARK[key]}\'\n\n\ndef test_the_light_ink_is_true_black():\n    """Primary text is one role with two mode values: dark is a grey on the\n    grid, light is TRUE_BLACK."""\n    assert LIGHT[\'text\'] == colors.TRUE_BLACK == \'#000000\'\n\n\n# ------------------------------------------------------- the half that stayed\n\ndef test_the_light_scrollbar_track_did_not_follow_the_ink():\n    """The whole reason this pass split a constant. #e0e0e0 was doing two\n    jobs under one name; the surface half stays exactly where it was."""\n    assert LIGHT[\'scrollbar_bg\'] == colors.GREY_E0 == \'#e0e0e0\', (\n        f\'the light scrollbar track is {LIGHT["scrollbar_bg"]}. It is a \'\n        f\'SURFACE -- the ink grid does not govern it, and picker and \'\n        f\'icon-builder both keep this track at #e0e0e0.\')\n\n\ndef test_the_light_track_no_longer_reads_the_ink_constant():\n    """Spelling, not just value. If it points at APP_TEXT again it will follow\n    the next ink move silently, which is what this pass existed to stop."""\n    source = STYLES.read_text(encoding=\'utf-8\')\n    assert "\'scrollbar_bg\': APP_TEXT," not in source, (\n        \'the light scrollbar track reads APP_TEXT again\')\n    assert "\'scrollbar_bg\': GREY_E0," in source\n\n\ndef test_no_dark_entry_accidentally_took_the_surface_step():\n    """The mirror of the test above. GREY_E0 belongs to the light track and\n    nothing in dark should have picked it up."""\n    strays = [k for k, v in DARK.items() if v == colors.GREY_E0]\n    assert not strays, f\'dark entries now carrying the light surface: {strays}\'\n\n\n# ------------------------------------------------------------------ provenance\n\ndef test_the_new_step_is_classified():\n    assert colors.PROVENANCE.get(\'GREY_E0\') == \'app-ramp\', (\n        \'GREY_E0 has no provenance entry, or the wrong one. It is a ramp step, \'\n        \'not a register value -- #e0e0e0 is no longer what the brand holds.\')\n\n\ndef test_the_ramp_is_still_ordered_by_byte():\n    """This app names ramp steps by their byte so the ramp reads in order.\n    GREY_E0 has to sit where its value says, not where it was appended."""\n    names = re.findall(r\'^(GREY_[0-9A-F]{2}): Final\',\n                       COLORS.read_text(encoding=\'utf-8\'), re.M)\n    values = [int(n[5:], 16) for n in names]\n    assert values == sorted(values), (\n        f\'the ramp is out of order: {names}\')\n\n\n# ---------------------------------------------------------------- the renames\n\n@pytest.mark.parametrize(\'name\', RENAMED_GOLDS)\ndef test_the_golds_carry_the_brand_prefix(name):\n    assert hasattr(colors, name)\n    assert name in colors.PROVENANCE, f\'{name} has no provenance entry\'\n\n\ndef test_no_bare_gold_name_survives():\n    """Anchored so BRAND_DARK_GOLD_PRESSED does not count as a bare\n    GOLD_PRESSED -- the substring trap that would have renamed it to\n    BRAND_DARK_BRAND_GOLD_PRESSED."""\n    stale = []\n    for path in (COLORS, STYLES, ROOT / \'utils\' / \'__init__.py\'):\n        text = path.read_text(encoding=\'utf-8\')\n        for bare in (\'GOLD_HOVER\', \'GOLD_PRESSED\'):\n            for match in re.finditer(rf\'(?<![A-Z_]){bare}\\b\', text):\n                line = text[:match.start()].count(\'\\n\') + 1\n                stale.append(f\'{path.name}:{line}\')\n    assert not stale, (\n        \'the unprefixed gold names survive at: \' + \', \'.join(stale))\n\n\ndef test_the_renamed_golds_are_still_derived_not_restated():\n    """A rename must not turn a derivative into a literal."""\n    source = COLORS.read_text(encoding=\'utf-8\')\n    assert re.search(r\'BRAND_GOLD_HOVER: Final\\[str\\] = lighten\\(\', source), (\n        \'BRAND_GOLD_HOVER is no longer computed from its base\')\n    assert colors.BRAND_GOLD_HOVER == colors.lighten(colors.BRAND_GOLD, 13)\n    assert colors.BRAND_GOLD_PRESSED == colors.BRAND_GOLD\n\n\n# ---------------------------------------------------------------- what it costs\n\ndef _luminance(value: str) -> float:\n    ch = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    ch = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in ch]\n    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    hi, lo = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (hi + 0.05) / (lo + 0.05)\n\n\ndef test_the_ink_clears_the_text_floor_on_every_dark_ground_it_touches():\n    grounds = (\'#000000\', \'#1a1a1a\', \'#2a2a2a\', \'#333333\', \'#3a3a3a\', \'#444444\')\n    worst = min((_contrast(colors.APP_TEXT, g), g) for g in grounds)\n    assert worst[0] >= 4.5, (\n        f\'the ink falls to {worst[0]:.2f}:1 on {worst[1]}, under the 4.5 floor\')\n'
+GUARD_SOURCE = '"""Three ramp steps become register mirrors, and one hex is split in two.\n\nWHAT THIS PASS DID. rnv-brand registered three values this app had been\ncarrying as anonymous ramp steps:\n\n    GREY_3A  #3a3a3a  ->  APP_PANEL_HOVER          APP["panel-hover"]  rev 22\n    GREY_EE  #eeeeee  ->  APP_HOVER_LIGHT          APP["hover-light"]  rev 23\n    GREY_E8  #e8e8e8  ->  GOLD_TEXT_GROUND_FLOOR   module constant     rev 24\n\nTHE LATENT FAILURE THIS CLOSES. test_app_owned_values_are_not_register_values\nin tests/test_brand_mirror.py fails when something classified app-owned is in\nfact a register value. It skips where rnv-brand is not importable, and CI does\nnot have it -- so all three sat misclassified from the day the register ruled\nthem, with the suite reporting clean. The proving run is the one with the brand\non the path.\n\nGREY_EE IS SPLIT, NOT RENAMED. Four entries hold #eeeeee and only one plays the\nregister\'s role: bg_hover in the light dialog palette. The other three --\ndiff_html_header_bg in both modes, and line_number_bg -- are STATIC surfaces. A\nresting ground is not an interaction state, and wiring all four would claim a\nrole for three of them on the strength of a shared hex. GREY_EE therefore\nsurvives as a ramp step, and the coincidence is recorded in COINCIDENT beside\nGREY_DD / APP["text"], which is the same shape.\n\nWHY #e8e8e8 IS REGISTERED AT ALL, AND WHY THIS FILE\'S APP CAUSED IT.\nBRAND_DARK_GOLD_DEEP is defined in utils/colors.py as the smallest uniform\nper-channel step that clears #e8e8e8: -14 gives 4.5334, -13 gives 4.4675 and\nfails. That derivative is published, checked, mirrored and pinned in five\nrepositories, and its INPUT was app-owned -- so nothing could mirror the\nconstraint the derivation rests on. The coupling is asserted below, both ways,\nmirroring the guard the register now runs at import.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport io\nimport pathlib\nimport re\nimport tokenize\n\nimport pytest\n\nfrom utils import colors\nfrom utils.dialog_styles import DialogStyleManager\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\nCOLORS = ROOT / \'utils\' / \'colors.py\'\nSTYLES = ROOT / \'utils\' / \'dialog_styles.py\'\n\nGRID_STEP = 0x11\nLADDER_STEP = 0x10\nTEXT_FLOOR = 4.5\n\n#: Constant -> the value it must hold. Resolution to rnv-brand is by the\n#: convention tests/test_brand_mirror.py already uses: APP_<KEY> -> APP["key"],\n#: anything else -> the module attribute of the same name.\nNEW = {\n    \'APP_PANEL_HOVER\': \'#3a3a3a\',\n    \'APP_HOVER_LIGHT\': \'#eeeeee\',\n    \'GOLD_TEXT_GROUND_FLOOR\': \'#e8e8e8\',\n}\n\n#: The names this pass removes. A rename is only finished when the old name is\n#: gone from every file, not merely unused in one.\nGONE = (\'GREY_3A\', \'GREY_E8\')\n\n#: What the split leaves behind: the ramp step, and the three static surfaces\n#: that keep it. If this list ever empties, the split has collapsed.\nSTATIC_EE_KEYS = (\'diff_html_header_bg\', \'line_number_bg\')\n\n#: Palette entries and what they must resolve to. Written as VALUES, because\n#: this pass renames the constants that hold them -- a check that read the new\n#: name\'s value would be reading the rename twice and proving nothing.\nPINNED_ENTRIES = {\n    (\'DARK\', \'bg_hover\'): \'#3a3a3a\',\n    (\'LIGHT\', \'bg_hover\'): \'#eeeeee\',\n    (\'LIGHT\', \'bg_tertiary\'): \'#e8e8e8\',\n    (\'LIGHT\', \'line_number_current_bg\'): \'#e8e8e8\',\n}\n\n\ndef grey(n: int) -> str:\n    v = n * GRID_STEP\n    return \'#%02x%02x%02x\' % (v, v, v)\n\n\ndef _luminance(value: str) -> float:\n    channels = [int(value.lstrip(\'#\')[i:i + 2], 16) / 255 for i in (0, 2, 4)]\n    channels = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4\n                for c in channels]\n    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]\n\n\ndef _contrast(a: str, b: str) -> float:\n    high, low = sorted((_luminance(a), _luminance(b)), reverse=True)\n    return (high + 0.05) / (low + 0.05)\n\n\ndef _shift(value: str, step: int) -> str:\n    parts = [max(0, min(255, int(value.lstrip(\'#\')[i:i + 2], 16) + step))\n             for i in (0, 2, 4)]\n    return \'#%02x%02x%02x\' % tuple(parts)\n\n\ndef _palette_names(name: str) -> dict:\n    """key -> the NAME each entry is written as, read from the source. The live\n    dict gives values; only the source says which constant was used."""\n    tree = ast.parse(STYLES.read_text(encoding=\'utf-8\'))\n    for node in ast.walk(tree):\n        if not isinstance(node, (ast.Assign, ast.AnnAssign)):\n            continue\n        target = node.targets[0] if isinstance(node, ast.Assign) else node.target\n        if getattr(target, \'id\', None) != name or not isinstance(node.value, ast.Dict):\n            continue\n        out = {}\n        for k, v in zip(node.value.keys, node.value.values):\n            if isinstance(k, ast.Constant) and isinstance(v, ast.Name):\n                out[k.value] = v.id\n        return out\n    raise AssertionError(f\'{name} is not a dict in utils/dialog_styles.py\')\n\n\n# ------------------------------------------------------------- guard the guard\n\ndef test_everything_this_file_reads_still_exists():\n    for name in NEW:\n        assert hasattr(colors, name), f\'utils.colors has no {name}\'\n    assert hasattr(colors, \'GREY_EE\'), \'the ramp step survived the split\'\n    for mode, key in PINNED_ENTRIES:\n        live = getattr(DialogStyleManager, mode)\n        assert key in live, f\'{mode} has no {key!r}\'\n\n\ndef test_the_maps_this_file_iterates_are_not_empty():\n    """Every sweep below iterates one of these. An empty map passes all."""\n    assert len(NEW) == 3 and len(PINNED_ENTRIES) == 4 and STATIC_EE_KEYS\n\n\n# ------------------------------------------------------------------ the values\n\ndef test_the_new_constants_hold_the_registered_values():\n    """The local half. Runs everywhere, including where engine.brand is not\n    importable -- which is exactly the case that let these three sit\n    misclassified for two days."""\n    drift = {n: getattr(colors, n) for n, v in NEW.items()\n             if getattr(colors, n) != v}\n    assert not drift, f\'these no longer hold their registered values: {drift}\'\n\n\ndef test_the_new_constants_match_rnv_brand():\n    brand = pytest.importorskip(\n        \'engine.brand\',\n        reason=\'rnv-brand not importable here; the local values are doing the work\')\n    drift = []\n    for name in NEW:\n        theirs = (brand.APP[name[4:].lower().replace(\'_\', \'-\')]\n                  if name.startswith(\'APP_\') else getattr(brand, name))\n        mine = getattr(colors, name)\n        if mine.lower() != theirs.lower():\n            drift.append(f\'{name}: ours {mine}, theirs {theirs}\')\n    assert not drift, \'drift from rnv-brand:\\n  \' + \'\\n  \'.join(drift)\n\n\ndef test_all_three_are_classified_register():\n    for name in NEW:\n        assert colors.PROVENANCE.get(name) == \'register\', (\n            f\'{name} is not classified register. The reclassification IS this \'\n            f\'pass; a constant in the register section with an app-ramp label \'\n            f\'is the misclassification it exists to fix.\')\n\n\ndef _identifiers(source: str) -> set:\n    """Every identifier a file actually USES, plus every string literal.\n\n    Read from the token stream so COMMENTS ARE EXCLUDED. A regex cannot tell a\n    use from a mention, and the comment beside APP_PANEL_HOVER says "WAS\n    GREY_3A, A RAMP STEP" -- explaining the rename, in the file the rename\n    happened in. A word-anchored regex flags that and reports the rename as\n    incomplete, which is exactly what it did the first time this ran.\n    """\n    names = set()\n    for token in tokenize.generate_tokens(io.StringIO(source).readline):\n        if token.type == tokenize.NAME:\n            names.add(token.string)\n        elif token.type == tokenize.STRING:\n            names.add(token.string.strip(\'\\\'"\'))\n    return names\n\n\ndef test_the_old_names_are_gone_everywhere():\n    """A rename is finished when the old name is absent from every file, not\n    merely unused in one. NAME tokens are uses, STRING tokens catch the\n    __all__ entries, and comments -- where the rename is explained -- are\n    neither."""\n    stale = []\n    for path in (COLORS, STYLES, ROOT / \'utils\' / \'__init__.py\'):\n        used = _identifiers(path.read_text(encoding=\'utf-8\'))\n        for name in GONE:\n            if name in used:\n                stale.append(f\'{path.name}: {name}\')\n    assert not stale, f\'renamed constants still used: {stale}\'\n\n\ndef test_the_rename_is_still_explained_where_it_happened():\n    """Guard the guard, from the other side. The sweep above deliberately\n    cannot see comments, so passing it proves nothing about whether the note\n    explaining the rename survived -- and that note is the only thing telling\n    the next reader why GREY_3A vanished."""\n    text = COLORS.read_text(encoding=\'utf-8\')\n    for name in GONE:\n        assert re.search(rf\'WAS {name}\\b\', text), (\n            f\'the comment recording that {name} was renamed is gone. The \'\n            f\'token-stream sweep cannot see comments, so nothing else would \'\n            f\'notice it went.\')\n\n\n# --------------------------------------------------------------------- the split\n\ndef test_the_ramp_step_survived_and_is_still_app_owned():\n    """GREY_EE is NOT the register\'s. Three static surfaces keep it, and if it\n    ever became a mirror those three would start following an interaction\n    plate they have nothing to do with."""\n    assert colors.GREY_EE == \'#eeeeee\'\n    assert colors.PROVENANCE.get(\'GREY_EE\') == \'app-ramp\'\n\n\ndef test_the_static_surfaces_still_use_the_ramp_step():\n    """The half of the split that a sweep for \'no old name survives\' cannot\n    see: if every use had moved to APP_HOVER_LIGHT the rename would look\n    complete and the distinction would be gone."""\n    names = {}\n    for mode in (\'DARK\', \'LIGHT\'):\n        names.update(_palette_names(mode))\n    using = [k for k in STATIC_EE_KEYS if names.get(k) == \'GREY_EE\']\n    assert len(using) == len(STATIC_EE_KEYS), (\n        f\'only {using} still name GREY_EE. The split puts the interaction \'\n        f\'plate on APP_HOVER_LIGHT and leaves the static grounds on the ramp \'\n        f\'step; if the grounds moved too, three surfaces are now claiming to \'\n        f\'be a hover state.\')\n\n\ndef test_the_hover_plate_names_the_register_constant():\n    """And the other half: the one entry that IS the plate."""\n    assert _palette_names(\'LIGHT\').get(\'bg_hover\') == \'APP_HOVER_LIGHT\'\n    assert _palette_names(\'DARK\').get(\'bg_hover\') == \'APP_PANEL_HOVER\'\n\n\ndef test_the_coincidence_is_recorded():\n    """A shared hex with two roles has to be named, or the next value check\n    reads the sharing as a misclassification and the next person reads it as a\n    mistake."""\n    mirror = pathlib.Path(__file__).with_name(\'test_brand_mirror.py\')\n    text = mirror.read_text(encoding=\'utf-8\')\n    assert "\'GREY_EE\': (" in text, (\n        \'GREY_EE shares #eeeeee with APP["hover-light"] and is not in \'\n        \'COINCIDENT. The exemption is what keeps the sharing deliberate.\')\n\n\n# ------------------------------------------------------------------ the ladder\n\ndef test_the_dark_rung_is_an_exact_step_on_the_ladder():\n    """BRAND_BLACK + n * 0x10. This was app-owned on the argument that the\n    ladder might not be real."""\n    base = int(colors.BRAND_BLACK.lstrip(\'#\'), 16)\n    want = base + 2 * (LADDER_STEP * 0x010101)\n    assert int(colors.APP_PANEL_HOVER.lstrip(\'#\'), 16) == want\n\n\ndef test_the_border_is_an_edge_and_not_a_rung():\n    """The distinction that made the ladder look incomplete. #333333 is grey(3)\n    on the ink grid, which governs inks and edges; it was never a surface."""\n    assert colors.APP_BORDER == grey(3)\n    base = int(colors.BRAND_BLACK.lstrip(\'#\'), 16)\n    rungs = {base + n * (LADDER_STEP * 0x010101) for n in range(-1, 3)}\n    assert int(colors.APP_BORDER.lstrip(\'#\'), 16) not in rungs\n\n\n# --------------------------------------------------- the floor and the plate\n\ndef test_the_plate_is_a_step_on_the_ink_grid():\n    assert colors.APP_HOVER_LIGHT == grey(14) == \'#eeeeee\'\n\n\ndef test_the_deep_gold_is_calibrated_against_the_floor():\n    """The coupling the register now guards at import, asserted here too\n    because this is the file the derivation is written in. One step less must\n    FAIL -- a check that only proved the current value clears would pass on any\n    darker gold and say nothing about why -14 is the number."""\n    gold = colors.BRAND_DARK_GOLD_DEEP\n    floor = colors.GOLD_TEXT_GROUND_FLOOR\n    assert _contrast(gold, floor) >= TEXT_FLOOR, (\n        f\'{gold} reads {_contrast(gold, floor):.4f} on {floor}\')\n    softer = _shift(colors.BRAND_DARK_GOLD, -13)\n    assert _contrast(softer, floor) < TEXT_FLOOR, (\n        f\'one step less than the published -14 still clears the floor at \'\n        f\'{_contrast(softer, floor):.4f}, so -14 is no longer the SMALLEST \'\n        f\'step that clears it and the derivation note is stale.\')\n\n\ndef test_the_plate_is_not_the_floor():\n    """Both clear the 4.5 floor. Only one clears it by enough to survive the\n    gold moving, and the other is the value the gold is calibrated against."""\n    gold = colors.BRAND_DARK_GOLD_DEEP\n    here = _contrast(gold, colors.APP_HOVER_LIGHT)\n    edge = _contrast(gold, colors.GOLD_TEXT_GROUND_FLOOR)\n    assert colors.APP_HOVER_LIGHT != colors.GOLD_TEXT_GROUND_FLOOR\n    assert here - TEXT_FLOOR >= 0.2, (\n        f\'the plate clears the floor by only {here - TEXT_FLOOR:.4f}. The \'\n        f\'register moved APP["hover-light"] here for margin, not for a pass.\')\n    assert edge - TEXT_FLOOR < 0.05\n\n\n# ------------------------------------------------------- nothing moved at all\n\ndef test_every_renamed_entry_resolves_to_what_it_resolved_to_before():\n    """The values are written down rather than read from the new constants. A\n    check that compared an entry against the name it now uses would be reading\n    the rename twice and proving nothing about it."""\n    wrong = []\n    for (mode, key), want in PINNED_ENTRIES.items():\n        got = getattr(DialogStyleManager, mode)[key]\n        if got != want:\n            wrong.append(f\'{mode}[{key!r}] is {got}, not {want}\')\n    assert not wrong, \'a rename landed on the wrong value:\\n  \' + \'\\n  \'.join(wrong)\n'
 
 
 # ------------------------------------------------------------------ plumbing
