@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import ast
 import pathlib
+import re
 
 import pytest
 
@@ -135,20 +136,61 @@ COINCIDENT: dict[str, tuple[str, str]] = {
         'Different mode, different role. If APP["text"] moves off grey(13) '
         'this must NOT follow it, which is exactly why it is named here '
         'rather than mirrored.'),
+    'GREY_EE': (
+        'APP["hover-light"]',
+        'grey(14) does two jobs here, the same way grey(13) does. In the '
+        'register it is the LIGHT INTERACTION PLATE -- what a control hovers '
+        'to in light mode, which this app mirrors as APP_HOVER_LIGHT. This '
+        'ramp step is three STATIC surfaces: the diff export header in both '
+        'modes, and the line number gutter at rest. A resting ground is not '
+        'an interaction state. If APP["hover-light"] moves off grey(14) these '
+        'three must NOT follow it, which is exactly why the hex is spelled by '
+        'two names rather than one.'),
 }
 
 
+HEX = re.compile(r'#[0-9a-fA-F]{6}$')
+
+
 def _register_values(brand) -> dict:
-    """Every value the register holds, hex -> where it is held."""
+    """Every value the register holds, hex -> where it is held.
+
+    ENUMERATED, NOT LISTED. Until 2026-08-30 this read six attribute names and
+    two dicts, written down. A value the register added afterwards was
+    therefore invisible to the test below, which is the only thing standing
+    between an app-owned label and a register value wearing it.
+
+    That is not hypothetical. rev 24 added GOLD_TEXT_GROUND_FLOOR #e8e8e8 as a
+    module constant, and this app held #e8e8e8 as GREY_E8, marked app-ramp. The
+    check ran, found nothing, and reported clean -- because the name of the
+    thing it needed to look at was not on its list. A list of what to check
+    goes stale behind the thing it checks; walking the module does not.
+    """
     named = {}
-    for attr in ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_BLACK',
-                 'TRUE_BLACK', 'WHITE', 'WEB_BLACK'):
-        named[getattr(brand, attr).lower()] = attr
-    for dict_name in ('APP', 'STATUS'):
-        for key, value in getattr(brand, dict_name).items():
-            if isinstance(value, str) and value.startswith('#'):
-                named.setdefault(value.lower(), f'{dict_name}["{key}"]')
+    for attr in sorted(dir(brand)):
+        if attr.startswith('_'):
+            continue
+        value = getattr(brand, attr)
+        if isinstance(value, str) and HEX.match(value):
+            named.setdefault(value.lower(), attr)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                if isinstance(item, str) and HEX.match(item):
+                    named.setdefault(item.lower(), f'{attr}["{key}"]')
     return named
+
+
+def test_the_register_enumeration_is_not_empty():
+    """Guard the guard. Every misclassification check below asks whether a
+    value is in this map. An empty map answers no to everything and passes."""
+    brand = pytest.importorskip('engine.brand', reason='rnv-brand not importable')
+    named = _register_values(brand)
+    assert len(named) >= 20, (
+        f'only {len(named)} register values enumerated. The sweeps that read '
+        f'this map pass trivially when it is small.')
+    for expected in (brand.BRAND_GOLD, brand.APP['text'],
+                     brand.GOLD_TEXT_GROUND_FLOOR):
+        assert expected.lower() in named, f'{expected} is not enumerated' 
 
 
 def test_app_owned_values_are_not_register_values():

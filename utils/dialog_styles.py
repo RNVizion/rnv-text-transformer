@@ -49,7 +49,6 @@ from utils.colors import (
     STATUS_ERROR_LIGHT,
     BRAND_GOLD_HOVER,
     BRAND_GOLD_PRESSED,
-    GREY_3A,
     GREY_44,
     GREY_55,
     GREY_60,
@@ -58,8 +57,10 @@ from utils.colors import (
     GREY_CC,
     GREY_DD,
     GREY_E0,
-    GREY_E8,
     GREY_EE,
+    APP_PANEL_HOVER,
+    APP_HOVER_LIGHT,
+    GOLD_TEXT_GROUND_FLOOR,
     GREY_F5,
     DIFF_ADDED_DARK,
     DIFF_REMOVED_DARK,
@@ -144,7 +145,7 @@ class DialogStyleManager:
         'bg': BRAND_BLACK,
         'bg_secondary': APP_CARD,
         'bg_tertiary': APP_BORDER,
-        'bg_hover': GREY_3A,
+        'bg_hover': APP_PANEL_HOVER,
         
         # Text
         'text': APP_TEXT,
@@ -242,8 +243,8 @@ class DialogStyleManager:
         # Backgrounds
         'bg': GREY_F5,
         'bg_secondary': WHITE,
-        'bg_tertiary': GREY_E8,
-        'bg_hover': GREY_EE,
+        'bg_tertiary': GOLD_TEXT_GROUND_FLOOR,
+        'bg_hover': APP_HOVER_LIGHT,
         
         # Text
         'text': TRUE_BLACK,
@@ -304,7 +305,7 @@ class DialogStyleManager:
         # Line number gutter widget
         'line_number_bg': GREY_EE,
         'line_number_fg': GREY_66,
-        'line_number_current_bg': GREY_E8,
+        'line_number_current_bg': GOLD_TEXT_GROUND_FLOOR,
         'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
 
         # Diff / compare semantic highlight colors

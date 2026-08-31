@@ -173,6 +173,49 @@ APP_TEXT: Final[str] = '#dddddd'
 #: engine/brand.py APP["text-dim"]
 APP_TEXT_DIM: Final[str] = '#aaaaaa'
 
+#: engine/brand.py APP["panel-hover"]. The dark interaction plate, and the n=+2
+#: rung of the dark surface ladder BRAND_BLACK + n*0x10, n in -1..+2:
+#: #0a0a0a canvas, #1a1a1a panel, #2a2a2a card, #3a3a3a panel-hover.
+#:
+#: WAS GREY_3A, A RAMP STEP, until rnv-brand rev 22 registered it on
+#: 2026-08-29. The register had called the ladder "two-thirds specified"
+#: because APP_BORDER #333333 is not #3a3a3a and so looked like a missing rung.
+#: It is not a rung at all: #333333 is grey(3) on the INK grid, which governs
+#: inks and EDGES, and a border is an edge. Two families compared to each
+#: other. The ladder was complete the whole time.
+APP_PANEL_HOVER: Final[str] = '#3a3a3a'
+
+#: engine/brand.py APP["hover-light"]. grey(14). The light interaction plate --
+#: bg_hover in the light dialog palette.
+#:
+#: Registered 2026-08-29 as #e8e8e8 and moved here on 2026-08-30 in rev 23,
+#: before any app had been wired to it. #e8e8e8 is the ground
+#: BRAND_DARK_GOLD_DEEP is calibrated against -- see GOLD_TEXT_GROUND_FLOOR
+#: below -- so a hover plate on that value clears the 4.5 text floor by 0.0334
+#: and fails the moment the gold moves one step. This clears by 0.2875.
+#: A boundary is not a plate.
+#:
+#: GREY_EE HOLDS THE SAME HEX AND IS NOT THIS. Three static surfaces still use
+#: the ramp step; only the hover plate is the register's. Recorded as a
+#: coincidence in tests/test_brand_mirror.py and asserted in both directions.
+APP_HOVER_LIGHT: Final[str] = '#eeeeee'
+
+#: engine/brand.py GOLD_TEXT_GROUND_FLOOR. The darkest light ground on which
+#: the gold family carries text.
+#:
+#: WAS GREY_E8, A RAMP STEP, until rnv-brand rev 24 registered it on
+#: 2026-08-30 -- and it was registered because this file showed it was doing
+#: register work with no register entry. BRAND_DARK_GOLD_DEEP is defined above
+#: as the smallest uniform step that clears #e8e8e8: -14 gives 4.5334, and -13
+#: gives 4.4675 and fails. That derivative is published, checked, mirrored and
+#: pinned in five repositories. Its INPUT was app-owned, so nothing could
+#: mirror the constraint the whole derivation rests on.
+#:
+#: Both uses here are grounds the gold family draws on: bg_tertiary, which
+#: carries the About dialog's tab labels, and line_number_current_bg, whose
+#: foreground is BRAND_DARK_GOLD_DEEP itself.
+GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'
+
 #: engine/brand.py STATUS["success"]
 STATUS_SUCCESS: Final[str] = '#28a745'
 
@@ -266,7 +309,6 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 # Named by their byte so the ramp reads in order and a step cannot be
 # confused with a role. Adding one is not drift.
 
-GREY_3A: Final[str] = '#3a3a3a'
 GREY_44: Final[str] = '#444444'
 GREY_55: Final[str] = '#555555'
 GREY_60: Final[str] = '#606060'
@@ -274,12 +316,22 @@ GREY_66: Final[str] = '#666666'
 GREY_88: Final[str] = '#888888'
 GREY_CC: Final[str] = '#cccccc'
 GREY_DD: Final[str] = '#dddddd'
-GREY_E0: Final[str] = '#e0e0e0'
 #: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
 #: moved to grey(13) and this did not follow -- it is a surface, and the
 #: published grid governs inks and edges only. rnv-color-picker and
 #: rnv-icon-builder both carry this same track at this same value.
-GREY_E8: Final[str] = '#e8e8e8'
+#:
+#: THIS COMMENT SAT ONE CONSTANT LOWER until 2026-08-30, where it documented
+#: GREY_E8 while describing GREY_E0's job: the scrollbar track is #e0e0e0
+#: (utils/dialog_styles.py 'scrollbar_bg'), and #e0e0e0 is what APP["text"]
+#: held before the ink moved. Moved when GREY_E8 became a register mirror --
+#: carrying a docstring that describes a different value into a mirror is how
+#: a wrong fact acquires the authority of a checked one.
+GREY_E0: Final[str] = '#e0e0e0'
+#: grey(14). Three STATIC surfaces: the diff export header in both modes, and
+#: the line number gutter's resting ground. NOT the light hover plate, which is
+#: APP_HOVER_LIGHT and holds this same hex -- one value, two roles, and only
+#: one of them is the register's. See COINCIDENT in tests/test_brand_mirror.py.
 GREY_EE: Final[str] = '#eeeeee'
 GREY_F5: Final[str] = '#f5f5f5'
 
@@ -399,6 +451,9 @@ PROVENANCE: Final[dict[str, str]] = {
     'APP_BORDER': 'register',
     'APP_TEXT': 'register',
     'APP_TEXT_DIM': 'register',
+    'APP_PANEL_HOVER': 'register',
+    'APP_HOVER_LIGHT': 'register',
+    'GOLD_TEXT_GROUND_FLOOR': 'register',
     'STATUS_SUCCESS': 'register',
     'STATUS_WARNING': 'register',
     'STATUS_ERROR': 'register',
@@ -409,7 +464,6 @@ PROVENANCE: Final[dict[str, str]] = {
     'BRAND_GOLD_HOVER': 'derived',
     'BRAND_GOLD_PRESSED': 'derived',
     # -- app-ramp
-    'GREY_3A': 'app-ramp',
     'GREY_44': 'app-ramp',
     'GREY_55': 'app-ramp',
     'GREY_60': 'app-ramp',
@@ -418,7 +472,6 @@ PROVENANCE: Final[dict[str, str]] = {
     'GREY_CC': 'app-ramp',
     'GREY_DD': 'app-ramp',
     'GREY_E0': 'app-ramp',
-    'GREY_E8': 'app-ramp',
     'GREY_EE': 'app-ramp',
     'GREY_F5': 'app-ramp',
     # -- app-semantic
@@ -450,13 +503,15 @@ __all__ = [
     'APP_BORDER',
     'APP_TEXT',
     'APP_TEXT_DIM',
+    'APP_PANEL_HOVER',
+    'APP_HOVER_LIGHT',
+    'GOLD_TEXT_GROUND_FLOOR',
     'STATUS_SUCCESS',
     'STATUS_WARNING',
     'STATUS_ERROR',
     'STATUS_ERROR_LIGHT',
     'BRAND_GOLD_HOVER',
     'BRAND_GOLD_PRESSED',
-    'GREY_3A',
     'GREY_44',
     'GREY_55',
     'GREY_60',
@@ -465,7 +520,6 @@ __all__ = [
     'GREY_CC',
     'GREY_DD',
     'GREY_E0',
-    'GREY_E8',
     'GREY_EE',
     'GREY_F5',
     'DIFF_ADDED_DARK',
