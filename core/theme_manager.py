@@ -205,7 +205,7 @@ class ThemeManager:
         
         This is the preferred way to access theme colors. Returns the full
         color dictionary including both dialog-specific and MainWindow-specific
-        keys (window_bg, button_bg, input_bg, output_text_color, etc.).
+        keys (window_bg, main_btn_bg, input_bg, output_text_color, etc.).
         
         Returns:
             Immutable color dictionary — do not modify.

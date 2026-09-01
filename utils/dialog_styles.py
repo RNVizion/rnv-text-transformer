@@ -111,7 +111,7 @@ class DialogStyleManager:
     
     MainWindow Colors (separate from dialog bg for intentional contrast):
     - window_bg: Main window background (#000000 dark, #f5f5f5 light)
-    - button_bg/button_text/button_hover_bg/button_pressed_text: Button colors
+    - main_btn_bg/main_btn_text/main_btn_hover_bg/main_btn_pressed_text: Button colors
     - input_bg/input_text/input_border: Input field colors
     - label_bg/label_text: Label colors
     - text_color/border_color: Aliases for backward compat with ThemeColors
@@ -189,11 +189,11 @@ class DialogStyleManager:
         
         # MainWindow-specific (pure black background, distinct from dialog bg)
         'window_bg': TRUE_BLACK,
-        'button_bg': BRAND_BLACK,
-        'button_text': APP_TEXT,
-        'button_hover_bg': APP_BORDER,
-        'button_pressed_bg': GREY_44,
-        'button_pressed_text': TRUE_BLACK,
+        'main_btn_bg': BRAND_BLACK,
+        'main_btn_text': APP_TEXT,
+        'main_btn_hover_bg': APP_BORDER,
+        'main_btn_pressed_bg': GREY_44,
+        'main_btn_pressed_text': TRUE_BLACK,
         'input_bg': BRAND_BLACK,
         'input_text': APP_TEXT,
         'input_border': APP_BORDER,
@@ -288,11 +288,11 @@ class DialogStyleManager:
         
         # MainWindow-specific
         'window_bg': GREY_F5,
-        'button_bg': WHITE,
-        'button_text': TRUE_BLACK,
-        'button_hover_bg': APP_BORDER,
-        'button_pressed_bg': GREY_44,
-        'button_pressed_text': WHITE,
+        'main_btn_bg': WHITE,
+        'main_btn_text': TRUE_BLACK,
+        'main_btn_hover_bg': APP_BORDER,
+        'main_btn_pressed_bg': GREY_44,
+        'main_btn_pressed_text': WHITE,
         'input_bg': WHITE,
         'input_text': TRUE_BLACK,
         'input_border': GREY_CC,

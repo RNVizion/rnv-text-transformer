@@ -86,10 +86,10 @@ DARK = {
 
     # ── Main Window Specific ──
     'window_bg':       '#000000',   # Main window background (pure black)
-    'button_bg':       '#1A1A1A',   # Main window button background
-    'button_text':     '#E0E0E0',   # Main window button text
-    'button_hover_bg': '#333333',   # Main window button hover
-    'button_pressed_text': '#000000', # Text when button is pressed (on gold bg)
+    'main_btn_bg':       '#1A1A1A',   # Main window button background
+    'main_btn_text':     '#E0E0E0',   # Main window button text
+    'main_btn_hover_bg': '#333333',   # Main window button hover
+    'main_btn_pressed_text': '#000000', # Text when button is pressed (on gold bg)
     'input_bg':        '#1A1A1A',   # Text input background
     'input_text':      '#E0E0E0',   # Text input foreground
     'input_border':    '#333333',   # Text input border
@@ -151,10 +151,10 @@ LIGHT = {
 
     # ── Main Window Specific ──
     'window_bg':       '#F5F5F5',   # Main window background
-    'button_bg':       '#FFFFFF',   # Main window button background
-    'button_text':     '#000000',   # Main window button text
-    'button_hover_bg': '#333333',   # Main window button hover
-    'button_pressed_text': '#FFFFFF', # Text when button is pressed (on dark gold bg)
+    'main_btn_bg':       '#FFFFFF',   # Main window button background
+    'main_btn_text':     '#000000',   # Main window button text
+    'main_btn_hover_bg': '#333333',   # Main window button hover
+    'main_btn_pressed_text': '#FFFFFF', # Text when button is pressed (on dark gold bg)
     'input_bg':        '#FFFFFF',   # Text input background
     'input_text':      '#000000',   # Text input foreground
     'input_border':    '#CCCCCC',   # Text input border

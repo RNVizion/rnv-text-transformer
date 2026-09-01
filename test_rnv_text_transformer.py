@@ -1202,7 +1202,7 @@ class TestDialogStyleManager(unittest.TestCase):
             "scrollbar_bg", "scrollbar_handle", "scrollbar_handle_hover",
             "checkbox_indicator_bg", "checkbox_border",
             "list_hover_bg", "list_hover_text",
-            "window_bg", "button_bg", "button_text", "button_hover_bg",
+            "window_bg", "main_btn_bg", "main_btn_text", "main_btn_hover_bg",
             "input_bg", "input_text", "input_border",
             "output_text_color", "border_color", "text_color",
             "line_number_bg", "line_number_fg",
@@ -1607,8 +1607,8 @@ class TestEdgeCases(unittest.TestCase):
         """Keys referenced in main_window.py exist in DialogStyleManager."""
         mw_keys = [
             "window_bg", "label_text", "input_bg", "input_text", "input_border",
-            "selection_bg", "selection_text", "output_text_color", "button_bg",
-            "button_text", "button_hover_bg", "button_pressed_text", "border_color",
+            "selection_bg", "selection_text", "output_text_color", "main_btn_bg",
+            "main_btn_text", "main_btn_hover_bg", "main_btn_pressed_text", "border_color",
             "text_color", "accent", "checkbox_border", "checkbox_indicator_bg",
             "scrollbar_bg", "scrollbar_handle_main", "scrollbar_handle_hover",
             "list_hover_bg", "list_hover_text", "tooltip_border",

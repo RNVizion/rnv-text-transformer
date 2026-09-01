@@ -847,25 +847,25 @@ class MainWindow(QMainWindow):
             if pressed:
                 bg, color, hover_bg = _d['bg_tertiary'], _d['accent_text'], _d['bg_tertiary']
             else:
-                bg, color, hover_bg = _d['button_bg'], _d['text'], _d['button_hover_bg']
+                bg, color, hover_bg = _d['main_btn_bg'], _d['text'], _d['main_btn_hover_bg']
             border = _d['border']
             hover_color = color
-            pressed_bg = _d['button_pressed_bg']
-            pressed_color = _d['button_pressed_text']
+            pressed_bg = _d['main_btn_pressed_bg']
+            pressed_color = _d['main_btn_pressed_text']
         else:
             # Dark/Light mode colors from theme
             theme = self.theme_manager.colors
-            bg = theme['button_bg']
+            bg = theme['main_btn_bg']
             border = theme['border_color']
-            hover_bg = theme['button_hover_bg']
+            hover_bg = theme['main_btn_hover_bg']
             if pressed:
-                color = theme['button_pressed_text']
-                hover_color = theme['button_pressed_text']
+                color = theme['main_btn_pressed_text']
+                hover_color = theme['main_btn_pressed_text']
             else:
-                color = theme['button_text']
-                hover_color = theme['button_text']
-            pressed_bg = theme['button_pressed_bg']
-            pressed_color = theme['button_pressed_text']
+                color = theme['main_btn_text']
+                hover_color = theme['main_btn_text']
+            pressed_bg = theme['main_btn_pressed_bg']
+            pressed_color = theme['main_btn_pressed_text']
         
         return f"""
             QPushButton {{
@@ -1298,7 +1298,7 @@ class MainWindow(QMainWindow):
                 return f"""
                     QComboBox::drop-down {{
                         border: none;
-                        background-color: {active_theme['button_bg']};
+                        background-color: {active_theme['main_btn_bg']};
                     }}
                     QComboBox QAbstractItemView {{
                         background-color: {_d['image_dropdown_bg']};
@@ -1322,7 +1322,7 @@ class MainWindow(QMainWindow):
                 return f"""
                     QComboBox::drop-down {{
                         border: none;
-                        background-color: {active_theme['button_bg']};
+                        background-color: {active_theme['main_btn_bg']};
                     }}
                     QComboBox QAbstractItemView {{
                         background-color: {_c['bg']};
@@ -1337,7 +1337,7 @@ class MainWindow(QMainWindow):
                 return f"""
                     QComboBox::drop-down {{
                         border: none;
-                        background-color: {active_theme['button_bg']};
+                        background-color: {active_theme['main_btn_bg']};
                     }}
                     QComboBox QAbstractItemView {{
                         background-color: {_c['bg_secondary']};

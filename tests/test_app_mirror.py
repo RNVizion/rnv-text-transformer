@@ -46,7 +46,7 @@ DARK = DialogStyleManager.get_colors(True)
 LIGHT = DialogStyleManager.get_colors(False)
 
 #: Dark-mode entries that carry the ink.
-INK_KEYS = ('text', 'button_text', 'input_text', 'label_text', 'text_color')
+INK_KEYS = ('text', 'main_btn_text', 'input_text', 'label_text', 'text_color')
 
 #: The golds that finished their rename in this pass. Upstream settled on the
 #: BRAND_ prefix in rnv-brand@faf1fd6; four of the five apps already used it.

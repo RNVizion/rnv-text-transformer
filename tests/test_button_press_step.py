@@ -68,15 +68,15 @@ def test_both_palettes_carry_the_button_keys():
     them would leave the rest passing while checking nothing."""
     for name, is_dark in THEMES.items():
         colors = DialogStyleManager.get_colors(is_dark)
-        for key in ("button_bg", "button_hover_bg", "button_pressed_bg",
-                    "button_text", "button_pressed_text"):
+        for key in ("main_btn_bg", "main_btn_hover_bg", "main_btn_pressed_bg",
+                    "main_btn_text", "main_btn_pressed_text"):
             assert key in colors, f"{name} has no {key}"
 
 
 @pytest.mark.parametrize("name", sorted(THEMES))
 def test_the_plate_steps_on_press(name):
     colors = DialogStyleManager.get_colors(THEMES[name])
-    hover, pressed = colors["button_hover_bg"], colors["button_pressed_bg"]
+    hover, pressed = colors["main_btn_hover_bg"], colors["main_btn_pressed_bg"]
     assert hover != pressed, (
         f"{name}: the pressed plate is the hover plate, so a press changes "
         f"only the label")
@@ -87,7 +87,7 @@ def test_the_plate_steps_on_press(name):
 @pytest.mark.parametrize("name", sorted(THEMES))
 def test_the_label_inverts_on_press(name):
     colors = DialogStyleManager.get_colors(THEMES[name])
-    resting, pressed = colors["button_text"], colors["button_pressed_text"]
+    resting, pressed = colors["main_btn_text"], colors["main_btn_pressed_text"]
     assert (_lum(resting) > 0.5) != (_lum(pressed) > 0.5), (
         f"{name}: {resting} -> {pressed} is not an inversion")
 
@@ -126,9 +126,9 @@ def test_the_pressed_rule_carries_the_ground_and_the_label(name, qtbot):
     """
     button, colors = _button(qtbot, THEMES[name])
     rule = _rule(button.styleSheet(), "QPushButton:pressed")
-    assert rule.get("background-color") == colors["button_pressed_bg"], (
+    assert rule.get("background-color") == colors["main_btn_pressed_bg"], (
         f"{name}: the pressed rule does not carry the pressed plate")
-    assert rule.get("color") == colors["button_pressed_text"], (
+    assert rule.get("color") == colors["main_btn_pressed_text"], (
         f"{name}: the pressed rule does not carry the pressed label, so the "
         f"label depends on the Python path and any press without a hover "
         f"renders it on the resting plate")

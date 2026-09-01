@@ -280,7 +280,7 @@ class ImageButton(QPushButton):
         
         theme = self.theme_manager.colors
         
-        text_color = theme['button_pressed_text'] if is_pressed else theme['button_text']
+        text_color = theme['main_btn_pressed_text'] if is_pressed else theme['main_btn_text']
         stylesheet = self._build_text_mode_stylesheet(text_color)
         if stylesheet:
             self.setStyleSheet(stylesheet)
@@ -335,11 +335,11 @@ class ImageButton(QPushButton):
                     if text_w_at_12 > 0:
                         font_size = max(8, int(12 * available_w / text_w_at_12))
         
-        color = text_color or theme['button_text']
+        color = text_color or theme['main_btn_text']
         
         return f"""
             QPushButton {{
-                background-color: {theme['button_bg']};
+                background-color: {theme['main_btn_bg']};
                 color: {color};
                 border: 1px solid {theme['border_color']};
                 padding: 8px 16px;
@@ -349,11 +349,11 @@ class ImageButton(QPushButton):
                 font-size: {font_size}pt;
             }}
             QPushButton:hover {{
-                background-color: {theme['button_hover_bg']};
+                background-color: {theme['main_btn_hover_bg']};
             }}
             QPushButton:pressed {{
-                background-color: {theme['button_pressed_bg']};
-                color: {theme['button_pressed_text']};
+                background-color: {theme['main_btn_pressed_bg']};
+                color: {theme['main_btn_pressed_text']};
             }}
         """
     
