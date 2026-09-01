@@ -519,12 +519,12 @@ One developer, one tool, built for anyone who spends their day wrangling text.<b
             }}
             QTabBar::tab:selected {{
                 background-color: {c['bg']};
-                color: {c['accent']};
+                color: {c['accent_ink']};
                 border-bottom: 2px solid {c['accent']};
             }}
             QTabBar::tab:hover:!selected {{
                 background-color: {c['bg_tertiary']};
-                color: {c['accent']};
+                color: {c['accent_ink']};
                 border-bottom: 2px solid {c['accent_pressed']};
             }}
             QLabel {{
