@@ -1,72 +1,83 @@
 #!/usr/bin/env python3
 """
-RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP
+RNV-NAMING-TOOL-DO-NOT-SWEEP
 
-Rename the five main-window button keys from button_* to main_btn_*.
+A constant names a COLOUR. A key names a ROLE. Apply that to the twenty
+values this application owns outright.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
     python up.py --verify    # run the suites only, change nothing
     python up.py --finish    # delete this file
 
-NOT ONE PIXEL MOVES. This is a rename and nothing else.
+WHY
 
-Across the five desktop applications, `button_*` means two different things.
-In rnv-icon-builder and rnv-color-picker it holds the GOLD DIALOG scheme, and
-a second family, main_btn_*, holds the black-and-white main-window scheme. In
-this application, in rnv-color-palette-manager and in rnv-color-mixer the same
-name holds the MAIN scheme instead. One name, two schemes, decided by which
-repository you happen to have open.
+Chris, reading the colour tree on 2026-09-02:
 
-In this application the split is already clean -- it is only the name that is
-wrong. These five keys are read in exactly two places, ui/main_window.py and
-ui/image_button.py, both main-window code:
+    "_DRAG_HIGHLIGHT_GOLD reads as a constant but it should read as a key --
+     the constant should denote the colour, as that is what will change to
+     affect the rest of the app elements, not the keys."
 
-    button_bg  button_text  button_hover_bg  button_pressed_bg  button_pressed_text
+That is the naming half of rule 1. Rule 1 says every literal lives in one
+file and everything else wires through a constant; this says what the
+constant is allowed to be CALLED. A name that answers both questions at once
+is a role frozen to a colour, and a future brand swap cannot flow through it,
+because the thing that should change and the thing that should not are the
+same identifier.
 
-and the dialog stylesheet in utils/dialog_styles.py never touches them. Its
-buttons draw from bg_secondary / text / bg_hover / accent / accent_ink /
-accent_text. So this application does not need a dialog button family invented
-for it; it needs the family it has to say what it is.
+THE RULING ON THIS APPLICATION'S TWENTY (2026-09-02)
 
-WHAT MOVES
+The diff and regex colours have no brand name, because the brand has no
+greens or purples. Two patterns were rendered side by side and Chris ruled:
 
-Sixty-nine quoted occurrences in nine files, plus the prose that names them:
-the palette definitions, the two consumers, four test modules, the syrupy
-snapshot, one docstring in utils/dialog_styles.py, one comment in
-core/theme_manager.py, and docs/RNV_Brand_Color_System.md, which already
-describes these keys as "Main window button background" and will now agree
-with itself.
+    A  hue + shade      GREEN_DEEP, GREEN_PALE ...
+    B  meaning          SEMANTIC_DIFF_ADDED, SEMANTIC_DIFF_ADDED_LIGHT   <-- ruled
 
-THE SNAPSHOT IS RESORTED, NOT HAND-EDITED
+These are not decorative colours that happen to be green. They carry MEANING:
+added, removed, changed, current, matched. If a future RNV app puts purple
+where gold sits, its "removed" is still red -- the accent swap must not reach
+them. The register already names exactly this category by meaning rather than
+hue (STATUS = success / warning / error) and already handles the two grounds
+the same way: STATUS_ERROR is the base, STATUS_ERROR_LIGHT the light variant.
+This file's own PROVENANCE map has classified all of them 'app-semantic'
+since the mirror was built. The category existed in the code; it had no name.
 
-tests/__snapshots__/test_snapshots.ambr records each palette as a sorted key
-list. main_btn_* does not sort where button_* sorted -- the five lines move
-from below "border_light" to below "list_hover_text" -- so a rename that only
-substituted text would leave the file out of order and the next snapshot run
-would fail with a diff that looks like a regression. This script re-sorts each
-block it touches and asserts the block was sorted before it started, which is
-the only way to tell "I sorted it correctly" from "it was never sorted".
+So the _DARK suffix goes (the register writes the base unsuffixed), _LIGHT
+stays, and SEMANTIC_ says which category it is:
 
-WHAT THE GUARD ASSERTS
+    DIFF_ADDED_DARK       ->  SEMANTIC_DIFF_ADDED
+    DIFF_REMOVED_DARK     ->  SEMANTIC_DIFF_REMOVED
+    DIFF_CHANGED_DARK     ->  SEMANTIC_DIFF_CHANGED
+    DIFF_CURRENT_DARK     ->  SEMANTIC_DIFF_CURRENT
+    DIFF_ADDED_LIGHT      ->  SEMANTIC_DIFF_ADDED_LIGHT
+    DIFF_REMOVED_LIGHT    ->  SEMANTIC_DIFF_REMOVED_LIGHT
+    DIFF_CHANGED_LIGHT    ->  SEMANTIC_DIFF_CHANGED_LIGHT
+    DIFF_CURRENT_LIGHT    ->  SEMANTIC_DIFF_CURRENT_LIGHT
+    REGEX_MATCH_DARK      ->  SEMANTIC_REGEX_MATCH
+    REGEX_MATCH_LIGHT     ->  SEMANTIC_REGEX_MATCH_LIGHT
+    REGEX_GROUP_PALETTE   ->  SEMANTIC_REGEX_GROUPS
 
-tests/test_button_key_names.py fails if any old name comes back, if either
-palette loses a new one, and -- the one that matters -- if any of the ten
-values changed. The rename is only safe because the values are pinned; without
-that assertion this script and a script that quietly restyled every button
-would look identical in review.
+NO PIXEL MOVES. Every value is unchanged and the guard pins all twenty. This
+is a rename plus one literal moved into the palette.
 
-FOUND WHILE DOING THIS, NOT FIXED HERE
+ALSO HERE -- the class C member, and one stray literal
 
-docs/RNV_Brand_Color_System.md carries stale values for these keys: it says
-button_text is #E0E0E0 in dark where the palette holds #dddddd, and annotates
-button_pressed_text as "on gold bg" where the pressed plate is #444444. Both
-predate this pass. A rename is the wrong place to correct documented colour
-values, so the names are updated and the numbers are left exactly as found.
+    _DRAG_HIGHLIGHT_GOLD  ->  _DRAG_HIGHLIGHT     (ui/drag_drop_text_edit.py)
+
+The derivation stays exactly as it is -- with_alpha(BRAND_GOLD, 0xBF) -- so
+the colour still comes from the constant. Only the name stops naming it, and
+a purple brand can now flow through the same line. The guard reads the
+assignment with ast and asserts it is still a call to with_alpha on
+BRAND_GOLD, so a later hand-edit to a literal fails rather than passes.
+
+Two lines below it, the same style block wrote color: #000000 as a raw
+literal -- the one rule-1 stray left in this application. It becomes
+TRUE_BLACK in the same pass.
 """
 from __future__ import annotations
 
 import argparse
+import ast
 import os
 import re
 import subprocess
@@ -75,10 +86,10 @@ import tempfile
 from pathlib import Path
 
 REPO = "rnv-text-transformer"
-DESCRIPTION = "rename the main-window button keys to main_btn_*"
-SENTINEL_FILE = "utils/dialog_styles.py"
-SENTINEL = "'main_btn_bg'"
-GUARD = "tests/test_button_key_names.py"
+DESCRIPTION = "rename the app-semantic constants and free the drag highlight"
+SENTINEL_FILE = "utils/colors.py"
+SENTINEL = "RNV-SEMANTIC-NAMING"
+GUARD = "tests/test_semantic_naming.py"
 SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
 
 SUITES = [
@@ -88,207 +99,178 @@ SUITES = [
      [sys.executable, "-m", "unittest", "test_rnv_text_transformer"]),
 ]
 
-RENAME = {
-    "button_bg": "main_btn_bg",
-    "button_text": "main_btn_text",
-    "button_hover_bg": "main_btn_hover_bg",
-    "button_pressed_bg": "main_btn_pressed_bg",
-    "button_pressed_text": "main_btn_pressed_text",
-}
+RENAMES = [('DIFF_ADDED_DARK', 'SEMANTIC_DIFF_ADDED'), ('DIFF_REMOVED_DARK', 'SEMANTIC_DIFF_REMOVED'), ('DIFF_CHANGED_DARK', 'SEMANTIC_DIFF_CHANGED'), ('DIFF_CURRENT_DARK', 'SEMANTIC_DIFF_CURRENT'), ('DIFF_ADDED_LIGHT', 'SEMANTIC_DIFF_ADDED_LIGHT'), ('DIFF_REMOVED_LIGHT', 'SEMANTIC_DIFF_REMOVED_LIGHT'), ('DIFF_CHANGED_LIGHT', 'SEMANTIC_DIFF_CHANGED_LIGHT'), ('DIFF_CURRENT_LIGHT', 'SEMANTIC_DIFF_CURRENT_LIGHT'), ('REGEX_MATCH_DARK', 'SEMANTIC_REGEX_MATCH'), ('REGEX_MATCH_LIGHT', 'SEMANTIC_REGEX_MATCH_LIGHT'), ('REGEX_GROUP_PALETTE', 'SEMANTIC_REGEX_GROUPS')]
+SWEEP = ('utils/colors.py', 'utils/__init__.py', 'utils/dialog_styles.py', 'tests/test_brand_mirror.py')
+VALUES = {'SEMANTIC_DIFF_ADDED': '#1a4d1a', 'SEMANTIC_DIFF_REMOVED': '#4d1a1a', 'SEMANTIC_DIFF_CHANGED': '#4d4d1a', 'SEMANTIC_DIFF_CURRENT': '#4d1a4d', 'SEMANTIC_DIFF_ADDED_LIGHT': '#d4edda', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#f8d7da', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#fff3cd', 'SEMANTIC_DIFF_CURRENT_LIGHT': '#e2d4f0', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
+GROUPS = ('#3d5c5c', '#5c3d5c', '#5c5c3d', '#3d5c3d', '#5c3d3d', '#3d3d5c', '#5c4d3d', '#3d5c4d')
 
-#: path -> how many QUOTED occurrences that file holds. Written down so the
-#: script refuses to run against a tree that has moved under it.
-QUOTED = {
-    "utils/dialog_styles.py": 10,
-    "ui/main_window.py": 15,
-    "ui/image_button.py": 7,
-    "test_rnv_text_transformer.py": 7,
-    "tests/test_button_press_step.py": 11,
-    "tests/test_app_mirror.py": 1,
-    "tests/__snapshots__/test_snapshots.ambr": 10,
-    "docs/RNV_Brand_Color_System.md": 8,
-}
+DRAG_FILE = "ui/drag_drop_text_edit.py"
 
-#: The ten values, pinned. A rename that changes one of these is not a rename.
-PINNED = {
-    "dark": {"main_btn_bg": "#1a1a1a", "main_btn_text": "#dddddd",
-             "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-             "main_btn_pressed_text": "#000000"},
-    "light": {"main_btn_bg": "#ffffff", "main_btn_text": "#000000",
-              "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-              "main_btn_pressed_text": "#ffffff"},
-}
+OLD_DRAG = """\
+    # Drag highlight gold -- Qt #AARRGGBB, primary brand gold at 75% alpha.
+    # Not a six-digit hex: the alpha channel comes first, so a plain
+    # #[0-9a-f]{6} search will neither find it nor safely rewrite it.
+    _DRAG_HIGHLIGHT_GOLD: str = with_alpha(BRAND_GOLD, 0xBF)
+"""
 
-#: Prose that names the keys. Renamed so the documentation stays true.
-PROSE = [
-    ("utils/dialog_styles.py",
-     "    - button_bg/button_text/button_hover_bg/button_pressed_text: Button colors",
-     "    - main_btn_bg/main_btn_text/main_btn_hover_bg/main_btn_pressed_text: Button colors",
-     1),
-    ("core/theme_manager.py",
-     "keys (window_bg, button_bg, input_bg, output_text_color, etc.).",
-     "keys (window_bg, main_btn_bg, input_bg, output_text_color, etc.).",
-     1),
-]
+NEW_DRAG = """\
+    # RNV-SEMANTIC-NAMING (2026-09-02): this name used to end in the name of
+    # the colour that fills it. A constant names a colour and a key names a
+    # role; this is a role, so it no longer says which colour it holds. The
+    # colour still arrives from BRAND_GOLD -- keep the derivation, drop the
+    # claim -- so a brand that is not gold flows through this line unchanged.
+    #
+    # Qt #AARRGGBB, primary brand at 75% alpha. Not a six-digit hex: the
+    # alpha channel comes first, so a plain #[0-9a-f]{6} search will neither
+    # find it nor safely rewrite it.
+    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, 0xBF)
+"""
 
-_QUOTED_RE = re.compile(r"(['\"])(" + "|".join(sorted(RENAME, key=len, reverse=True))
-                        + r")\1")
-_ENTRY_RE = re.compile(r'^(\s*)"([A-Za-z0-9_]+)": (.*?)(,?)$')
+OLD_STYLE = """\
+            border: 2px dashed {_DRAG_HIGHLIGHT_GOLD};
+            background-color: {_DRAG_HIGHLIGHT_GOLD};
+            color: #000000;
+"""
+
+NEW_STYLE = """\
+            border: 2px dashed {_DRAG_HIGHLIGHT};
+            background-color: {_DRAG_HIGHLIGHT};
+            color: {TRUE_BLACK};
+"""
+
+OLD_IMPORT = "from utils.colors import BRAND_GOLD, with_alpha\n"
+NEW_IMPORT = "from utils.colors import BRAND_GOLD, TRUE_BLACK, with_alpha\n"
+
+NOTE = """\
+# ============ APP SEMANTICS ============
+#
+# Neither brand values nor ramp steps, and named for what they MEAN rather
+# than what hue they are -- the way the register names STATUS.
+#
+# RNV-SEMANTIC-NAMING (2026-09-02): the _DARK suffix is gone because the base
+# carries the dark value, exactly as STATUS_ERROR / STATUS_ERROR_LIGHT do
+# upstream. The accent swap must never reach these: a purple brand still
+# deletes in red.
+#
+# Diff highlighting borrows the Bootstrap alert palette; the regex colours
+# are this app alone.
+"""
+
+OLD_NOTE = """\
+# ============ APP SEMANTICS ============
+#
+# Neither brand values nor ramp steps. Diff highlighting borrows the
+# Bootstrap alert palette; the regex colours are this app alone.
+"""
 
 
-def _rename_quoted(text: str) -> tuple[str, int]:
-    hits = 0
+def _token_sub(text: str) -> tuple[str, int]:
+    """One pass, longest name first, whole tokens only.
 
-    def swap(m: re.Match) -> str:
-        nonlocal hits
-        hits += 1
-        return f"{m.group(1)}{RENAME[m.group(2)]}{m.group(1)}"
-
-    return _QUOTED_RE.sub(swap, text), hits
-
-
-def _resort_blocks(text: str) -> str:
-    """Re-sort every run of `"key": value` lines the rename disturbed.
-
-    A block is a maximal run of sibling entry lines at one indent. Each is
-    checked to have been sorted BEFORE the rename -- a block that was not
-    sorted to begin with is not ours to reorder, and silently sorting it would
-    be an unrelated change hidden inside this one.
+    Sequential passes would be wrong the moment one new name contains an old
+    one. Word boundaries make the quoted forms in __all__ and PROVENANCE
+    rename themselves, which is what makes those two maps stay complete.
     """
-    lines = text.split("\n")
-    out: list[str] = []
-    i = 0
-    while i < len(lines):
-        m = _ENTRY_RE.match(lines[i])
-        if not m:
-            out.append(lines[i])
-            i += 1
-            continue
-        indent = m.group(1)
-        block = []
-        while i < len(lines):
-            m2 = _ENTRY_RE.match(lines[i])
-            if not m2 or m2.group(1) != indent:
-                break
-            block.append((m2.group(2), lines[i]))
-            i += 1
-        keys = [k for k, _ in block]
-        if keys != sorted(keys):
-            out.extend(line for _, line in block)
-            continue
-        renamed = [(RENAME.get(k, k), line) for k, line in block]
-        renamed = [(k, _rename_quoted(line)[0]) for k, line in renamed]
-        renamed.sort(key=lambda kv: kv[0])
-        # the trailing entry of a block may or may not carry a comma; keep
-        # whatever punctuation each line arrived with by not touching it.
-        out.extend(line for _, line in renamed)
-    return "\n".join(out)
+    pairs = sorted(RENAMES, key=lambda p: -len(p[0]))
+    lookup = dict(pairs)
+    pattern = re.compile(r"\b(%s)\b" % "|".join(re.escape(o) for o, _ in pairs))
+    n = 0
+
+    def swap(m):
+        nonlocal n
+        n += 1
+        return lookup[m.group(1)]
+
+    return pattern.sub(swap, text), n
 
 
 def edits(tree) -> None:
     total = 0
-    for rel, expected in QUOTED.items():
-        src = tree.read(rel)
-        if rel.endswith(".ambr"):
-            before = len(_QUOTED_RE.findall(src))
-            if before != expected:
-                raise SystemExit(f"{rel}: expected {expected} quoted key(s), "
-                                 f"found {before}")
-            tree.write(rel, _resort_blocks(src))
-            total += before
-            continue
-        new, hits = _rename_quoted(src)
-        if hits != expected:
-            raise SystemExit(f"{rel}: expected {expected} quoted key(s), "
-                             f"found {hits}. The file moved; re-derive this "
-                             f"edit before trusting the script.")
+    for rel in SWEEP:
+        text = tree.read(rel)
+        new, n = _token_sub(text)
+        if n == 0:
+            raise SystemExit(f"{rel} mentions none of the eleven names")
         tree.write(rel, new)
-        total += hits
-    for rel, old, new, times in PROSE:
-        tree.sub(rel, old, new, times)
-    print(f"  renamed {total} quoted keys in {len(QUOTED)} files, "
-          f"{len(PROSE)} prose mentions")
+        total += n
+        print(f"  {rel}: {n} occurrence(s) renamed")
+    print(f"  {total} occurrence(s) across {len(SWEEP)} file(s)")
+
+    tree.sub(SENTINEL_FILE, OLD_NOTE, NOTE, 1)
+    tree.sub(DRAG_FILE, OLD_IMPORT, NEW_IMPORT, 1)
+    tree.sub(DRAG_FILE, OLD_DRAG, NEW_DRAG, 1)
+    tree.sub(DRAG_FILE, OLD_STYLE, NEW_STYLE, 1)
+    print("  drag highlight freed, #000000 wired through TRUE_BLACK")
 
 
 def checks(tree) -> None:
-    old_names = set(RENAME)
-    for rel in list(QUOTED) + [rel for rel, *_ in PROSE]:
-        text = tree.read(rel)
-        for old in old_names:
-            if re.search(r"(['\"])" + old + r"\1", text):
-                raise SystemExit(f"{rel}: {old!r} survived the rename")
+    src = tree.read(SENTINEL_FILE)
+    if src.count(SENTINEL) != 1:
+        raise SystemExit("the ruling note did not land exactly once")
 
-    styles = tree.read("utils/dialog_styles.py")
-    for mode, values in PINNED.items():
-        for key, value in values.items():
-            if f"'{key}'" not in styles:
-                raise SystemExit(f"utils/dialog_styles.py: {key!r} missing")
-
-    # The values are the point. Resolve both palettes out of the edited source
-    # and compare against the pins rather than trusting the substitution.
-    import ast
-    module = ast.parse(styles)
-    # The palette values are NAMES imported from utils/colors.py, so a resolver
-    # that reads only this file resolves every one of them to None -- and then
-    # compares None to None and passes. The constants module is read too.
-    consts = {}
-    for source in (tree.read("utils/colors.py"), styles):
-        for node in ast.walk(ast.parse(source)):
-            target = value = None
-            if isinstance(node, ast.Assign) and len(node.targets) == 1 \
-                    and isinstance(node.targets[0], ast.Name):
-                target, value = node.targets[0].id, node.value
-            elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-                target, value = node.target.id, node.value
-            if target and isinstance(value, ast.Constant) \
-                    and isinstance(value.value, str):
-                consts.setdefault(target, value.value)
-
-    found = []
-    for node in ast.walk(module):
-        if not isinstance(node, ast.Dict):
+    # Every old name gone from every file in the repository, not just the four
+    # swept -- a name that survives somewhere unswept is an ImportError at run
+    # time that no unit test necessarily reaches.
+    root = Path(tree.root)
+    strays = []
+    for path in sorted(root.rglob("*.py")):
+        if any(p in {".git", "build", "dist", ".venv", "__pycache__"}
+               for p in path.parts):
             continue
-        pairs = {}
-        for k, v in zip(node.keys, node.values):
-            if not (isinstance(k, ast.Constant) and isinstance(k.value, str)):
-                continue
-            if isinstance(v, ast.Constant) and isinstance(v.value, str):
-                pairs[k.value] = v.value
-            elif isinstance(v, ast.Name):
-                pairs[k.value] = consts.get(v.id)
-            elif isinstance(v, ast.Attribute):
-                pairs[k.value] = consts.get(v.attr)
-        if "main_btn_bg" in pairs:
-            found.append({k: pairs.get(k) for k in PINNED["dark"]})
-    if len(found) != 2:
-        raise SystemExit(f"expected 2 palettes carrying the renamed keys, "
-                         f"found {len(found)}")
-    if any(v is None for palette in found for v in palette.values()):
-        raise SystemExit(f"a value would not resolve: {found}. A comparison "
-                         f"between two unresolved palettes passes by accident.")
-    for pins in PINNED.values():
-        if pins not in found:
-            raise SystemExit(f"a palette no longer matches its pinned values.\n"
-                             f"  wanted {pins}\n  found  {found}")
+        if path.name in ("up.py", "up1.py", "up2.py"):
+            continue
+        # The buffered text where there is one -- otherwise --check would
+        # read the untouched disk and report every rename as a failure.
+        rel = str(path.relative_to(root))
+        text = tree.files.get(rel)
+        if text is None:
+            text = path.read_text(encoding="utf-8-sig", errors="replace")
+        if "RNV-NAMING-TOOL-DO-NOT-SWEEP" in text or "RNV-SEMANTIC-GUARD" in text:
+            continue
+        for old, _ in RENAMES:
+            if re.search(r"\b%s\b" % re.escape(old), text):
+                strays.append(f"{path.relative_to(root)}: {old}")
+    if strays:
+        raise SystemExit("old names survived:\n  " + "\n  ".join(strays))
 
-    ambr = tree.read("tests/__snapshots__/test_snapshots.ambr")
-    if ambr.count('"main_btn_') != QUOTED["tests/__snapshots__/test_snapshots.ambr"]:
-        raise SystemExit("the snapshot did not gain the renamed keys")
-    for block_start in ("    \"main_btn_bg\"",):
-        if block_start not in ambr:
-            raise SystemExit("the snapshot lost its indentation shape")
-    print("  guards: no old name survives, both palettes hold their pinned "
-          "values, snapshot re-sorted")
+    # Values unchanged. Read them out of the source rather than importing, so
+    # this runs before the suites do.
+    tree_ast = ast.parse(src)
+    found = {}
+    for node in tree_ast.body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for t in targets:
+                if isinstance(t, ast.Name) and isinstance(node.value, ast.Constant):
+                    found[t.id] = node.value.value
+    for name, want in VALUES.items():
+        if found.get(name) != want:
+            raise SystemExit(f"{name} is {found.get(name)!r}, expected {want!r}")
 
-GUARD_SOURCE = r'''"""The button keys say where the button lives.
+    drag = tree.read(DRAG_FILE)
+    if "_DRAG_HIGHLIGHT_GOLD" in drag:
+        raise SystemExit("the old drag-highlight name survived")
+    if "#000000" in drag:
+        raise SystemExit("the raw black literal survived in " + DRAG_FILE)
 
-RNV-BUTTON-NAMING-GUARD
+    print(f"  guards: {len(RENAMES)} names renamed, "
+          f"{len(VALUES)} values unmoved, drag highlight freed")
 
-main_btn_* is the main window at launch. dialog_btn_* is anything that opens
-later. This application has only the first family; its dialog buttons draw
-from the shared surface and accent keys, not from a button family, and that is
-recorded here so a later pass does not "restore" a button_* name on the
-strength of the other repositories having one.
+
+GUARD_SOURCE = r'''"""A constant names a colour; a key names a role. RNV-SEMANTIC-GUARD
+
+Ruled by Chris on 2026-09-02, on the twenty values this application owns
+outright, after seeing them rendered in situ: name them by MEANING, the way
+the register names STATUS, not by hue. So SEMANTIC_DIFF_ADDED rather than
+GREEN_DEEP, and the base carries the dark value with _LIGHT for the other
+ground -- STATUS_ERROR / STATUS_ERROR_LIGHT upstream, exactly.
+
+This guard pins three things that are easy to lose in a later pass:
+
+  * the values did not move when the names did,
+  * the old names cannot come back,
+  * the drag highlight still DERIVES from BRAND_GOLD rather than repeating
+    a gold literal, so a brand swap still flows through it.
 """
 from __future__ import annotations
 
@@ -296,181 +278,91 @@ import ast
 import re
 from pathlib import Path
 
-import pytest
+from utils import colors
 
 ROOT = Path(__file__).resolve().parent.parent
-OLD = ("button_bg", "button_text", "button_hover_bg", "button_pressed_bg",
-       "button_pressed_text")
-NEW = tuple("main_" + n.replace("button_", "btn_") for n in OLD)
+PALETTE = ROOT / "utils" / "colors.py"
+DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 
-PINNED = {
-    "dark": {"main_btn_bg": "#1a1a1a", "main_btn_text": "#dddddd",
-             "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-             "main_btn_pressed_text": "#000000"},
-    "light": {"main_btn_bg": "#ffffff", "main_btn_text": "#000000",
-              "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-              "main_btn_pressed_text": "#ffffff"},
-}
-
-SKIP = {".git", "build", "dist", ".venv", "__pycache__"}
-
-#: A sweep for a name cannot tell a USE of that name from a MENTION of it, and
-#: the two files most certain to mention it are this guard -- which lists the
-#: old names in order to forbid them -- and the delivery script that performs
-#: the rename. Both carry a marker for exactly this reason, and a file is
-#: skipped by its marker rather than by its filename, because the delivery
-#: script arrives under whatever name it is saved as.
-MARKERS = ("RNV-BUTTON-NAMING-GUARD", "RNV-BUTTON-NAMING-TOOL-DO-NOT-SWEEP")
+VALUES = {'SEMANTIC_DIFF_ADDED': '#1a4d1a', 'SEMANTIC_DIFF_REMOVED': '#4d1a1a', 'SEMANTIC_DIFF_CHANGED': '#4d4d1a', 'SEMANTIC_DIFF_CURRENT': '#4d1a4d', 'SEMANTIC_DIFF_ADDED_LIGHT': '#d4edda', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#f8d7da', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#fff3cd', 'SEMANTIC_DIFF_CURRENT_LIGHT': '#e2d4f0', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
+GROUPS = ('#3d5c5c', '#5c3d5c', '#5c5c3d', '#3d5c3d', '#5c3d3d', '#3d3d5c', '#5c4d3d', '#3d5c4d')
+RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD')
 
 
-def _sources():
-    for path in sorted(ROOT.rglob("*")):
-        if path.is_dir() or path.suffix not in (".py", ".ambr", ".md"):
-            continue
-        if any(part in SKIP for part in path.parts):
-            continue
-        text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if any(marker in text for marker in MARKERS):
-            continue
-        yield path, text
+def test_the_semantic_values_did_not_move():
+    """A rename that changes a value is not a rename."""
+    for name, want in VALUES.items():
+        assert hasattr(colors, name), f"{name} is gone"
+        assert getattr(colors, name).lower() == want, (
+            f"{name} is {getattr(colors, name)}, was {want} before the rename")
+    assert tuple(colors.SEMANTIC_REGEX_GROUPS) == GROUPS
 
 
-def _palettes():
-    src = (ROOT / "utils" / "dialog_styles.py").read_text(encoding="utf-8-sig")
-    module = ast.parse(src)
-    # The palette values are NAMES imported from utils/colors.py. A resolver
-    # that reads only dialog_styles.py resolves all of them to None, and then
-    # compares None with None and passes. Read the constants module too.
-    consts = {}
-    for source in ((ROOT / "utils" / "colors.py").read_text(encoding="utf-8-sig"),
-                   src):
-        for node in ast.walk(ast.parse(source)):
-            target = value = None
-            if isinstance(node, ast.Assign) and len(node.targets) == 1 \
-                    and isinstance(node.targets[0], ast.Name):
-                target, value = node.targets[0].id, node.value
-            elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-                target, value = node.target.id, node.value
-            if target and isinstance(value, ast.Constant) \
-                    and isinstance(value.value, str):
-                consts.setdefault(target, value.value)
-    out = []
-    for node in ast.walk(module):
-        if not isinstance(node, ast.Dict):
-            continue
-        pairs = {}
-        for k, v in zip(node.keys, node.values):
-            if not (isinstance(k, ast.Constant) and isinstance(k.value, str)):
-                continue
-            if isinstance(v, ast.Constant) and isinstance(v.value, str):
-                pairs[k.value] = v.value
-            elif isinstance(v, ast.Name):
-                pairs[k.value] = consts.get(v.id)
-            elif isinstance(v, ast.Attribute):
-                pairs[k.value] = consts.get(v.attr)
-        if "main_btn_bg" in pairs:
-            out.append(pairs)
-    return out
+def test_every_app_semantic_constant_says_so():
+    """PROVENANCE is the classification; the name should agree with it.
+
+    The point of the ruling is that the category is legible from the name.
+    An 'app-semantic' constant called DIFF_ADDED_DARK told you its role and
+    its mode and not its category."""
+    wrong = [n for n, g in colors.PROVENANCE.items()
+             if g == 'app-semantic' and not n.startswith('SEMANTIC_')]
+    assert not wrong, f"app-semantic constants not named as such: {wrong}"
 
 
-def test_no_old_button_key_name_survives():
-    offenders = []
-    for path, text in _sources():
-        for old in OLD:
-            if re.search(r"(['\"])" + old + r"\1", text):
-                offenders.append(f"{path.relative_to(ROOT)}: {old}")
-    assert not offenders, (
-        "these are main-window button keys and must be named main_btn_*:\n  "
-        + "\n  ".join(offenders))
+def test_nothing_semantic_carries_the_dark_suffix():
+    """_DARK is the half of the pair the register does not write.
+
+    Upstream holds STATUS_ERROR and STATUS_ERROR_LIGHT -- the base IS the
+    dark value. A _DARK suffix here would mean this app disagreed with the
+    register about what a base name means."""
+    bad = [n for n, g in colors.PROVENANCE.items()
+           if g == 'app-semantic' and n.endswith('_DARK')]
+    assert not bad, f"the retired suffix came back on: {bad}"
 
 
-def test_the_marker_exemption_covers_only_the_two_tools():
-    """An exemption that grows silently is how a guard stops guarding.
-
-    Only this guard and the delivery script may carry a marker. If a third
-    file gains one -- or if application source starts quoting the markers --
-    the sweep above would go quiet without anyone noticing.
-    """
-    marked = []
+def test_the_retired_names_are_gone_from_the_application():
+    """Not a bare-token sweep of the whole tree: this guard and the delivery
+    script both NAME the old names in order to forbid them, and a sweep that
+    cannot tell a use from a mention fails on itself. Skip anything carrying
+    either marker, and look at real source only."""
+    strays = []
     for path in sorted(ROOT.rglob("*.py")):
-        if any(part in SKIP for part in path.parts):
+        if any(p in {".git", "build", "dist", ".venv", "__pycache__"}
+               for p in path.parts):
             continue
         text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if any(marker in text for marker in MARKERS):
-            marked.append(path.relative_to(ROOT))
-    assert len(marked) <= 2, f"unexpected marked file(s): {marked}"
-    assert Path(__file__).relative_to(ROOT) in marked
-
-
-def test_both_palettes_carry_the_new_names():
-    palettes = _palettes()
-    assert len(palettes) == 2, f"expected 2 palettes, found {len(palettes)}"
-    for palette in palettes:
-        missing = [n for n in NEW if n not in palette]
-        assert not missing, f"palette missing {missing}"
-
-
-def test_the_rename_moved_no_value():
-    palettes = _palettes()
-    actual = [{k: p.get(k) for k in PINNED["dark"]} for p in palettes]
-    assert not any(v is None for a in actual for v in a.values()), (
-        f"a value would not resolve: {actual}. Two unresolved palettes compare "
-        "equal, so this assertion has to fail loudly rather than pass quietly.")
-    for mode, pins in PINNED.items():
-        assert pins in actual, (
-            f"the {mode} palette no longer holds its pinned values.\n"
-            f"  wanted {pins}\n  found  {actual}\n"
-            "A rename that changes a value is not a rename.")
-
-
-def test_the_dialog_stylesheet_still_owns_its_own_button_colours():
-    """This app's dialogs never read the main family, and must not start.
-
-    If a later pass wires the dialog stylesheet to main_btn_*, the two schemes
-    fuse and the naming stops meaning anything. The dialog QSS draws from
-    bg_secondary / bg_hover / accent, and that is asserted rather than assumed.
-    """
-    src = (ROOT / "utils" / "dialog_styles.py").read_text(encoding="utf-8-sig")
-    start = src.index("/* ===== PUSH BUTTON ===== */")
-    block = src[start:start + 900]
-    assert "c['bg_secondary']" in block
-    assert "c['bg_hover']" in block
-    for name in NEW:
-        assert name not in block, (
-            f"the dialog button rule now reads {name}. Dialog buttons and main"
-            " window buttons are different schemes; wire dialogs to a"
-            " dialog_btn_* family instead.")
-
-
-def test_the_main_window_reads_the_main_family():
-    src = (ROOT / "ui" / "main_window.py").read_text(encoding="utf-8-sig")
-    for name in NEW:
-        assert f"'{name}'" in src, f"ui/main_window.py no longer reads {name}"
-
-
-@pytest.mark.parametrize("rel", ["tests/__snapshots__/test_snapshots.ambr"])
-def test_every_snapshot_block_is_still_sorted(rel):
-    """The rename moves five lines; if it left them where they were, the next
-    snapshot run fails with a diff that reads like a regression."""
-    entry = re.compile(r'^(\s*)"([A-Za-z0-9_]+)": ')
-    lines = (ROOT / rel).read_text(encoding="utf-8").split("\n")
-    i = 0
-    unsorted = []
-    while i < len(lines):
-        m = entry.match(lines[i])
-        if not m:
-            i += 1
+        if "RNV-SEMANTIC-GUARD" in text or "RNV-NAMING-TOOL-DO-NOT-SWEEP" in text:
             continue
-        indent, block = m.group(1), []
-        while i < len(lines):
-            m2 = entry.match(lines[i])
-            if not m2 or m2.group(1) != indent:
-                break
-            block.append(m2.group(2))
-            i += 1
-        if len(block) > 1 and block != sorted(block):
-            unsorted.append(block[:6])
-    assert not unsorted, f"unsorted snapshot block(s): {unsorted}"
+        for old in RETIRED:
+            if re.search(r"\b%s\b" % re.escape(old), text):
+                strays.append(f"{path.relative_to(ROOT)}: {old}")
+    assert not strays, "retired names are still in use:\n  " + "\n  ".join(strays)
+
+
+def test_the_drag_highlight_is_a_role_wired_to_the_brand():
+    """The class C member. Its name must not say gold, and its value must
+    still be DERIVED from BRAND_GOLD rather than written out -- a later
+    hand-edit to a literal would keep the name honest and break the swap,
+    which is the failure this reads the syntax tree to catch."""
+    tree = ast.parse(DRAG.read_text(encoding="utf-8-sig"))
+    found = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) \
+                and node.target.id == "_DRAG_HIGHLIGHT":
+            found = node.value
+    assert found is not None, "_DRAG_HIGHLIGHT is not assigned in " + DRAG.name
+    assert isinstance(found, ast.Call), "_DRAG_HIGHLIGHT is no longer derived"
+    assert getattr(found.func, "id", None) == "with_alpha", (
+        "_DRAG_HIGHLIGHT is not built with with_alpha any more")
+    assert isinstance(found.args[0], ast.Name) and found.args[0].id == "BRAND_GOLD", (
+        "_DRAG_HIGHLIGHT no longer takes its colour from BRAND_GOLD")
+
+
+def test_the_drag_highlight_style_holds_no_literal():
+    """rule 1, in the one place this application still broke it."""
+    text = DRAG.read_text(encoding="utf-8-sig")
+    hits = re.findall(r"#[0-9a-fA-F]{6}\b", text)
+    assert not hits, f"{DRAG.name} writes colour literals: {hits}"
 '''
 
 
