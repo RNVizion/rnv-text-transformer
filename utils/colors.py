@@ -338,33 +338,41 @@ GREY_F5: Final[str] = '#f5f5f5'
 
 # ============ APP SEMANTICS ============
 #
-# Neither brand values nor ramp steps. Diff highlighting borrows the
-# Bootstrap alert palette; the regex colours are this app alone.
+# Neither brand values nor ramp steps, and named for what they MEAN rather
+# than what hue they are -- the way the register names STATUS.
+#
+# RNV-SEMANTIC-NAMING (2026-09-02): the _DARK suffix is gone because the base
+# carries the dark value, exactly as STATUS_ERROR / STATUS_ERROR_LIGHT do
+# upstream. The accent swap must never reach these: a purple brand still
+# deletes in red.
+#
+# Diff highlighting borrows the Bootstrap alert palette; the regex colours
+# are this app alone.
 
 
-DIFF_ADDED_DARK: Final[str] = '#1a4d1a'
+SEMANTIC_DIFF_ADDED: Final[str] = '#1a4d1a'
 
-DIFF_REMOVED_DARK: Final[str] = '#4d1a1a'
+SEMANTIC_DIFF_REMOVED: Final[str] = '#4d1a1a'
 
-DIFF_CHANGED_DARK: Final[str] = '#4d4d1a'
+SEMANTIC_DIFF_CHANGED: Final[str] = '#4d4d1a'
 
-DIFF_CURRENT_DARK: Final[str] = '#4d1a4d'
+SEMANTIC_DIFF_CURRENT: Final[str] = '#4d1a4d'
 #: Bootstrap alert-success background
-DIFF_ADDED_LIGHT: Final[str] = '#d4edda'
+SEMANTIC_DIFF_ADDED_LIGHT: Final[str] = '#d4edda'
 #: Bootstrap alert-danger background
-DIFF_REMOVED_LIGHT: Final[str] = '#f8d7da'
+SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#f8d7da'
 #: Bootstrap alert-warning background
-DIFF_CHANGED_LIGHT: Final[str] = '#fff3cd'
+SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#fff3cd'
 
-DIFF_CURRENT_LIGHT: Final[str] = '#e2d4f0'
+SEMANTIC_DIFF_CURRENT_LIGHT: Final[str] = '#e2d4f0'
 
-REGEX_MATCH_DARK: Final[str] = '#4a4a00'
+SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'
 
-REGEX_MATCH_LIGHT: Final[str] = '#ffff99'
+SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#ffff99'
 
 
 #: Dark-only capture-group highlighting; index 0 is group 1.
-REGEX_GROUP_PALETTE: Final[tuple[str, ...]] = (
+SEMANTIC_REGEX_GROUPS: Final[tuple[str, ...]] = (
     '#3d5c5c',
     '#5c3d5c',
     '#5c5c3d',
@@ -475,17 +483,17 @@ PROVENANCE: Final[dict[str, str]] = {
     'GREY_EE': 'app-ramp',
     'GREY_F5': 'app-ramp',
     # -- app-semantic
-    'DIFF_ADDED_DARK': 'app-semantic',
-    'DIFF_REMOVED_DARK': 'app-semantic',
-    'DIFF_CHANGED_DARK': 'app-semantic',
-    'DIFF_CURRENT_DARK': 'app-semantic',
-    'DIFF_ADDED_LIGHT': 'app-semantic',
-    'DIFF_REMOVED_LIGHT': 'app-semantic',
-    'DIFF_CHANGED_LIGHT': 'app-semantic',
-    'DIFF_CURRENT_LIGHT': 'app-semantic',
-    'REGEX_MATCH_DARK': 'app-semantic',
-    'REGEX_MATCH_LIGHT': 'app-semantic',
-    'REGEX_GROUP_PALETTE': 'app-semantic',
+    'SEMANTIC_DIFF_ADDED': 'app-semantic',
+    'SEMANTIC_DIFF_REMOVED': 'app-semantic',
+    'SEMANTIC_DIFF_CHANGED': 'app-semantic',
+    'SEMANTIC_DIFF_CURRENT': 'app-semantic',
+    'SEMANTIC_DIFF_ADDED_LIGHT': 'app-semantic',
+    'SEMANTIC_DIFF_REMOVED_LIGHT': 'app-semantic',
+    'SEMANTIC_DIFF_CHANGED_LIGHT': 'app-semantic',
+    'SEMANTIC_DIFF_CURRENT_LIGHT': 'app-semantic',
+    'SEMANTIC_REGEX_MATCH': 'app-semantic',
+    'SEMANTIC_REGEX_MATCH_LIGHT': 'app-semantic',
+    'SEMANTIC_REGEX_GROUPS': 'app-semantic',
 }
 
 __all__ = [
@@ -522,15 +530,15 @@ __all__ = [
     'GREY_E0',
     'GREY_EE',
     'GREY_F5',
-    'DIFF_ADDED_DARK',
-    'DIFF_REMOVED_DARK',
-    'DIFF_CHANGED_DARK',
-    'DIFF_CURRENT_DARK',
-    'DIFF_ADDED_LIGHT',
-    'DIFF_REMOVED_LIGHT',
-    'DIFF_CHANGED_LIGHT',
-    'DIFF_CURRENT_LIGHT',
-    'REGEX_MATCH_DARK',
-    'REGEX_MATCH_LIGHT',
-    'REGEX_GROUP_PALETTE',
+    'SEMANTIC_DIFF_ADDED',
+    'SEMANTIC_DIFF_REMOVED',
+    'SEMANTIC_DIFF_CHANGED',
+    'SEMANTIC_DIFF_CURRENT',
+    'SEMANTIC_DIFF_ADDED_LIGHT',
+    'SEMANTIC_DIFF_REMOVED_LIGHT',
+    'SEMANTIC_DIFF_CHANGED_LIGHT',
+    'SEMANTIC_DIFF_CURRENT_LIGHT',
+    'SEMANTIC_REGEX_MATCH',
+    'SEMANTIC_REGEX_MATCH_LIGHT',
+    'SEMANTIC_REGEX_GROUPS',
 ]

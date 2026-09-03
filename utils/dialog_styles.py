@@ -62,17 +62,17 @@ from utils.colors import (
     APP_HOVER_LIGHT,
     GOLD_TEXT_GROUND_FLOOR,
     GREY_F5,
-    DIFF_ADDED_DARK,
-    DIFF_REMOVED_DARK,
-    DIFF_CHANGED_DARK,
-    DIFF_CURRENT_DARK,
-    DIFF_ADDED_LIGHT,
-    DIFF_REMOVED_LIGHT,
-    DIFF_CHANGED_LIGHT,
-    DIFF_CURRENT_LIGHT,
-    REGEX_MATCH_DARK,
-    REGEX_MATCH_LIGHT,
-    REGEX_GROUP_PALETTE,
+    SEMANTIC_DIFF_ADDED,
+    SEMANTIC_DIFF_REMOVED,
+    SEMANTIC_DIFF_CHANGED,
+    SEMANTIC_DIFF_CURRENT,
+    SEMANTIC_DIFF_ADDED_LIGHT,
+    SEMANTIC_DIFF_REMOVED_LIGHT,
+    SEMANTIC_DIFF_CHANGED_LIGHT,
+    SEMANTIC_DIFF_CURRENT_LIGHT,
+    SEMANTIC_REGEX_MATCH,
+    SEMANTIC_REGEX_MATCH_LIGHT,
+    SEMANTIC_REGEX_GROUPS,
     BRAND_GOLD,
     BRAND_DARK_GOLD,
     BRAND_DARK_GOLD_DEEP,
@@ -210,22 +210,22 @@ class DialogStyleManager:
         'line_number_current_fg': BRAND_GOLD,
 
         # Diff / compare semantic highlight colors
-        'diff_added_bg':   DIFF_ADDED_DARK,
-        'diff_removed_bg': DIFF_REMOVED_DARK,
-        'diff_changed_bg': DIFF_CHANGED_DARK,
-        'diff_current_bg': DIFF_CURRENT_DARK,
+        'diff_added_bg':   SEMANTIC_DIFF_ADDED,
+        'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
+        'diff_changed_bg': SEMANTIC_DIFF_CHANGED,
+        'diff_current_bg': SEMANTIC_DIFF_CURRENT,
 
         # Diff HTML export colors (standalone document — always light-styled)
         'diff_html_equal_bg':  WHITE,
-        'diff_html_insert_bg': DIFF_ADDED_LIGHT,
-        'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
+        'diff_html_insert_bg': SEMANTIC_DIFF_ADDED_LIGHT,
+        'diff_html_delete_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
         'diff_html_header_bg': GREY_EE,
         'diff_html_line_num':  GREY_88,
         'diff_html_border':    GREY_DD,
         'diff_html_stats_text':GREY_66,
 
         # Regex builder match highlight
-        'regex_match_bg': REGEX_MATCH_DARK,
+        'regex_match_bg': SEMANTIC_REGEX_MATCH,
 
         # Image mode semi-transparent overlay values (rgba — used only in image mode)
         'image_overlay_bg':            'rgba(0, 0, 0, 171)',
@@ -309,22 +309,22 @@ class DialogStyleManager:
         'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
 
         # Diff / compare semantic highlight colors
-        'diff_added_bg':   DIFF_ADDED_LIGHT,
-        'diff_removed_bg': DIFF_REMOVED_LIGHT,
-        'diff_changed_bg': DIFF_CHANGED_LIGHT,
-        'diff_current_bg': DIFF_CURRENT_LIGHT,
+        'diff_added_bg':   SEMANTIC_DIFF_ADDED_LIGHT,
+        'diff_removed_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
+        'diff_changed_bg': SEMANTIC_DIFF_CHANGED_LIGHT,
+        'diff_current_bg': SEMANTIC_DIFF_CURRENT_LIGHT,
 
         # Diff HTML export colors (standalone document — always light-styled)
         'diff_html_equal_bg':  WHITE,
-        'diff_html_insert_bg': DIFF_ADDED_LIGHT,
-        'diff_html_delete_bg': DIFF_REMOVED_LIGHT,
+        'diff_html_insert_bg': SEMANTIC_DIFF_ADDED_LIGHT,
+        'diff_html_delete_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
         'diff_html_header_bg': GREY_EE,
         'diff_html_line_num':  GREY_88,
         'diff_html_border':    GREY_DD,
         'diff_html_stats_text':GREY_66,
 
         # Regex builder match highlight
-        'regex_match_bg': REGEX_MATCH_LIGHT,
+        'regex_match_bg': SEMANTIC_REGEX_MATCH_LIGHT,
 
         # Image mode semi-transparent overlay values (rgba — used only in image mode)
         # Same values as DARK since image mode always uses dark-based overlays
@@ -342,7 +342,7 @@ class DialogStyleManager:
     # ==================== REGEX GROUP HIGHLIGHT PALETTE ====================
     # Dark-only visualization palette for regex capture group highlighting.
     # Each color corresponds to a different capture group (group 1 → index 0, etc.).
-    REGEX_GROUP_COLORS: ClassVar[list[str]] = list(REGEX_GROUP_PALETTE)
+    REGEX_GROUP_COLORS: ClassVar[list[str]] = list(SEMANTIC_REGEX_GROUPS)
 
     # ==================== PUBLIC METHODS ====================
     

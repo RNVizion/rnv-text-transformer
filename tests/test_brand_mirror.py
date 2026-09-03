@@ -312,7 +312,7 @@ def test_every_palette_colour_is_a_known_constant():
 
 def test_regex_group_palette_is_named():
     assert tuple(DialogStyleManager.REGEX_GROUP_COLORS) == \
-        tuple(colors.REGEX_GROUP_PALETTE)
+        tuple(colors.SEMANTIC_REGEX_GROUPS)
 
 
 # ══════════════════════════════════════════════════════════════════════════

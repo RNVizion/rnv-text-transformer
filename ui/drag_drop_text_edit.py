@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import QTextEdit, QApplication, QMenu
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QAction
 
-from utils.colors import BRAND_GOLD, with_alpha
+from utils.colors import BRAND_GOLD, TRUE_BLACK, with_alpha
 from utils.config import SUPPORTED_FORMATS
 from utils.dialog_styles import DialogStyleManager
 
@@ -45,17 +45,23 @@ class DragDropTextEdit(QTextEdit):
     saveFileRequested = pyqtSignal()
     clearRequested = pyqtSignal()
     
-    # Drag highlight gold -- Qt #AARRGGBB, primary brand gold at 75% alpha.
-    # Not a six-digit hex: the alpha channel comes first, so a plain
-    # #[0-9a-f]{6} search will neither find it nor safely rewrite it.
-    _DRAG_HIGHLIGHT_GOLD: str = with_alpha(BRAND_GOLD, 0xBF)
+    # RNV-SEMANTIC-NAMING (2026-09-02): this name used to end in the name of
+    # the colour that fills it. A constant names a colour and a key names a
+    # role; this is a role, so it no longer says which colour it holds. The
+    # colour still arrives from BRAND_GOLD -- keep the derivation, drop the
+    # claim -- so a brand that is not gold flows through this line unchanged.
+    #
+    # Qt #AARRGGBB, primary brand at 75% alpha. Not a six-digit hex: the
+    # alpha channel comes first, so a plain #[0-9a-f]{6} search will neither
+    # find it nor safely rewrite it.
+    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, 0xBF)
 
     # Drag highlight style
     _DRAG_HIGHLIGHT_STYLE: str = f"""
         QTextEdit {{
-            border: 2px dashed {_DRAG_HIGHLIGHT_GOLD};
-            background-color: {_DRAG_HIGHLIGHT_GOLD};
-            color: #000000;
+            border: 2px dashed {_DRAG_HIGHLIGHT};
+            background-color: {_DRAG_HIGHLIGHT};
+            color: {TRUE_BLACK};
             padding: 4px;
         }}
     """
