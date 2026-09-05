@@ -216,34 +216,73 @@ APP_HOVER_LIGHT: Final[str] = '#eeeeee'
 #: foreground is BRAND_DARK_GOLD_DEEP itself.
 GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'
 
-#: engine/brand.py STATUS["success"]
-STATUS_SUCCESS: Final[str] = '#28a745'
+#: engine/brand.py STATUS["success"] -- RNV-STATUS-FAMILY (2026-09-03)
+#:
+#: A FILL. Badges, boundaries, filled bars. It is not text: every fill in this
+#: family sits in the L* 48-59 band, which is precisely what lets ONE value
+#: work on a dark AND a light ground, and a mid-tone cannot carry text on
+#: either side. 3.92 on #1a1a1a, 3.23 on #2a2a2a -- above the 3:1 fill floor
+#: and below the 4.5:1 text floor, by design rather than by accident.
+#:
+#: Was #28a745, Bootstrap's green. Retired because it and the Bootstrap red
+#: sat about 4 apart under deuteranopia -- one olive -- and success and error
+#: are the two most consequential colours in an interface.
+STATUS_SUCCESS: Final[str] = '#926c89'
 
-#: engine/brand.py STATUS["warning"]
-STATUS_WARNING: Final[str] = '#ffc107'
+#: engine/brand.py STATUS["warning"] -- a FILL. Was #ffc107.
+#:
+#: Retired on arithmetic rather than taste: #ffc107 read 1.63 on #ffffff and
+#: 1.49 on #f5f5f5 against a 3:1 fill floor. It could not legally carry a
+#: boundary on a light ground at all.
+STATUS_WARNING: Final[str] = '#a2703c'
 
-#: engine/brand.py STATUS["error"]
-STATUS_ERROR: Final[str] = '#dc3545'
+#: engine/brand.py STATUS["error"] -- a FILL. Was #dc3545.
+STATUS_ERROR: Final[str] = '#c75b64'
 
-#: Derived. Error TEXT on a light dialog ground.
+#: engine/brand.py STATUS["success-text"], ["warning-text"], ["error-text"].
+#: TEXT on a dark ground.
 #:
-#: No red carries text at 4.5:1 on a real light panel: STATUS_ERROR clears
-#: only pure white, at 4.5275, and reads 4.1528 on this app's #f5f5f5 dialog
-#: background. Light therefore spends a derivative on TEXT for exactly the
-#: reason the gold does -- the fill and text jobs occupy non-overlapping
-#: luminance bands.
+#: The fills above cannot carry text. These can: 4.55, 4.60 and 4.52 on APP
+#: card #2a2a2a, the worst dark ground this application paints on. That is why
+#: the family has nine values and not three.
 #:
-#: 5.1811 on #f5f5f5, 4.8685 on #eeeeee, 4.6100 on #e8e8e8 -- the same
-#: coverage boundary BRAND_DARK_GOLD_DEEP publishes. Below #e8e8e8 red does
-#: not carry text, which is a ruling rather than a gap.
+#: REGISTERED, not derived. The register's rule -- hold hue and chroma, move
+#: lightness only, take the first step that clears 4.5 on the worst ground --
+#: is published as PROVENANCE so the choice is auditable. It is not re-run
+#: here. A rule held live becomes an edit anyone can make, and retuning it
+#: would silently change what an error looks like in five applications.
+STATUS_SUCCESS_TEXT: Final[str] = '#ad85a3'
+STATUS_WARNING_TEXT: Final[str] = '#bc8752'
+STATUS_ERROR_TEXT: Final[str] = '#dd6f77'
+
+#: engine/brand.py STATUS["*-text-light"] -- TEXT on a light ground.
 #:
-#: Derived, not written down, so it cannot orphan the way #c4a458 did when
-#: the gold it was a tint of was retired. A uniform per-channel step holds
-#: hue at 354.25 degrees, identical to STATUS_ERROR.
+#: 4.52, 4.52 and 4.51 on #f5f5f5, this application's light dialog background.
 #:
-#: DARK is deliberately not given one. See test_dark_error_text_is_short,
-#: which records the shortfall in both directions.
-STATUS_ERROR_LIGHT: Final[str] = lighten(STATUS_ERROR, -20)   # -> #c82131
+#: RNV-STATUS-LIGHT-FLOOR: the register walked these three against #f5f5f5 as
+#: "the worst light ground". It is not the worst one the register publishes --
+#: APP hover-light #eeeeee, GOLD_TEXT_GROUND_FLOOR #e8e8e8 and pressed-light
+#: #e0e0e0 all sit below it, and all three values fail 4.5 on all three rungs
+#: (4.25 / 4.02 / 3.74 for success). All three were walked to the FIRST step
+#: that clears, so there is no margin and one rung down they fail together.
+#: The values here are the register's AS PUBLISHED and the question is open
+#: with the brand chat; if it re-walks them against #e8e8e8 the answers are
+#: #825d79 / #8e5e2b / #ae4650, each moving less than the register's own 8.40
+#: "clearly different" bar. See tests/test_error_red.py for the measurements.
+#:
+#: THE LAST OF THESE WAS STATUS_ERROR_LIGHT, and was lighten(STATUS_ERROR, -20).
+#: Renamed because five siblings now land beside it under the _TEXT_LIGHT shape
+#: and the register names this colour error-text-light; the register's own note
+#: records that three applications derived it under TWO identifiers.
+#:
+#: Written down rather than derived because that formula no longer produces the
+#: registered value: against the new base it yields #b44753, which is neither
+#: the old value nor the new one. A derived value whose rule no longer produces
+#: it is not derived, it is a coincidence waiting to break -- the same reasoning
+#: that registered BRAND_STANDBY_GOLD rather than deriving it from BRAND_GOLD.
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = '#8a6581'
+STATUS_WARNING_TEXT_LIGHT: Final[str] = '#976633'
+STATUS_ERROR_TEXT_LIGHT: Final[str] = '#b84e58'
 
 
 # ============ HAND-PICKED GOLD MODULATIONS ============
@@ -342,7 +381,8 @@ GREY_F5: Final[str] = '#f5f5f5'
 # than what hue they are -- the way the register names STATUS.
 #
 # RNV-SEMANTIC-NAMING (2026-09-02): the _DARK suffix is gone because the base
-# carries the dark value, exactly as STATUS_ERROR / STATUS_ERROR_LIGHT do
+# carries the dark value, exactly as STATUS_ERROR_TEXT /
+# STATUS_ERROR_TEXT_LIGHT do
 # upstream. The accent swap must never reach these: a purple brand still
 # deletes in red.
 #
@@ -465,8 +505,13 @@ PROVENANCE: Final[dict[str, str]] = {
     'STATUS_SUCCESS': 'register',
     'STATUS_WARNING': 'register',
     'STATUS_ERROR': 'register',
+    'STATUS_SUCCESS_TEXT': 'register',
+    'STATUS_WARNING_TEXT': 'register',
+    'STATUS_ERROR_TEXT': 'register',
+    'STATUS_SUCCESS_TEXT_LIGHT': 'register',
+    'STATUS_WARNING_TEXT_LIGHT': 'register',
+    'STATUS_ERROR_TEXT_LIGHT': 'register',
     # -- derived
-    'STATUS_ERROR_LIGHT': 'derived',
     'BRAND_DARK_GOLD_DEEP': 'derived',
     'BRAND_DARK_GOLD_PRESSED': 'derived',
     'BRAND_GOLD_HOVER': 'derived',
@@ -517,7 +562,12 @@ __all__ = [
     'STATUS_SUCCESS',
     'STATUS_WARNING',
     'STATUS_ERROR',
-    'STATUS_ERROR_LIGHT',
+    'STATUS_SUCCESS_TEXT',
+    'STATUS_WARNING_TEXT',
+    'STATUS_ERROR_TEXT',
+    'STATUS_SUCCESS_TEXT_LIGHT',
+    'STATUS_WARNING_TEXT_LIGHT',
+    'STATUS_ERROR_TEXT_LIGHT',
     'BRAND_GOLD_HOVER',
     'BRAND_GOLD_PRESSED',
     'GREY_44',

@@ -43,10 +43,12 @@ from utils.colors import (
     APP_BORDER,
     APP_TEXT,
     APP_TEXT_DIM,
-    STATUS_SUCCESS,
-    STATUS_WARNING,
-    STATUS_ERROR,
-    STATUS_ERROR_LIGHT,
+    STATUS_SUCCESS_TEXT,
+    STATUS_WARNING_TEXT,
+    STATUS_ERROR_TEXT,
+    STATUS_SUCCESS_TEXT_LIGHT,
+    STATUS_WARNING_TEXT_LIGHT,
+    STATUS_ERROR_TEXT_LIGHT,
     BRAND_GOLD_HOVER,
     BRAND_GOLD_PRESSED,
     GREY_44,
@@ -165,9 +167,13 @@ class DialogStyleManager:
         'accent_text': TRUE_BLACK,  # Text on accent background
         
         # Semantic colors
-        'success': STATUS_SUCCESS,
-        'error': STATUS_ERROR,
-        'warning': STATUS_WARNING,
+        # RNV-STATUS-FAMILY: these three keys are read in fourteen
+        # places and every one is a `color:` declaration, so they
+        # carry the TEXT variants rather than the fills. The fills
+        # sit at L* 48-59 and cannot reach 4.5:1 on either ground.
+        'success': STATUS_SUCCESS_TEXT,
+        'error': STATUS_ERROR_TEXT,
+        'warning': STATUS_WARNING_TEXT,
         'info': BRAND_GOLD,
         
         # Special
@@ -264,9 +270,13 @@ class DialogStyleManager:
         'accent_text': WHITE,  # Text on accent background
         
         # Semantic colors
-        'success': STATUS_SUCCESS,
-        'error': STATUS_ERROR_LIGHT,
-        'warning': STATUS_WARNING,
+        # RNV-STATUS-FAMILY: light's siblings. success and warning
+        # had no light variant before this and read 2.87 and 1.50
+        # on #f5f5f5 -- illegal as text, live, and unnoticed because
+        # the only boundary test in this repo covered the red.
+        'success': STATUS_SUCCESS_TEXT_LIGHT,
+        'error': STATUS_ERROR_TEXT_LIGHT,
+        'warning': STATUS_WARNING_TEXT_LIGHT,
         'info': BRAND_DARK_GOLD_DEEP,
         
         # Special
