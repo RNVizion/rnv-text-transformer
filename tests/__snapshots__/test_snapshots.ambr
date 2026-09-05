@@ -2217,7 +2217,7 @@
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
     "diff_removed_bg": "#f8d7da",
-    "error": "#b84e58",
+    "error": "#ae4650",
     "image_dropdown_bg": "rgba(0, 0, 0, 131)",
     "image_dropdown_border": "rgba(51, 51, 51, 150)",
     "image_dropdown_selection": "rgba(51, 51, 51, 200)",
@@ -2252,13 +2252,13 @@
     "scrollbar_handle_main": "#aaaaaa",
     "selection_bg": "#8c7337",
     "selection_text": "#ffffff",
-    "success": "#8a6581",
+    "success": "#825d79",
     "text": "#000000",
     "text_color": "#000000",
     "text_disabled": "#aaaaaa",
     "text_muted": "#666666",
     "tooltip_border": "#8c7337",
-    "warning": "#976633",
+    "warning": "#8e5e2b",
     "window_bg": "#f5f5f5"
   }
   '''
@@ -2282,9 +2282,9 @@
   subtitle:    color: #666666; margin-bottom: 10px;
   description: color: #666666; font-size: 9pt;
   tip:         color: #7e6529; font-style: italic;
-  status(success): color: #8a6581;
-  status(error): color: #b84e58;
-  status(warning): color: #976633;
+  status(success): color: #825d79;
+  status(error): color: #ae4650;
+  status(warning): color: #8e5e2b;
   status(muted): color: #666666;
   status(info): color: #7e6529;
   status(accent): color: #7e6529;

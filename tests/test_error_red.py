@@ -2,7 +2,7 @@
 
     STATUS_SUCCESS / _WARNING / _ERROR               fills, L* 48-59
     STATUS_*_TEXT         #ad85a3 #bc8752 #dd6f77    text on a dark ground
-    STATUS_*_TEXT_LIGHT   #8a6581 #976633 #b84e58    text on a light ground
+    STATUS_*_TEXT_LIGHT   #825d79 #8e5e2b #ae4650    text on a light ground
 
 This file replaces the error-red tests, which covered a two-value red that no
 longer exists. Three of their premises are now false, and each is worth saying
@@ -10,7 +10,7 @@ out loud, because a test file quietly rewritten hides what changed:
 
   * "the light error red is DERIVED, not written down" -- it is written down
     now. lighten(STATUS_ERROR, -20) against the new base yields #b44753, not
-    the registered #b84e58. The register publishes the derivation as
+    the registered #ae4650. The register publishes the derivation as
     provenance and the value as a value.
 
   * "dark error text is SHORT and that is recorded" -- that exemption's own
@@ -30,7 +30,10 @@ TEXT_FLOOR = 4.5
 FILL_FLOOR = 3.0
 
 DARK_GROUNDS = ("#1a1a1a", "#2a2a2a")
-LIGHT_GROUNDS = ("#ffffff", "#f5f5f5")
+# All four registered rungs, down to GOLD_TEXT_GROUND_FLOOR. Narrowed to
+# two while RNV-STATUS-LIGHT-FLOOR was open; restored at rev 31 because
+# the re-walked values REACH them, not to make a point.
+LIGHT_GROUNDS = ("#ffffff", "#f5f5f5", "#eeeeee", "#e8e8e8")
 ALL_GROUNDS = DARK_GROUNDS + LIGHT_GROUNDS
 
 FILLS = ("STATUS_SUCCESS", "STATUS_WARNING", "STATUS_ERROR")
@@ -45,9 +48,9 @@ REGISTERED = {
     "STATUS_SUCCESS_TEXT": "#ad85a3",
     "STATUS_WARNING_TEXT": "#bc8752",
     "STATUS_ERROR_TEXT": "#dd6f77",
-    "STATUS_SUCCESS_TEXT_LIGHT": "#8a6581",
-    "STATUS_WARNING_TEXT_LIGHT": "#976633",
-    "STATUS_ERROR_TEXT_LIGHT": "#b84e58",
+    "STATUS_SUCCESS_TEXT_LIGHT": "#825d79",
+    "STATUS_WARNING_TEXT_LIGHT": "#8e5e2b",
+    "STATUS_ERROR_TEXT_LIGHT": "#ae4650",
 }
 RETIRED = ("#28a745", "#ffc107", "#dc3545", "#e56b77", "#c82131")
 
@@ -133,9 +136,13 @@ def test_light_text_variants_carry_text(name, ground):
 
     The registered replacements do NOT reach that far. Measured:
 
-        success-text-light #8a6581   #eeeeee 4.25  #e8e8e8 4.02  #e0e0e0 3.74
-        warning-text-light #976633   #eeeeee 4.24  #e8e8e8 4.02  #e0e0e0 3.73
-        error-text-light   #b84e58   #eeeeee 4.38  #e8e8e8 4.14  #e0e0e0 3.85
+        success-text-light #825d79   #eeeeee 4.77  #e8e8e8 4.52  #e0e0e0 4.20
+        warning-text-light #8e5e2b   #eeeeee 4.78  #e8e8e8 4.53  #e0e0e0 4.20
+        error-text-light   #ae4650   #eeeeee 4.77  #e8e8e8 4.52  #e0e0e0 4.20
+
+    The first three columns now pass. #e0e0e0 still does not, and that is
+    the boundary rather than a gap: BRAND_DARK_GOLD_DEEP reads 4.21 there
+    too, so no brand text of any family is carried below #e8e8e8.
 
     The cause is in the register's own rule, which walks these three against
     #f5f5f5 as "the worst light ground". Rev 27 put APP hover-light #eeeeee,
