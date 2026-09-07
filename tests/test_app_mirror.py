@@ -124,9 +124,25 @@ def test_no_dark_entry_accidentally_took_the_surface_step():
 # ------------------------------------------------------------------ provenance
 
 def test_the_new_step_is_classified():
+    """RNV-TT-REGISTER (2026-09-07): the assertion is unchanged and still
+    right; its REASON was wrong and is corrected here.
+
+    It used to say GREY_E0 is app-owned because '#e0e0e0 is no longer what
+    the brand holds'. That was true when it was written and stopped being
+    true at rnv-brand rev 27, which registered #e0e0e0 as
+    APP["pressed-light"]. The classification survives on better ground:
+    not because the register lacks the value, but because this key does
+    not play the register's ROLE. A scrollbar track is a resting surface
+    and pressed-light is an interaction state.
+
+    A test that passes for a reason that has quietly become false is worth
+    less than one that fails, because nobody re-reads a green test."""
     assert colors.PROVENANCE.get('GREY_E0') == 'app-ramp', (
-        'GREY_E0 has no provenance entry, or the wrong one. It is a ramp step, '
-        'not a register value -- #e0e0e0 is no longer what the brand holds.')
+        'GREY_E0 has no provenance entry, or the wrong one. The register '
+        'DOES hold #e0e0e0 -- APP["pressed-light"] since rev 27 -- and this '
+        'is still a ramp step, because the light scrollbar track is a '
+        'resting surface and not a pressed state. Declared in COINCIDENT '
+        'in tests/test_brand_mirror.py.')
 
 
 def test_the_ramp_is_still_ordered_by_byte():

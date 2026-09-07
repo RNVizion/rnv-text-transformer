@@ -200,6 +200,20 @@ APP_PANEL_HOVER: Final[str] = '#3a3a3a'
 #: coincidence in tests/test_brand_mirror.py and asserted in both directions.
 APP_HOVER_LIGHT: Final[str] = '#eeeeee'
 
+#: engine/brand.py APP["surface-light-3"]. The light window, panel and
+#: label ground -- what a dialog sits on in light mode.
+#:
+#: RNV-TT-REGISTER (2026-09-07): WAS GREY_F5, A RAMP STEP. rnv-brand
+#: rev 27 registered the light surface ladder and this value with it,
+#: and this application did not follow, because the check that compares
+#: it to the register is guarded with importorskip and rnv-brand is not
+#: installable. It kept a name saying the app owned it for four
+#: revisions of the register owning it.
+#:
+#: Every key that reads it is a surface -- 'bg', 'window_bg',
+#: 'label_bg' -- so unlike GREY_E0 below there is nothing to split.
+APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'
+
 #: engine/brand.py GOLD_TEXT_GROUND_FLOOR. The darkest light ground on which
 #: the gold family carries text.
 #:
@@ -375,13 +389,20 @@ GREY_DD: Final[str] = '#dddddd'
 #: held before the ink moved. Moved when GREY_E8 became a register mirror --
 #: carrying a docstring that describes a different value into a mirror is how
 #: a wrong fact acquires the authority of a checked one.
+#:
+#: RNV-TT-REGISTER (2026-09-07): THE REGISTER HOLDS #e0e0e0 AGAIN.
+#: rnv-brand rev 27 registered it as APP["pressed-light"], and this
+#: constant STAYS a ramp step anyway. A pressed plate is an
+#: interaction state; this is a scrollbar track at rest, and one
+#: shared byte is not a shared role. Same ruling as GREY_EE two
+#: constants down. Declared in COINCIDENT in
+#: tests/test_brand_mirror.py, and asserted in both directions.
 GREY_E0: Final[str] = '#e0e0e0'
 #: grey(14). Three STATIC surfaces: the diff export header in both modes, and
 #: the line number gutter's resting ground. NOT the light hover plate, which is
 #: APP_HOVER_LIGHT and holds this same hex -- one value, two roles, and only
 #: one of them is the register's. See COINCIDENT in tests/test_brand_mirror.py.
 GREY_EE: Final[str] = '#eeeeee'
-GREY_F5: Final[str] = '#f5f5f5'
 
 
 # ============ APP SEMANTICS ============
@@ -510,6 +531,7 @@ PROVENANCE: Final[dict[str, str]] = {
     'APP_TEXT_DIM': 'register',
     'APP_PANEL_HOVER': 'register',
     'APP_HOVER_LIGHT': 'register',
+    'APP_SURFACE_LIGHT_3': 'register',
     'GOLD_TEXT_GROUND_FLOOR': 'register',
     'STATUS_SUCCESS': 'register',
     'STATUS_WARNING': 'register',
@@ -535,7 +557,6 @@ PROVENANCE: Final[dict[str, str]] = {
     'GREY_DD': 'app-ramp',
     'GREY_E0': 'app-ramp',
     'GREY_EE': 'app-ramp',
-    'GREY_F5': 'app-ramp',
     # -- app-semantic
     'SEMANTIC_DIFF_ADDED': 'app-semantic',
     'SEMANTIC_DIFF_REMOVED': 'app-semantic',
@@ -567,6 +588,7 @@ __all__ = [
     'APP_TEXT_DIM',
     'APP_PANEL_HOVER',
     'APP_HOVER_LIGHT',
+    'APP_SURFACE_LIGHT_3',
     'GOLD_TEXT_GROUND_FLOOR',
     'STATUS_SUCCESS',
     'STATUS_WARNING',
@@ -588,7 +610,6 @@ __all__ = [
     'GREY_DD',
     'GREY_E0',
     'GREY_EE',
-    'GREY_F5',
     'SEMANTIC_DIFF_ADDED',
     'SEMANTIC_DIFF_REMOVED',
     'SEMANTIC_DIFF_CHANGED',

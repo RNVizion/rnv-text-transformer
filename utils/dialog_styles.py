@@ -62,8 +62,8 @@ from utils.colors import (
     GREY_EE,
     APP_PANEL_HOVER,
     APP_HOVER_LIGHT,
+    APP_SURFACE_LIGHT_3,
     GOLD_TEXT_GROUND_FLOOR,
-    GREY_F5,
     SEMANTIC_DIFF_ADDED,
     SEMANTIC_DIFF_REMOVED,
     SEMANTIC_DIFF_CHANGED,
@@ -247,7 +247,7 @@ class DialogStyleManager:
     
     LIGHT: ClassVar[dict[str, str]] = {
         # Backgrounds
-        'bg': GREY_F5,
+        'bg': APP_SURFACE_LIGHT_3,
         'bg_secondary': WHITE,
         'bg_tertiary': GOLD_TEXT_GROUND_FLOOR,
         'bg_hover': APP_HOVER_LIGHT,
@@ -297,7 +297,7 @@ class DialogStyleManager:
         'list_hover_text': WHITE,
         
         # MainWindow-specific
-        'window_bg': GREY_F5,
+        'window_bg': APP_SURFACE_LIGHT_3,
         'main_btn_bg': WHITE,
         'main_btn_text': TRUE_BLACK,
         'main_btn_hover_bg': APP_BORDER,
@@ -306,7 +306,7 @@ class DialogStyleManager:
         'input_bg': WHITE,
         'input_text': TRUE_BLACK,
         'input_border': GREY_CC,
-        'label_bg': GREY_F5,
+        'label_bg': APP_SURFACE_LIGHT_3,
         'label_text': TRUE_BLACK,
         'output_text_color': BRAND_DARK_GOLD,
         'border_color': GREY_CC,

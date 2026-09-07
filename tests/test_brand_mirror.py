@@ -128,6 +128,17 @@ def test_register_values_match_rnv_brand():
 #:
 #: name -> (register entry, why it is not the same role)
 COINCIDENT: dict[str, tuple[str, str]] = {
+    'GREY_E0': (
+        'APP["pressed-light"]',
+        'grey(14) is not the only step doing two jobs. rnv-brand rev 27 '
+        'registered #e0e0e0 as the LIGHT PRESSED PLATE -- what a control '
+        'goes to while it is held down. This ramp step is one STATIC '
+        'surface: the light scrollbar track, which rnv-color-picker and '
+        'rnv-icon-builder both carry at the same value. A resting groove '
+        'is not an interaction state. If APP["pressed-light"] moves this '
+        'must NOT follow it, which is why the hex is spelled by a ramp '
+        'name here rather than mirrored. FOUND 2026-09-07, by making '
+        'engine.brand importable and letting this file test itself.'),
     'GREY_DD': (
         'APP["text"]',
         'grey(13) does two jobs. In the register it is the DARK ink; here it '
