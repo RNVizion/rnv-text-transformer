@@ -4,7 +4,7 @@
 # For development and testing dependencies, see tests/requirements-dev.txt
 
 # GUI framework
-PyQt6>=6.6.0
+PyQt6>=6.6.0,<7.0
 
 # Image processing for theme backgrounds and resources
 Pillow>=10.0.0,<13.0

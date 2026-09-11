@@ -26,13 +26,16 @@ from __future__ import annotations
 
 import sys
 
-# Python version check - requires 3.10+ for match statements and modern type hints
-MIN_PYTHON_VERSION = (3, 10)
+# Python version check. RNV-FLEET-FLOOR 2026-09-11: the fleet declares
+# requires-python >= 3.13 and every CI job runs it, so this constant says
+# 3.13 too. It said 3.10 while the message below already called 3.13 the
+# recommended version -- the code knew the answer and the constant did not.
+MIN_PYTHON_VERSION = (3, 13)
 if sys.version_info < MIN_PYTHON_VERSION:
     sys.exit(
         f"Error: Python {MIN_PYTHON_VERSION[0]}.{MIN_PYTHON_VERSION[1]}+ required "
         f"(found {sys.version_info.major}.{sys.version_info.minor}). "
-        f"Python 3.13+ recommended for best performance."
+        f"Python 3.13+ is required by this application."
     )
 
 from PyQt6.QtWidgets import QApplication
