@@ -2173,7 +2173,7 @@
     "regex_match_bg": "#4a4a00",
     "scrollbar_bg": "#2a2a2a",
     "scrollbar_handle": "#444444",
-    "scrollbar_handle_hover": "#606060",
+    "scrollbar_handle_hover": "#d2bc93",
     "scrollbar_handle_main": "#444444",
     "selection_bg": "#d2bc93",
     "selection_text": "#000000",

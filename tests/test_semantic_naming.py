@@ -27,7 +27,7 @@ DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 
 VALUES = {'SEMANTIC_DIFF_ADDED': '#1a4d1a', 'SEMANTIC_DIFF_REMOVED': '#4d1a1a', 'SEMANTIC_DIFF_CHANGED': '#4d4d1a', 'SEMANTIC_DIFF_CURRENT': '#4d1a4d', 'SEMANTIC_DIFF_ADDED_LIGHT': '#d4edda', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#f8d7da', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#fff3cd', 'SEMANTIC_DIFF_CURRENT_LIGHT': '#e2d4f0', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
 GROUPS = ('#3d5c5c', '#5c3d5c', '#5c5c3d', '#3d5c3d', '#5c3d3d', '#3d3d5c', '#5c4d3d', '#3d5c4d')
-RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD')
+RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60')
 
 
 def test_the_semantic_values_did_not_move():
@@ -72,7 +72,13 @@ def test_the_retired_names_are_gone_from_the_application():
                for p in path.parts):
             continue
         text = path.read_text(encoding="utf-8-sig", errors="replace")
-        if "RNV-SEMANTIC-GUARD" in text or "RNV-NAMING-TOOL-DO-NOT-SWEEP" in text:
+        # RNV-GOLD-HOVER 2026-09-12: the fleet's one delivery marker, for the
+        # same reason as the two beside it -- a delivery script names what it
+        # retires and this guard reads raw text. The fleet-floor round taught
+        # it to four test_brand_* scanners and missed the two naming guards,
+        # which is what a survey by filename convention misses.
+        if ("RNV-SEMANTIC-GUARD" in text or "RNV-NAMING-TOOL-DO-NOT-SWEEP" in text
+                or "RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP" in text):
             continue
         for old in RETIRED:
             if re.search(r"\b%s\b" % re.escape(old), text):

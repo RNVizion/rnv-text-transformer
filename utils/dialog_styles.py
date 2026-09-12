@@ -53,7 +53,6 @@ from utils.colors import (
     BRAND_GOLD_PRESSED,
     GREY_44,
     GREY_55,
-    GREY_60,
     GREY_66,
     GREY_88,
     GREY_CC,
@@ -181,7 +180,7 @@ class DialogStyleManager:
         'selection_text': TRUE_BLACK,
         'scrollbar_bg': APP_CARD,
         'scrollbar_handle': GREY_44,
-        'scrollbar_handle_hover': GREY_60,
+        'scrollbar_handle_hover': BRAND_GOLD,
         'scrollbar_handle_main': GREY_44,
         'tooltip_border': BRAND_GOLD,
         

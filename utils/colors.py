@@ -373,7 +373,6 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 
 GREY_44: Final[str] = '#444444'
 GREY_55: Final[str] = '#555555'
-GREY_60: Final[str] = '#606060'
 GREY_66: Final[str] = '#666666'
 GREY_88: Final[str] = '#888888'
 GREY_CC: Final[str] = '#cccccc'
@@ -550,7 +549,6 @@ PROVENANCE: Final[dict[str, str]] = {
     # -- app-ramp
     'GREY_44': 'app-ramp',
     'GREY_55': 'app-ramp',
-    'GREY_60': 'app-ramp',
     'GREY_66': 'app-ramp',
     'GREY_88': 'app-ramp',
     'GREY_CC': 'app-ramp',
@@ -603,7 +601,6 @@ __all__ = [
     'BRAND_GOLD_PRESSED',
     'GREY_44',
     'GREY_55',
-    'GREY_60',
     'GREY_66',
     'GREY_88',
     'GREY_CC',
