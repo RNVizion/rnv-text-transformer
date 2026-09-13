@@ -1,3 +1,10 @@
+# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',
+# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000
+# 0.41: a matched span carried no visible highlight at all. Same failure as
+# the diff red retired the same day, one line below it in utils/colors.py,
+# and that round did not look at it. tests/test_diff_floors.py now sweeps
+# EVERY fill this application draws behind text rather than the three it was
+# written for, and derives the Regex Builder's from the dialog itself.
 # RNV-DIFF-FLOORS, 2026-09-13 -- tests/test_diff_floors.py holds the six diff
 # highlight values to three floors per mode: the ink on the fill clears WCAG
 # 4.5, the fill clears CIEDE2000 8.40 from the pane behind it, and any two

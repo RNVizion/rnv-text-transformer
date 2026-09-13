@@ -31,7 +31,7 @@ DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 # utils/colors.py. This table is the pin, so it moves WITH them: a value
 # that changes without this file changing is still the defect this guard
 # was written for.
-VALUES = {'SEMANTIC_DIFF_ADDED': '#426153', 'SEMANTIC_DIFF_REMOVED': '#704a4a', 'SEMANTIC_DIFF_CHANGED': '#403f00', 'SEMANTIC_DIFF_ADDED_LIGHT': '#8eafa0', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#a17877', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#d6cd8a', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
+VALUES = {'SEMANTIC_DIFF_ADDED': '#426153', 'SEMANTIC_DIFF_REMOVED': '#704a4a', 'SEMANTIC_DIFF_CHANGED': '#403f00', 'SEMANTIC_DIFF_ADDED_LIGHT': '#8eafa0', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#a17877', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#d6cd8a', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#cdcf6b'}
 RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60',
            # Retired by RNV-DIFF-FLOORS: ten values with no
            # consumer left, and every name that carried one.

@@ -468,9 +468,21 @@ SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#a17877'
 #: text 12.9587, ground 10.12.
 SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#d6cd8a'
 
+#: text 6.8090, ground 12.75. Checked under the same five eyes as the diff
+#: values and left alone -- this one never had the defect.
 SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'
 
-SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#ffff99'
+#: RNV-REGEX-FLOOR (2026-09-13). Was '#ffff99', which read 23.83 from the
+#: test pane in normal vision and 0.41 under achromatopsia -- the pale
+#: highlighter and the #f5f5f5 pane collapse to #f3f3f3 and #f5f5f5, so a
+#: matched span carried no visible highlight at all. Same failure as the diff
+#: red that RNV-DIFF-FLOORS retired, one line below the three values that
+#: round moved, and that round did not look at it.
+#:
+#: Walked down its own hue line -- hue held to 0.03 degrees, chroma to 0.4 --
+#: until the pane cleared with margin rather than by a whisker.
+#: text 12.7332, ground 11.37, which is 35% over the floor.
+SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#cdcf6b'
 
 # ==================== ALPHA HELPER ====================
 

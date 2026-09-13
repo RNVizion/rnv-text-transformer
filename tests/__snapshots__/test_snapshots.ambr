@@ -2243,7 +2243,7 @@
     "main_btn_pressed_text": "#ffffff",
     "main_btn_text": "#000000",
     "output_text_color": "#8c7337",
-    "regex_match_bg": "#ffff99",
+    "regex_match_bg": "#cdcf6b",
     "scrollbar_bg": "#e0e0e0",
     "scrollbar_handle": "#aaaaaa",
     "scrollbar_handle_hover": "#888888",

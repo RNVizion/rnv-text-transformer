@@ -24,6 +24,15 @@ validates its own instrument before it trusts a single figure.
   ground   CIEDE2000, fill against the pane it sits on              >= 8.40
   pair     CIEDE2000, between two roles that can share a widget     >= 8.40
 
+RNV-REGEX-FLOOR (2026-09-13) widened the first two rules past the diff three.
+SEMANTIC_REGEX_MATCH_LIGHT '#ffff99' had the same defect as the diff red and
+was one line below it in the same file, and the round that fixed the three
+walked past it: 23.83 from the test pane in normal vision, 0.41 under
+achromatopsia. A rule that names the values it covers will always be one
+value behind the file, so the ground and ink rules now sweep every fill this
+application paints behind text -- the diff three, plus whatever the Regex
+Builder is found to draw.
+
 THE GROUND IS READ FROM THE PALETTE THE WIDGET USES, NOT THE ONE THAT SOUNDS
 RIGHT. LIGHT['input_bg'] is #ffffff and LIGHT['bg'] is #f5f5f5; the compare
 panes take the latter, which a rendered frame shows and the palette does not.
@@ -63,6 +72,7 @@ from utils.dialog_styles import DialogStyleManager
 ROOT = Path(__file__).resolve().parent.parent
 DIALOG = ROOT / "ui" / "compare_dialog.py"
 EXPORT = ROOT / "core" / "diff_engine.py"
+REGEX = ROOT / "ui" / "regex_builder_dialog.py"
 
 TEXT_FLOOR = 4.5
 DE_FLOOR = 8.40
@@ -183,13 +193,21 @@ def worst(one: str, two: str) -> tuple[float, str]:
 
 # ------------------------------------------------------- what shares a widget
 def _dialog_tree() -> ast.Module:
-    return ast.parse(DIALOG.read_text(encoding="utf-8"), str(DIALOG))
+    return _tree(DIALOG)
 
 
-def _classvar_keys() -> dict[str, tuple[str, str]]:
-    """_ADDED_COLOR_DARK -> ('DARK', 'diff_added_bg'), read off the class."""
+def _tree(path: Path) -> ast.Module:
+    return ast.parse(path.read_text(encoding="utf-8"), str(path))
+
+
+def _classvar_keys(path: Path = None) -> dict[str, tuple[str, str]]:
+    """_ADDED_COLOR_DARK -> ('DARK', 'diff_added_bg'), read off the class.
+
+    Takes a path because the Regex Builder declares its own fill the same way
+    and this guard now measures that one too.
+    """
     out = {}
-    for node in ast.walk(_dialog_tree()):
+    for node in ast.walk(_tree(path or DIALOG)):
         if not isinstance(node, ast.AnnAssign) or not node.value:
             continue
         if not isinstance(node.target, ast.Name):
@@ -300,6 +318,46 @@ def palette(mode: str) -> dict:
 DIFF_KEYS = ("diff_added_bg", "diff_removed_bg", "diff_changed_bg")
 
 
+def regex_keys() -> tuple[str, ...]:
+    """The palette keys ui/regex_builder_dialog.py paints into its test pane.
+
+    Derived rather than listed, for the same reason the diff pairs are: this
+    dialog used to declare a second family of eight capture-group fills, and
+    they were retired only after a render proved nothing drew them. If a
+    second fill is ever wired back in, the blindness test below says so
+    rather than this guard quietly measuring one of two.
+
+    ANY reference counts, not only one inside a setBackground call. The
+    first version looked in setBackground first and fell back to the whole
+    file only when that found nothing -- two branches, mutually exclusive, so
+    a dialog painting one fill through a local and another directly reported
+    just the direct one. A tamper that wired a second fill in stayed green on
+    that version. Under-reporting is the one direction a blindness check must
+    not fail in, so this counts every reference and accepts that a declared
+    colour nobody draws with would be measured too; a fill that clears the
+    floors and is never painted costs nothing.
+
+    The retired names are not spelled here. tests/test_semantic_naming.py
+    owns that rule and sweeps raw text, so a guard that names what it is glad
+    to be rid of lands red in it -- which this docstring did, one round after
+    the paragraph in this same file explaining that exact trap.
+    """
+    keys = _classvar_keys(REGEX)
+    used = {keys[n.attr][1] for n in ast.walk(_tree(REGEX))
+            if isinstance(n, ast.Attribute) and n.attr in keys}
+    return tuple(sorted(used))
+
+
+def highlight_keys() -> tuple[str, ...]:
+    """Every semantic fill this application draws behind text.
+
+    The diff three plus whatever the Regex Builder paints. They share the
+    ground and the ink floors and nothing else -- a match has no co-visible
+    partner, because after RNV-DIFF-FLOORS its pane holds exactly one fill.
+    """
+    return DIFF_KEYS + regex_keys()
+
+
 # ------------------------------------------------------------------- the tests
 def test_the_instrument_is_ciede2000():
     """Before any figure here means anything, the metric has to be the one
@@ -347,7 +405,7 @@ def test_every_fill_clears_the_ink_drawn_on_it():
     for mode in ("DARK", "LIGHT"):
         pal = palette(mode)
         ink = pal[INK_KEY]
-        for key in DIFF_KEYS:
+        for key in highlight_keys():
             ratio = contrast(pal[key], ink)
             if ratio < TEXT_FLOOR:
                 bad.append(f"{mode}[{key}] {pal[key]} on ink {ink}: "
@@ -365,7 +423,7 @@ def test_every_fill_is_visible_against_its_own_pane():
     for mode in ("DARK", "LIGHT"):
         pal = palette(mode)
         ground = pal[GROUND_KEY]
-        for key in DIFF_KEYS:
+        for key in highlight_keys():
             distance, eye = worst(pal[key], ground)
             if distance < DE_FLOOR:
                 bad.append(f"{mode}[{key}] {pal[key]} against {ground}: "
@@ -436,6 +494,16 @@ def test_the_pairs_were_derived_and_not_assumed():
         "#dddddd ink ceiling at grey 97 and an achromatopsia floor at grey "
         "52, a three-level ladder needs 50 steps and there are 45. Re-derive "
         "the dark three before landing this.")
+
+    matches = regex_keys()
+    assert len(matches) == 1, (
+        f"ui/regex_builder_dialog.py paints {len(matches)} fill(s) into its "
+        f"test pane: {matches}. This guard measures every one it finds "
+        f"against the ground and the ink, but it has no pair rule for them -- "
+        f"one fill in a pane owes nobody a separation. Two do. If a second "
+        f"family is back, give them a pair rule before landing it.")
+    assert matches[0] in palette("DARK") and matches[0] in palette("LIGHT"), (
+        f"{matches[0]} is not in both palettes, so one mode is unmeasured")
 
     assert export_keys(), (
         "core/diff_engine.py no longer pairs .diff-insert with .diff-delete "
