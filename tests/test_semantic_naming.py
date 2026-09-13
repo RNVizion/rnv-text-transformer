@@ -25,9 +25,35 @@ ROOT = Path(__file__).resolve().parent.parent
 PALETTE = ROOT / "utils" / "colors.py"
 DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 
-VALUES = {'SEMANTIC_DIFF_ADDED': '#1a4d1a', 'SEMANTIC_DIFF_REMOVED': '#4d1a1a', 'SEMANTIC_DIFF_CHANGED': '#4d4d1a', 'SEMANTIC_DIFF_CURRENT': '#4d1a4d', 'SEMANTIC_DIFF_ADDED_LIGHT': '#d4edda', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#f8d7da', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#fff3cd', 'SEMANTIC_DIFF_CURRENT_LIGHT': '#e2d4f0', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
-GROUPS = ('#3d5c5c', '#5c3d5c', '#5c5c3d', '#3d5c3d', '#5c3d3d', '#3d3d5c', '#5c4d3d', '#3d5c4d')
-RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60')
+# RNV-DIFF-FLOORS (2026-09-13) moved the six diff values and retired ten
+# others. The six moved for a measured reason, not a taste -- the floors
+# are held by tests/test_diff_floors.py and the reason is in
+# utils/colors.py. This table is the pin, so it moves WITH them: a value
+# that changes without this file changing is still the defect this guard
+# was written for.
+VALUES = {'SEMANTIC_DIFF_ADDED': '#426153', 'SEMANTIC_DIFF_REMOVED': '#704a4a', 'SEMANTIC_DIFF_CHANGED': '#403f00', 'SEMANTIC_DIFF_ADDED_LIGHT': '#8eafa0', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#a17877', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#d6cd8a', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}
+RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60',
+           # Retired by RNV-DIFF-FLOORS: ten values with no
+           # consumer left, and every name that carried one.
+           # The two CURRENT names reached a palette key and
+           # a pair of ClassVars and stopped; the eight
+           # groups reached REGEX_GROUP_COLORS, then
+           # _GROUP_COLORS, and were never painted -- with
+           # four capture groups on screen the Regex Builder
+           # drew regex_match_bg and nothing else.
+           #
+           # THIS TUPLE IS WHERE THAT RULE LIVES. The floors
+           # guard installed alongside them held the same
+           # names in a rule of its own and landed red here,
+           # on the sweep below, which cannot tell
+           # forbidding a name from using one. The fix was to
+           # delete the duplicate rather than mark the file:
+           # two guards over one fact are two guards that can
+           # disagree.
+           'SEMANTIC_DIFF_CURRENT', 'SEMANTIC_DIFF_CURRENT_LIGHT',
+           'SEMANTIC_REGEX_GROUPS', 'REGEX_GROUP_COLORS',
+           '_GROUP_COLORS', '_CURRENT_COLOR_DARK',
+           '_CURRENT_COLOR_LIGHT', 'diff_current_bg')
 
 
 def test_the_semantic_values_did_not_move():
@@ -36,7 +62,6 @@ def test_the_semantic_values_did_not_move():
         assert hasattr(colors, name), f"{name} is gone"
         assert getattr(colors, name).lower() == want, (
             f"{name} is {getattr(colors, name)}, was {want} before the rename")
-    assert tuple(colors.SEMANTIC_REGEX_GROUPS) == GROUPS
 
 
 def test_every_app_semantic_constant_says_so():

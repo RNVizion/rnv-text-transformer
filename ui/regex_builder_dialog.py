@@ -62,7 +62,6 @@ class RegexBuilderDialog(BaseDialog):
     # Highlight colors
     _MATCH_COLOR_DARK:  ClassVar[str]       = DialogStyleManager.DARK['regex_match_bg']
     _MATCH_COLOR_LIGHT: ClassVar[str]       = DialogStyleManager.LIGHT['regex_match_bg']
-    _GROUP_COLORS:      ClassVar[list[str]] = DialogStyleManager.REGEX_GROUP_COLORS
     
     __slots__ = (
         'input_text',

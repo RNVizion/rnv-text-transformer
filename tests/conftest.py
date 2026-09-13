@@ -1,3 +1,11 @@
+# RNV-DIFF-FLOORS, 2026-09-13 -- tests/test_diff_floors.py holds the six diff
+# highlight values to three floors per mode: the ink on the fill clears WCAG
+# 4.5, the fill clears CIEDE2000 8.40 from the pane behind it, and any two
+# roles that can share a widget clear 8.40 from each other -- each under
+# normal vision and the four simulations rnv-color-picker grades with. It
+# measures against the ground and the ink the widget actually draws, because
+# the light panes take LIGHT['bg'] and not LIGHT['input_bg'], and the palette
+# does not say so. Ten values with no consumer left went with it.
 # RNV-GOLD-HOVER, 2026-09-12 -- every hover on the main surface takes the
 # mode's gold: BRAND_GOLD in dark and image, BRAND_DARK_GOLD in light. The
 # extras were always allowed it; this extends the same treatment to the

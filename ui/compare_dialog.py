@@ -217,12 +217,10 @@ class CompareDialog(BaseDialog):
     _ADDED_COLOR_DARK:   ClassVar[str] = DialogStyleManager.DARK['diff_added_bg']
     _REMOVED_COLOR_DARK: ClassVar[str] = DialogStyleManager.DARK['diff_removed_bg']
     _CHANGED_COLOR_DARK: ClassVar[str] = DialogStyleManager.DARK['diff_changed_bg']
-    _CURRENT_COLOR_DARK: ClassVar[str] = DialogStyleManager.DARK['diff_current_bg']
 
     _ADDED_COLOR_LIGHT:   ClassVar[str] = DialogStyleManager.LIGHT['diff_added_bg']
     _REMOVED_COLOR_LIGHT: ClassVar[str] = DialogStyleManager.LIGHT['diff_removed_bg']
     _CHANGED_COLOR_LIGHT: ClassVar[str] = DialogStyleManager.LIGHT['diff_changed_bg']
-    _CURRENT_COLOR_LIGHT: ClassVar[str] = DialogStyleManager.LIGHT['diff_current_bg']
     
     __slots__ = (
         'input_text', 'output_text',

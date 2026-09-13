@@ -415,42 +415,62 @@ GREY_EE: Final[str] = '#eeeeee'
 # upstream. The accent swap must never reach these: a purple brand still
 # deletes in red.
 #
-# Diff highlighting borrows the Bootstrap alert palette; the regex colours
-# are this app alone.
+# The regex colours are this app alone. The diff colours were the Bootstrap
+# alert palette until RNV-DIFF-FLOORS; they are now derived, and they are
+# held to three floors per mode by tests/test_diff_floors.py:
+#
+#   text     WCAG 2.1 against the ink drawn on the fill        >= 4.5
+#   ground   CIEDE2000 from the pane the fill sits on          >= 8.40
+#   pair     CIEDE2000 between roles that share a widget       >= 8.40
+#
+# each under normal vision and the four simulations rnv-color-picker grades
+# with. 8.40 is this fleet's register's own "perceptible at a glance" --
+# BRAND_GOLD to #b49e75 reads 8.4035.
+#
+# WHAT WAS WRONG WITH THE OLD SIX. '#4d1a1a' collapsed to #181818 under
+# achromatopsia, on a panel that collapses to #191919: CIEDE2000 0.31, so a
+# deleted line carried no visible highlight at all. The added/changed pair
+# read 8.08 dark and 7.81 light, both under the bar. A first re-derivation
+# missed both, because it measured pairs in dE76 and read them against a bar
+# published in CIEDE2000, and never measured a fill against its ground under
+# any simulation at all.
+#
+# THE LIGHT GROUND IS #f5f5f5, NOT WHITE. LIGHT['input_bg'] is #ffffff, but
+# the compare panes take LIGHT['bg'] -- which is what the rendered widget
+# shows, and what the palette does not tell you. Derived against white,
+# SEMANTIC_DIFF_CHANGED_LIGHT cleared the real ground by 3%.
+#
+# DARK OWES TWO PAIRS AND LIGHT OWES THREE. ui/compare_dialog.py paints
+# DELETE on the left pane and INSERT on the right, so added and removed never
+# share a widget. core/diff_engine.py is the exception that costs light the
+# third pair: it reads LIGHT in both themes and puts delete and insert in the
+# two columns of one row.
+#
+# The hues are Chris's, from the mixer, held to within 0.6 degrees.
 
 
-SEMANTIC_DIFF_ADDED: Final[str] = '#1a4d1a'
+#: Inserted line, right pane. text 5.0420, ground 17.75, worst pair 9.75.
+SEMANTIC_DIFF_ADDED: Final[str] = '#426153'
 
-SEMANTIC_DIFF_REMOVED: Final[str] = '#4d1a1a'
+#: Deleted line, left pane. text 5.5869, ground 19.45.
+SEMANTIC_DIFF_REMOVED: Final[str] = '#704a4a'
 
-SEMANTIC_DIFF_CHANGED: Final[str] = '#4d4d1a'
+#: Replaced line, BOTH panes -- so it owes a pair to each of the other two,
+#: and it is the value the dark ceiling binds. text 8.0150, ground 9.82.
+SEMANTIC_DIFF_CHANGED: Final[str] = '#403f00'
 
-SEMANTIC_DIFF_CURRENT: Final[str] = '#4d1a4d'
-#: Bootstrap alert-success background
-SEMANTIC_DIFF_ADDED_LIGHT: Final[str] = '#d4edda'
-#: Bootstrap alert-danger background
-SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#f8d7da'
-#: Bootstrap alert-warning background
-SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#fff3cd'
+#: text 8.7897, ground 20.07, worst pair 10.07. Also the HTML export's insert.
+SEMANTIC_DIFF_ADDED_LIGHT: Final[str] = '#8eafa0'
 
-SEMANTIC_DIFF_CURRENT_LIGHT: Final[str] = '#e2d4f0'
+#: text 5.4683, ground 28.24. Also the HTML export's delete.
+SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#a17877'
+
+#: text 12.9587, ground 10.12.
+SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#d6cd8a'
 
 SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'
 
 SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#ffff99'
-
-
-#: Dark-only capture-group highlighting; index 0 is group 1.
-SEMANTIC_REGEX_GROUPS: Final[tuple[str, ...]] = (
-    '#3d5c5c',
-    '#5c3d5c',
-    '#5c5c3d',
-    '#3d5c3d',
-    '#5c3d3d',
-    '#3d3d5c',
-    '#5c4d3d',
-    '#3d5c4d',
-)
 
 # ==================== ALPHA HELPER ====================
 
@@ -559,14 +579,11 @@ PROVENANCE: Final[dict[str, str]] = {
     'SEMANTIC_DIFF_ADDED': 'app-semantic',
     'SEMANTIC_DIFF_REMOVED': 'app-semantic',
     'SEMANTIC_DIFF_CHANGED': 'app-semantic',
-    'SEMANTIC_DIFF_CURRENT': 'app-semantic',
     'SEMANTIC_DIFF_ADDED_LIGHT': 'app-semantic',
     'SEMANTIC_DIFF_REMOVED_LIGHT': 'app-semantic',
     'SEMANTIC_DIFF_CHANGED_LIGHT': 'app-semantic',
-    'SEMANTIC_DIFF_CURRENT_LIGHT': 'app-semantic',
     'SEMANTIC_REGEX_MATCH': 'app-semantic',
     'SEMANTIC_REGEX_MATCH_LIGHT': 'app-semantic',
-    'SEMANTIC_REGEX_GROUPS': 'app-semantic',
 }
 
 __all__ = [
@@ -610,14 +627,11 @@ __all__ = [
     'SEMANTIC_DIFF_ADDED',
     'SEMANTIC_DIFF_REMOVED',
     'SEMANTIC_DIFF_CHANGED',
-    'SEMANTIC_DIFF_CURRENT',
     'SEMANTIC_DIFF_ADDED_LIGHT',
     'SEMANTIC_DIFF_REMOVED_LIGHT',
     'SEMANTIC_DIFF_CHANGED_LIGHT',
-    'SEMANTIC_DIFF_CURRENT_LIGHT',
     'SEMANTIC_REGEX_MATCH',
     'SEMANTIC_REGEX_MATCH_LIGHT',
-    'SEMANTIC_REGEX_GROUPS',
 ]
 
 # RNV-GOLD-GUARD (2026-09-07): the values below are swept by

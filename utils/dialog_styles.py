@@ -66,14 +66,11 @@ from utils.colors import (
     SEMANTIC_DIFF_ADDED,
     SEMANTIC_DIFF_REMOVED,
     SEMANTIC_DIFF_CHANGED,
-    SEMANTIC_DIFF_CURRENT,
     SEMANTIC_DIFF_ADDED_LIGHT,
     SEMANTIC_DIFF_REMOVED_LIGHT,
     SEMANTIC_DIFF_CHANGED_LIGHT,
-    SEMANTIC_DIFF_CURRENT_LIGHT,
     SEMANTIC_REGEX_MATCH,
     SEMANTIC_REGEX_MATCH_LIGHT,
-    SEMANTIC_REGEX_GROUPS,
     BRAND_GOLD,
     BRAND_DARK_GOLD,
     BRAND_DARK_GOLD_DEEP,
@@ -218,7 +215,6 @@ class DialogStyleManager:
         'diff_added_bg':   SEMANTIC_DIFF_ADDED,
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
         'diff_changed_bg': SEMANTIC_DIFF_CHANGED,
-        'diff_current_bg': SEMANTIC_DIFF_CURRENT,
 
         # Diff HTML export colors (standalone document — always light-styled)
         'diff_html_equal_bg':  WHITE,
@@ -321,7 +317,6 @@ class DialogStyleManager:
         'diff_added_bg':   SEMANTIC_DIFF_ADDED_LIGHT,
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
         'diff_changed_bg': SEMANTIC_DIFF_CHANGED_LIGHT,
-        'diff_current_bg': SEMANTIC_DIFF_CURRENT_LIGHT,
 
         # Diff HTML export colors (standalone document — always light-styled)
         'diff_html_equal_bg':  WHITE,
@@ -348,11 +343,6 @@ class DialogStyleManager:
         'image_dropdown_border':       'rgba(51, 51, 51, 150)',
     }
     
-    # ==================== REGEX GROUP HIGHLIGHT PALETTE ====================
-    # Dark-only visualization palette for regex capture group highlighting.
-    # Each color corresponds to a different capture group (group 1 → index 0, etc.).
-    REGEX_GROUP_COLORS: ClassVar[list[str]] = list(SEMANTIC_REGEX_GROUPS)
-
     # ==================== PUBLIC METHODS ====================
     
     @classmethod

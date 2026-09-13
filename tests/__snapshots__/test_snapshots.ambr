@@ -2131,17 +2131,16 @@
     "border_light": "#444444",
     "checkbox_border": "#555555",
     "checkbox_indicator_bg": "#1a1a1a",
-    "diff_added_bg": "#1a4d1a",
-    "diff_changed_bg": "#4d4d1a",
-    "diff_current_bg": "#4d1a4d",
+    "diff_added_bg": "#426153",
+    "diff_changed_bg": "#403f00",
     "diff_html_border": "#dddddd",
-    "diff_html_delete_bg": "#f8d7da",
+    "diff_html_delete_bg": "#a17877",
     "diff_html_equal_bg": "#ffffff",
     "diff_html_header_bg": "#eeeeee",
-    "diff_html_insert_bg": "#d4edda",
+    "diff_html_insert_bg": "#8eafa0",
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
-    "diff_removed_bg": "#4d1a1a",
+    "diff_removed_bg": "#704a4a",
     "error": "#dd6f77",
     "image_dropdown_bg": "rgba(0, 0, 0, 131)",
     "image_dropdown_border": "rgba(51, 51, 51, 150)",
@@ -2206,17 +2205,16 @@
     "border_light": "#dddddd",
     "checkbox_border": "#aaaaaa",
     "checkbox_indicator_bg": "#ffffff",
-    "diff_added_bg": "#d4edda",
-    "diff_changed_bg": "#fff3cd",
-    "diff_current_bg": "#e2d4f0",
+    "diff_added_bg": "#8eafa0",
+    "diff_changed_bg": "#d6cd8a",
     "diff_html_border": "#dddddd",
-    "diff_html_delete_bg": "#f8d7da",
+    "diff_html_delete_bg": "#a17877",
     "diff_html_equal_bg": "#ffffff",
     "diff_html_header_bg": "#eeeeee",
-    "diff_html_insert_bg": "#d4edda",
+    "diff_html_insert_bg": "#8eafa0",
     "diff_html_line_num": "#888888",
     "diff_html_stats_text": "#666666",
-    "diff_removed_bg": "#f8d7da",
+    "diff_removed_bg": "#a17877",
     "error": "#ae4650",
     "image_dropdown_bg": "rgba(0, 0, 0, 131)",
     "image_dropdown_border": "rgba(51, 51, 51, 150)",
@@ -2332,10 +2330,10 @@
   .diff-table td { padding: 2px 8px; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; }
   .diff-table .line-num { color: #888888; text-align: right; width: 40px; border-right: 1px solid #dddddd; }
   .diff-equal { background-color: #ffffff; }
-  .diff-insert { background-color: #d4edda; }
-  .diff-delete { background-color: #f8d7da; }
-  .diff-replace-left { background-color: #f8d7da; }
-  .diff-replace-right { background-color: #d4edda; }
+  .diff-insert { background-color: #8eafa0; }
+  .diff-delete { background-color: #a17877; }
+  .diff-replace-left { background-color: #a17877; }
+  .diff-replace-right { background-color: #8eafa0; }
   .header { background-color: #eeeeee; font-weight: bold; padding: 10px; margin-bottom: 10px; }
   .stats { margin-bottom: 20px; color: #666666; }
   </style>
