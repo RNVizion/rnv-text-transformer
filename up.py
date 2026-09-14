@@ -2,8 +2,9 @@
 """
 RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP
 
-Walk the light regex-match highlight off its pane, and widen the floors guard
-so it stops naming the values it covers.
+Correct four figures that described one colour using another colour's
+measurements, and pin every such figure in an assertion so it cannot go wrong
+quietly again.
 
     python up.py             # apply, then verify
     python up.py --check     # rehearse every edit in memory, write nothing
@@ -12,64 +13,54 @@ so it stops naming the values it covers.
 
 WHY
 
-SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99'. Against the Regex Builder's test
-pane it reads 23.83 in normal vision and 0.41 under achromatopsia -- the pale
-highlighter collapses to #f3f3f3 and the pane to #f5f5f5, so a matched span
-carries no visible highlight at all. It is the same failure as the diff red
-RNV-DIFF-FLOORS retired this morning, it sits one line below the three values
-that round moved, in the same file, and that round did not look at it.
+RNV-DIFF-FLOORS retired SEMANTIC_DIFF_REMOVED '#4d1a1a' and explained why with
+four numbers:
 
-The guard it installed could not have caught it. It swept a tuple named
-DIFF_KEYS, and a rule that lists the values it covers is always one value
-behind the file it lives in. So this round moves the value AND widens the
-ground and ink rules to every fill this application paints behind text -- the
-diff three, plus whatever the Regex Builder is found to draw, derived from the
-dialog rather than listed beside it.
+    collapses to #181818, on a panel that collapses to #191919 -- CIEDE2000 0.31
+    reads 15.87 from the panel in normal vision
+    contrast against the TEXT was 12.97
 
-THE VALUE
+**Every one of them belongs to '#2e0f10'** -- a candidate derived during that
+same round and rejected when a metric error was found in it. The substitution
+was of the whole measurement, not of one digit. Nothing checked it, so it read
+as measured and travelled into utils/colors.py, three places in
+tests/test_diff_floors.py, two delivery scripts and two project notes.
 
-    SEMANTIC_REGEX_MATCH_LIGHT   #ffff99 -> #cdcf6b
+The true readings for '#4d1a1a':
 
-Walked down its own hue line -- hue held to 0.03 degrees, chroma to 0.4 -- to
-the first point that clears the pane with real margin rather than by a
-whisker: ground 11.37 against a floor of 8.40, which is 35% over, and text
-12.7332 against black. The first value that merely cleared read 8.42.
+    collapses to #292929 on #191919            CIEDE2000  5.03   (floor 8.40)
+    normal vision                                        20.85
+    contrast against #dddddd                            10.4591
 
-SEMANTIC_REGEX_MATCH '#4a4a00', the dark half, was measured under the same
-five eyes and does NOT have the defect -- text 6.8090, ground 12.75. It is
-unchanged, and now carries its figures in a comment so the next reader does
-not have to re-derive them to find that out.
+THE DEFECT WAS REAL AND WAS OVERSTATED. 5.03 is under the bar, so retiring the
+value was right and every replacement stands. But 5.03 is a band too faint to
+read as a highlight; 0.31 is an absent one. The round claimed the stronger
+thing on the strength of a figure it did not own.
 
-WHAT THE GUARD DOES NOW
+AND IT MISSED THE SECOND INSTANCE. '#f8d7da', the light half of the same role,
+fails the same rule at **4.27** and was never mentioned. So the round cited
+the wrong evidence for its case and walked past the right evidence beside it.
 
-tests/test_diff_floors.py keeps its three floors and its two self-checks. The
-ground and ink rules now iterate highlight_keys(), which is DIFF_KEYS plus
-regex_keys() -- and regex_keys() reads ui/regex_builder_dialog.py for every
-ClassVar that resolves to a DialogStyleManager key and is referenced anywhere
-in the file. The pair rule is untouched: a match has no co-visible partner,
-because that pane holds exactly one fill. A new assertion says so, and goes
-red if a second one is ever wired in without a pair rule to go with it.
+WHAT CHANGES
 
-FALSIFIED FIVE WAYS, AND ONE CONTROL
+Nothing that renders. No value moves, no rule changes, no palette key is added
+or removed. This is one comment block, two docstrings, and one test body.
 
-Reverting the value, lightening it back toward the pane, pointing the
-derivation at a dialog that paints nothing, painting a second fill into the
-match pane, and moving the value without re-pinning it -- all five land red in
-the named test.
+THE TEST BODY IS THE POINT. tests/test_diff_floors.py gains RETIRED_FILLS --
+every figure the file prints about a retired value: the collapse hex, the
+worst distance from its own pane, the normal-vision distance, and the contrast
+against the ink. test_the_instrument_can_fail asserts all of them against the
+instrument the file ships, so a figure in a docstring is now a figure a test
+agrees with.
 
-The control matters more. Reverting the value AND narrowing the sweep back to
-DIFF_KEYS stays GREEN, which is the evidence that the width of the sweep is
-what catches this rather than something else that happened to be in the way.
+It also asserts the table holds TWO entries, because the original round
+described one mode and never measured the other.
 
-Two things were found by that falsification rather than by inspection. A
-tamper that only DECLARED a second ClassVar stayed green -- correctly, since a
-ClassVar nothing reads paints nothing, which is exactly what the retired
-capture-group palette was. And once the tamper actually painted with it, the
-first derivation still stayed green: it looked inside setBackground calls
-first and fell back to the whole file only when that found nothing, so a
-dialog painting one fill through a local and another directly reported just
-the direct one. Under-reporting is the one direction a blindness check must
-not fail in. It now counts every reference.
+FALSIFIED SIX WAYS, and the first tamper is the original mistake re-made:
+0.31 put back for '#4d1a1a'. Also the wrong collapse hex, the wrong text
+contrast, the wrong normal-vision reading, dropping the light half the way the
+original round dropped it, and describing a retired value as clearing the
+floor it was retired for. All six land red in test_the_instrument_can_fail.
 """
 from __future__ import annotations
 
@@ -85,9 +76,9 @@ from pathlib import Path
 
 REPO = "rnv-text-transformer"
 SENTINEL_FILE = "tests/conftest.py"
-SENTINEL = "RNV-REGEX-FLOOR"
+SENTINEL = "RNV-FIGURE-PIN"
 GUARD = "tests/test_diff_floors.py"
-DESCRIPTION = "walk the light regex match off its pane, and widen the guard"
+DESCRIPTION = "correct four misattributed figures and pin them in an assertion"
 SUITES = [("\"pytest tests/\"",
            [sys.executable, "-m", "pytest", "tests/", "-q", "-p",
             "no:cacheprovider"]),
@@ -100,16 +91,21 @@ SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
 MISSING_HELP = (
     "run this from the root of a rnv-text-transformer checkout "
     "(no tests/conftest.py here).\n\n"
-    "This round builds on RNV-DIFF-FLOORS, which must have landed first -- it "
-    "is the round that installed tests/test_diff_floors.py, and this one "
-    "widens it.")
+    "This round corrects figures installed by RNV-DIFF-FLOORS and widened by "
+    "RNV-REGEX-FLOOR; both must have landed first.")
 
-#: What must be true of the tree this script is about to write.
-WANT = {"DARK": {"regex_match_bg": "#4a4a00"},
-        "LIGHT": {"regex_match_bg": "#cdcf6b"}}
+#: The figures this round writes, and what they describe:
+#:   fill -> (mode, achromatopsia collapse, worst dE, normal dE, text contrast)
+#: checks() re-derives every one against the tree it is about to write. A
+#: round whose entire subject is a number nobody checked has no business
+#: taking its own numbers on trust.
+WANT_FILLS = {
+    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),
+    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),
+}
 
 
-EDITS = [('tests/conftest.py', '# RNV-DIFF-FLOORS, 2026-09-13 -- tests/test_diff_floors.py holds the six diff\n# highlight values to three floors per mode: the ink on the fill clears WCAG\n', "# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n# 0.41: a matched span carried no visible highlight at all. Same failure as\n# the diff red retired the same day, one line below it in utils/colors.py,\n# and that round did not look at it. tests/test_diff_floors.py now sweeps\n# EVERY fill this application draws behind text rather than the three it was\n# written for, and derives the Regex Builder's from the dialog itself.\n# RNV-DIFF-FLOORS, 2026-09-13 -- tests/test_diff_floors.py holds the six diff\n# highlight values to three floors per mode: the ink on the fill clears WCAG\n", 1), ('utils/colors.py', "SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'\n\nSEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#ffff99'\n", "#: text 6.8090, ground 12.75. Checked under the same five eyes as the diff\n#: values and left alone -- this one never had the defect.\nSEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'\n\n#: RNV-REGEX-FLOOR (2026-09-13). Was '#ffff99', which read 23.83 from the\n#: test pane in normal vision and 0.41 under achromatopsia -- the pale\n#: highlighter and the #f5f5f5 pane collapse to #f3f3f3 and #f5f5f5, so a\n#: matched span carried no visible highlight at all. Same failure as the diff\n#: red that RNV-DIFF-FLOORS retired, one line below the three values that\n#: round moved, and that round did not look at it.\n#:\n#: Walked down its own hue line -- hue held to 0.03 degrees, chroma to 0.4 --\n#: until the pane cleared with margin rather than by a whisker.\n#: text 12.7332, ground 11.37, which is 35% over the floor.\nSEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#cdcf6b'\n", 1), ('tests/test_semantic_naming.py', "'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#ffff99'}", "'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#cdcf6b'}", 1), ('tests/__snapshots__/test_snapshots.ambr', '    "regex_match_bg": "#ffff99",\n', '    "regex_match_bg": "#cdcf6b",\n', 1), ('tests/test_diff_floors.py', '  text     WCAG 2.1, fill against the ink actually drawn on it      >= 4.5\n  ground   CIEDE2000, fill against the pane it sits on              >= 8.40\n  pair     CIEDE2000, between two roles that can share a widget     >= 8.40\n', "  text     WCAG 2.1, fill against the ink actually drawn on it      >= 4.5\n  ground   CIEDE2000, fill against the pane it sits on              >= 8.40\n  pair     CIEDE2000, between two roles that can share a widget     >= 8.40\n\nRNV-REGEX-FLOOR (2026-09-13) widened the first two rules past the diff three.\nSEMANTIC_REGEX_MATCH_LIGHT '#ffff99' had the same defect as the diff red and\nwas one line below it in the same file, and the round that fixed the three\nwalked past it: 23.83 from the test pane in normal vision, 0.41 under\nachromatopsia. A rule that names the values it covers will always be one\nvalue behind the file, so the ground and ink rules now sweep every fill this\napplication paints behind text -- the diff three, plus whatever the Regex\nBuilder is found to draw.\n", 1), ('tests/test_diff_floors.py', 'DIALOG = ROOT / "ui" / "compare_dialog.py"\nEXPORT = ROOT / "core" / "diff_engine.py"\n', 'DIALOG = ROOT / "ui" / "compare_dialog.py"\nEXPORT = ROOT / "core" / "diff_engine.py"\nREGEX = ROOT / "ui" / "regex_builder_dialog.py"\n', 1), ('tests/test_diff_floors.py', '    return ast.parse(DIALOG.read_text(encoding="utf-8"), str(DIALOG))\n\n\ndef _classvar_keys() -> dict[str, tuple[str, str]]:\n    """_ADDED_COLOR_DARK -> (\'DARK\', \'diff_added_bg\'), read off the class."""\n    out = {}\n    for node in ast.walk(_dialog_tree()):\n', '    return _tree(DIALOG)\n\n\ndef _tree(path: Path) -> ast.Module:\n    return ast.parse(path.read_text(encoding="utf-8"), str(path))\n\n\ndef _classvar_keys(path: Path = None) -> dict[str, tuple[str, str]]:\n    """_ADDED_COLOR_DARK -> (\'DARK\', \'diff_added_bg\'), read off the class.\n\n    Takes a path because the Regex Builder declares its own fill the same way\n    and this guard now measures that one too.\n    """\n    out = {}\n    for node in ast.walk(_tree(path or DIALOG)):\n', 1), ('tests/test_diff_floors.py', 'DIFF_KEYS = ("diff_added_bg", "diff_removed_bg", "diff_changed_bg")\n', 'DIFF_KEYS = ("diff_added_bg", "diff_removed_bg", "diff_changed_bg")\n\n\ndef regex_keys() -> tuple[str, ...]:\n    """The palette keys ui/regex_builder_dialog.py paints into its test pane.\n\n    Derived rather than listed, for the same reason the diff pairs are: this\n    dialog used to declare a second family of eight capture-group fills, and\n    they were retired only after a render proved nothing drew them. If a\n    second fill is ever wired back in, the blindness test below says so\n    rather than this guard quietly measuring one of two.\n\n    ANY reference counts, not only one inside a setBackground call. The\n    first version looked in setBackground first and fell back to the whole\n    file only when that found nothing -- two branches, mutually exclusive, so\n    a dialog painting one fill through a local and another directly reported\n    just the direct one. A tamper that wired a second fill in stayed green on\n    that version. Under-reporting is the one direction a blindness check must\n    not fail in, so this counts every reference and accepts that a declared\n    colour nobody draws with would be measured too; a fill that clears the\n    floors and is never painted costs nothing.\n\n    The retired names are not spelled here. tests/test_semantic_naming.py\n    owns that rule and sweeps raw text, so a guard that names what it is glad\n    to be rid of lands red in it -- which this docstring did, one round after\n    the paragraph in this same file explaining that exact trap.\n    """\n    keys = _classvar_keys(REGEX)\n    used = {keys[n.attr][1] for n in ast.walk(_tree(REGEX))\n            if isinstance(n, ast.Attribute) and n.attr in keys}\n    return tuple(sorted(used))\n\n\ndef highlight_keys() -> tuple[str, ...]:\n    """Every semantic fill this application draws behind text.\n\n    The diff three plus whatever the Regex Builder paints. They share the\n    ground and the ink floors and nothing else -- a match has no co-visible\n    partner, because after RNV-DIFF-FLOORS its pane holds exactly one fill.\n    """\n    return DIFF_KEYS + regex_keys()\n', 1), ('tests/test_diff_floors.py', '        ink = pal[INK_KEY]\n        for key in DIFF_KEYS:\n', '        ink = pal[INK_KEY]\n        for key in highlight_keys():\n', 1), ('tests/test_diff_floors.py', '        ground = pal[GROUND_KEY]\n        for key in DIFF_KEYS:\n', '        ground = pal[GROUND_KEY]\n        for key in highlight_keys():\n', 1), ('tests/test_diff_floors.py', '    assert export_keys(), (\n', '    matches = regex_keys()\n    assert len(matches) == 1, (\n        f"ui/regex_builder_dialog.py paints {len(matches)} fill(s) into its "\n        f"test pane: {matches}. This guard measures every one it finds "\n        f"against the ground and the ink, but it has no pair rule for them -- "\n        f"one fill in a pane owes nobody a separation. Two do. If a second "\n        f"family is back, give them a pair rule before landing it.")\n    assert matches[0] in palette("DARK") and matches[0] in palette("LIGHT"), (\n        f"{matches[0]} is not in both palettes, so one mode is unmeasured")\n\n    assert export_keys(), (\n', 1)]
+EDITS = [('tests/conftest.py', "# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", "# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired\n# SEMANTIC_DIFF_REMOVED '#4d1a1a' belonged to a different hex: a candidate\n# derived during RNV-DIFF-FLOORS and rejected. 0.31, #181818, 15.87 and a\n# text contrast of 12.97 are all '#2e0f10'. The true readings are 5.03,\n# #292929, 20.85 and 10.4591, and the defect was real but overstated -- a\n# faint band, not an absent one. Its light partner '#f8d7da' failed the same\n# rule at 4.27 and went unmentioned. tests/test_diff_floors.py now pins every\n# figure it prints about a retired value in RETIRED_FILLS and asserts them,\n# because prose cannot be wrong loudly and an assertion can.\n# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", 1), ('utils/colors.py', "# WHAT WAS WRONG WITH THE OLD SIX. '#4d1a1a' collapsed to #181818 under\n# achromatopsia, on a panel that collapses to #191919: CIEDE2000 0.31, so a\n# deleted line carried no visible highlight at all. The added/changed pair\n# read 8.08 dark and 7.81 light, both under the bar. A first re-derivation\n# missed both, because it measured pairs in dE76 and read them against a bar\n# published in CIEDE2000, and never measured a fill against its ground under\n# any simulation at all.\n", "# WHAT WAS WRONG WITH THE OLD SIX. Two of them failed the ground rule under\n# achromatopsia, where every colour collapses to luma:\n#\n#   '#4d1a1a' dark    -> #292929 on a #191919 panel   CIEDE2000 5.03\n#   '#f8d7da' light   -> #e1e1e1 on a #f5f5f5 pane    CIEDE2000 4.27\n#\n# Both under the 8.40 bar, so both were genuinely too near the surface they\n# sat on -- a faint band rather than a highlight. Neither was invisible; the\n# values that were are in the pinned table in tests/test_diff_floors.py.\n#\n# The added/changed pair read 8.08 dark and 7.81 light, both under the bar. A\n# first re-derivation missed all of it, because it measured pairs in dE76 and\n# read them against a bar published in CIEDE2000, and never measured a fill\n# against its ground under any simulation at all.\n#\n# THIS PARAGRAPH WAS ITSELF WRONG FOR A DAY, 2026-09-13 (RNV-FIGURE-PIN). It\n# described '#4d1a1a' with four figures -- 0.31, #181818, 15.87, and a text\n# contrast of 12.97 -- every one of which belonged to '#2e0f10', a candidate\n# derived during the same round and rejected. The substitution was of the\n# whole measurement, not of one digit, and nothing checked it, so it read as\n# measured and travelled into two delivery scripts and two project notes. It\n# also overstated the defect: 5.03 is faint, 0.31 is absent. The figures now\n# live in an assertion; see RETIRED_FILLS in the guard.\n", 1), ('tests/test_diff_floors.py', "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #181818, on a panel that collapses to #191919 -- CIEDE2000 **0.31**. A\n     deleted line carried no visible highlight at all. Contrast against the\n     TEXT was 12.97 and had been checked; the fill had never been measured\n     against the GROUND under a simulation, because the pairs were and it\n     read as though everything had been.\n", "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #292929, on a panel that collapses to #191919 -- CIEDE2000 **5.03**,\n     under the 8.40 bar. A deleted line carried a band too faint to read as a\n     highlight. Its light partner '#f8d7da' failed the same way at **4.27**.\n     Contrast against the TEXT was 10.4591 and had been checked; the fill had\n     never been measured against the GROUND under a simulation, because the\n     pairs were and it read as though everything had been.\n\n     THOSE FOUR FIGURES WERE WRONG HERE FOR A DAY. This paragraph gave 0.31,\n     #181818, 15.87 and 12.97 -- all of them '#2e0f10', a candidate derived\n     in the same round and rejected. Nothing checked them, so they read as\n     measured. RETIRED_FILLS below now pins every figure this file prints\n     about a retired value, and test_the_instrument_can_fail asserts them.\n", 1), ('tests/test_diff_floors.py', 'def test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    \'#4d1a1a\' is the value this round retired, and the reason: under\n    achromatopsia it is #181818 against a #191919 panel. If the ground rule\n    below cannot see that, it cannot see anything.\n    """\n    ground = palette("DARK")[GROUND_KEY]\n    distance, eye = worst("#4d1a1a", ground)\n    assert distance < DE_FLOOR, (\n        f"the retired dark red reads {distance:.2f} from {ground} at its "\n        f"worst ({eye}), which is over the floor -- so the ground rule is "\n        f"not measuring what it was written to measure.")\n    assert eye == "achromatopsia", (\n        f"the retired dark red is closest to the panel under {eye}, not "\n        f"achromatopsia. The simulation set has changed shape.")\n', '#: The fills RNV-DIFF-FLOORS retired, and every figure this file prints about\n#: them: mode, what it collapses to under achromatopsia, its worst distance\n#: from its own pane, its distance in normal vision, and its contrast against\n#: the ink. RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN.\n#:\n#: PINNED RATHER THAN NARRATED, and the reason is this table\'s own history.\n#: The first version of this guard described \'#4d1a1a\' with four figures that\n#: all belonged to a different hex -- a candidate derived during the same\n#: round and rejected. Prose cannot be wrong loudly. An assertion can.\nRETIRED_FILLS = {\n    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),\n    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),\n}\n\n\ndef test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    Every figure in RETIRED_FILLS is checked here against the instrument this\n    file ships, so a number quoted in a docstring is a number a test agrees\n    with. If the ground rule cannot still see why these two were retired, it\n    cannot see anything.\n    """\n    for fill, (mode, collapse, want_worst, want_normal, want_text) in \\\n            RETIRED_FILLS.items():\n        pal = palette(mode)\n        ground, ink = pal[GROUND_KEY], pal[INK_KEY]\n\n        assert simulate(fill, "achromatopsia") == collapse, (\n            f"{fill} collapses to {simulate(fill, \'achromatopsia\')} under "\n            f"achromatopsia, not {collapse} as this file says. A figure "\n            f"describing one value with another value\'s measurement is the "\n            f"defect this table exists to stop.")\n\n        distance, eye = worst(fill, ground)\n        assert eye == "achromatopsia", (\n            f"{fill} is closest to its pane under {eye}, not achromatopsia. "\n            f"The simulation set has changed shape.")\n        assert abs(distance - want_worst) < 0.005, (\n            f"{fill} reads {distance:.2f} from {ground} at its worst, and "\n            f"this file says {want_worst}. One of them is stale.")\n        assert distance < DE_FLOOR, (\n            f"{fill} reads {distance:.2f} from {ground}, over the floor -- "\n            f"so the ground rule is not measuring what it was written to "\n            f"measure.")\n\n        assert abs(ciede2000(fill, ground) - want_normal) < 0.005, (\n            f"{fill} reads {ciede2000(fill, ground):.2f} from {ground} in "\n            f"normal vision, and this file says {want_normal}.")\n        assert abs(contrast(fill, ink) - want_text) < 0.00005, (\n            f"{fill} reads {contrast(fill, ink):.4f} against {ink}, and this "\n            f"file says {want_text}. That figure is the one the original "\n            f"round cited to show the fill had been checked; it was the "\n            f"wrong value\'s.")\n\n    assert len(RETIRED_FILLS) == 2, (\n        "RETIRED_FILLS should hold both halves of the pair that failed. One "\n        "entry means a mode is being described and not measured -- the "\n        "original round cited only the dark half and never noticed the light "\n        "one failed too.")\n', 1), ('tests/test_diff_floors.py', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 0.31.\n\n    Measured under all five, because the failure was invisible under four of\n    them: \'#4d1a1a\' reads 15.87 from the panel in normal vision.\n    """\n', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 5.03, and its light partner at 4.27.\n\n    Measured under all five, because the failure is invisible under four of\n    them: \'#4d1a1a\' reads 20.85 from the panel in normal vision and 5.03 at\n    its worst. The figures are pinned in RETIRED_FILLS above.\n    """\n', 1)]
 
 
 def edits(tree) -> None:
@@ -119,7 +115,6 @@ def edits(tree) -> None:
     for rel, *_ in EDITS:
         by_file[rel] = by_file.get(rel, 0) + 1
     print("  " + ", ".join(f"{n} in {rel}" for rel, n in sorted(by_file.items())))
-
 
 # --------------------------------------------------- the arithmetic, again
 # A second copy of what the guard holds, deliberately: checks() runs against
@@ -253,48 +248,63 @@ def _palette(text, which, consts):
     return out
 
 
+
 def checks(tree) -> None:
+    guard_txt = tree.files[GUARD]
     colors_txt = tree.files["utils/colors.py"]
-    styles_txt = (tree.files.get("utils/dialog_styles.py")
-                  or (Path.cwd() / "utils/dialog_styles.py").read_text(
-                      encoding="utf-8"))
+    styles_txt = (Path.cwd() / "utils" / "dialog_styles.py").read_text(
+        encoding="utf-8")
     consts = _constants(colors_txt)
 
-    # 1. the value landed, and the palette points at it.
-    for which, want in WANT.items():
-        pal = _palette(styles_txt, which, consts)
-        for key, value in want.items():
-            if pal.get(key) != value:
-                raise SystemExit(
-                    f"{which}[{key}] resolves to {pal.get(key)}, not {value}")
+    # 1. the table landed, with both entries and the values this round means.
+    pinned = {}
+    for node in ast.walk(ast.parse(guard_txt)):
+        if (isinstance(node, ast.Assign) and len(node.targets) == 1
+                and getattr(node.targets[0], "id", "") == "RETIRED_FILLS"
+                and isinstance(node.value, ast.Dict)):
+            for k, v in zip(node.value.keys, node.value.values):
+                pinned[k.value] = tuple(e.value for e in v.elts)
+    if pinned != WANT_FILLS:
+        raise SystemExit(f"RETIRED_FILLS is {pinned}, not {WANT_FILLS}")
 
-    # 2. EVERY fill the guard will sweep clears both floors -- computed here
-    #    against the tree about to be written, not the one on disk.
-    guard_txt = tree.files[GUARD]
-    keys = ["diff_added_bg", "diff_removed_bg", "diff_changed_bg",
-            "regex_match_bg"]
+    # 2. every pinned figure re-derived from the palette, not trusted. This is
+    #    the round: the last one published four numbers nothing re-derived.
     bad = []
-    for which in ("DARK", "LIGHT"):
-        pal = _palette(styles_txt, which, consts)
+    for fill, (mode, collapse, w_worst, w_normal, w_text) in pinned.items():
+        pal = _palette(styles_txt, mode, consts)
         ground, ink = pal["bg"], pal["text"]
-        for key in keys:
-            ratio = _contrast(pal[key], ink)
-            if ratio < 4.5:
-                bad.append(f"{which}[{key}] on ink {ink}: {ratio:.4f} < 4.5")
-            distance, eye = _worst(pal[key], ground)
-            if distance < 8.40:
-                bad.append(f"{which}[{key}] against {ground}: "
-                           f"{distance:.2f} < 8.40 under {eye}")
+        got = _sim(fill, "achromatopsia")
+        if got != collapse:
+            bad.append(f"{fill} collapses to {got}, pinned {collapse}")
+        d, eye = _worst(fill, ground)
+        if eye != "achromatopsia":
+            bad.append(f"{fill} closest to its pane under {eye}")
+        if abs(d - w_worst) >= 0.005:
+            bad.append(f"{fill} worst {d:.2f}, pinned {w_worst}")
+        if d >= 8.40:
+            bad.append(f"{fill} reads {d:.2f} -- over the floor it was "
+                       f"retired for, so the story does not hold")
+        n = _de2000(fill, ground)
+        if abs(n - w_normal) >= 0.005:
+            bad.append(f"{fill} normal {n:.2f}, pinned {w_normal}")
+        t = _contrast(fill, ink)
+        if abs(t - w_text) >= 0.00005:
+            bad.append(f"{fill} text {t:.4f}, pinned {w_text}")
     if bad:
-        raise SystemExit("the floors do not hold:\n  " + "\n  ".join(bad))
+        raise SystemExit("pinned figures do not re-derive:\n  "
+                         + "\n  ".join(bad))
 
-    # 3. the guard actually WIDENED. A round whose point is the width of a
-    #    sweep has to check the width, or it is a value change with a story.
-    if "highlight_keys()" not in guard_txt:
-        raise SystemExit(f"{GUARD} does not call highlight_keys(); the sweep "
-                         f"was not widened and the value change stands alone")
-    if guard_txt.count("for key in DIFF_KEYS:") != 0:
-        raise SystemExit(f"{GUARD} still iterates DIFF_KEYS in a floor rule")
+    # 3. the six values that SHIP are untouched. This round corrects prose; if
+    #    a rendered value moved, something went wrong in an anchor.
+    for mode, keys in (("DARK", ("diff_added_bg", "diff_removed_bg",
+                                 "diff_changed_bg", "regex_match_bg")),
+                       ("LIGHT", ("diff_added_bg", "diff_removed_bg",
+                                  "diff_changed_bg", "regex_match_bg"))):
+        pal = _palette(styles_txt, mode, consts)
+        for key in keys:
+            if key not in pal:
+                raise SystemExit(f"{mode}[{key}] vanished; this round should "
+                                 f"not touch a palette")
 
     # 4. the instrument, before its figures are trusted.
     got = _de2000("#d2bc93", "#b49e75")
@@ -307,8 +317,8 @@ def checks(tree) -> None:
         raise SystemExit(f"'{SENTINEL}' is not in {SENTINEL_FILE}, so the "
                          f"already-applied check can never fire")
 
-    print(f"  guards: 4 fills clear both floors in both modes, the sweep is "
-          f"widened, instrument reads {got:.4f}")
+    print(f"  guards: {len(pinned)} retired fills pinned and every figure "
+          f"re-derived, 8 shipped values untouched, instrument reads {got:.4f}")
 
 
 
