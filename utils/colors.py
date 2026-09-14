@@ -427,13 +427,29 @@ GREY_EE: Final[str] = '#eeeeee'
 # with. 8.40 is this fleet's register's own "perceptible at a glance" --
 # BRAND_GOLD to #b49e75 reads 8.4035.
 #
-# WHAT WAS WRONG WITH THE OLD SIX. '#4d1a1a' collapsed to #181818 under
-# achromatopsia, on a panel that collapses to #191919: CIEDE2000 0.31, so a
-# deleted line carried no visible highlight at all. The added/changed pair
-# read 8.08 dark and 7.81 light, both under the bar. A first re-derivation
-# missed both, because it measured pairs in dE76 and read them against a bar
-# published in CIEDE2000, and never measured a fill against its ground under
-# any simulation at all.
+# WHAT WAS WRONG WITH THE OLD SIX. Two of them failed the ground rule under
+# achromatopsia, where every colour collapses to luma:
+#
+#   '#4d1a1a' dark    -> #292929 on a #191919 panel   CIEDE2000 5.03
+#   '#f8d7da' light   -> #e1e1e1 on a #f5f5f5 pane    CIEDE2000 4.27
+#
+# Both under the 8.40 bar, so both were genuinely too near the surface they
+# sat on -- a faint band rather than a highlight. Neither was invisible; the
+# values that were are in the pinned table in tests/test_diff_floors.py.
+#
+# The added/changed pair read 8.08 dark and 7.81 light, both under the bar. A
+# first re-derivation missed all of it, because it measured pairs in dE76 and
+# read them against a bar published in CIEDE2000, and never measured a fill
+# against its ground under any simulation at all.
+#
+# THIS PARAGRAPH WAS ITSELF WRONG FOR A DAY, 2026-09-13 (RNV-FIGURE-PIN). It
+# described '#4d1a1a' with four figures -- 0.31, #181818, 15.87, and a text
+# contrast of 12.97 -- every one of which belonged to '#2e0f10', a candidate
+# derived during the same round and rejected. The substitution was of the
+# whole measurement, not of one digit, and nothing checked it, so it read as
+# measured and travelled into two delivery scripts and two project notes. It
+# also overstated the defect: 5.03 is faint, 0.31 is absent. The figures now
+# live in an assertion; see RETIRED_FILLS in the guard.
 #
 # THE LIGHT GROUND IS #f5f5f5, NOT WHITE. LIGHT['input_bg'] is #ffffff, but
 # the compare panes take LIGHT['bg'] -- which is what the rendered widget

@@ -1,3 +1,12 @@
+# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired
+# SEMANTIC_DIFF_REMOVED '#4d1a1a' belonged to a different hex: a candidate
+# derived during RNV-DIFF-FLOORS and rejected. 0.31, #181818, 15.87 and a
+# text contrast of 12.97 are all '#2e0f10'. The true readings are 5.03,
+# #292929, 20.85 and 10.4591, and the defect was real but overstated -- a
+# faint band, not an absent one. Its light partner '#f8d7da' failed the same
+# rule at 4.27 and went unmentioned. tests/test_diff_floors.py now pins every
+# figure it prints about a retired value in RETIRED_FILLS and asserts them,
+# because prose cannot be wrong loudly and an assertion can.
 # RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',
 # which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000
 # 0.41: a matched span carried no visible highlight at all. Same failure as

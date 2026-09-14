@@ -6,11 +6,18 @@ ways no contrast check would ever have reported.
 WHAT WENT WRONG, TWICE, AND WHY THIS FILE MEASURES THE WAY IT DOES
 
   1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to
-     #181818, on a panel that collapses to #191919 -- CIEDE2000 **0.31**. A
-     deleted line carried no visible highlight at all. Contrast against the
-     TEXT was 12.97 and had been checked; the fill had never been measured
-     against the GROUND under a simulation, because the pairs were and it
-     read as though everything had been.
+     #292929, on a panel that collapses to #191919 -- CIEDE2000 **5.03**,
+     under the 8.40 bar. A deleted line carried a band too faint to read as a
+     highlight. Its light partner '#f8d7da' failed the same way at **4.27**.
+     Contrast against the TEXT was 10.4591 and had been checked; the fill had
+     never been measured against the GROUND under a simulation, because the
+     pairs were and it read as though everything had been.
+
+     THOSE FOUR FIGURES WERE WRONG HERE FOR A DAY. This paragraph gave 0.31,
+     #181818, 15.87 and 12.97 -- all of them '#2e0f10', a candidate derived
+     in the same round and rejected. Nothing checked them, so they read as
+     measured. RETIRED_FILLS below now pins every figure this file prints
+     about a retired value, and test_the_instrument_can_fail asserts them.
 
   2. The first re-derivation measured pair separation in dE76 and read it
      against 8.40, which this fleet's register publishes in CIEDE2000. On the
@@ -381,22 +388,66 @@ def test_the_instrument_is_ciede2000():
         "they differ by 2.68. One of them is not what it claims to be.")
 
 
+#: The fills RNV-DIFF-FLOORS retired, and every figure this file prints about
+#: them: mode, what it collapses to under achromatopsia, its worst distance
+#: from its own pane, its distance in normal vision, and its contrast against
+#: the ink. RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN.
+#:
+#: PINNED RATHER THAN NARRATED, and the reason is this table's own history.
+#: The first version of this guard described '#4d1a1a' with four figures that
+#: all belonged to a different hex -- a candidate derived during the same
+#: round and rejected. Prose cannot be wrong loudly. An assertion can.
+RETIRED_FILLS = {
+    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),
+    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),
+}
+
+
 def test_the_instrument_can_fail():
     """A floor nothing can breach is decoration.
 
-    '#4d1a1a' is the value this round retired, and the reason: under
-    achromatopsia it is #181818 against a #191919 panel. If the ground rule
-    below cannot see that, it cannot see anything.
+    Every figure in RETIRED_FILLS is checked here against the instrument this
+    file ships, so a number quoted in a docstring is a number a test agrees
+    with. If the ground rule cannot still see why these two were retired, it
+    cannot see anything.
     """
-    ground = palette("DARK")[GROUND_KEY]
-    distance, eye = worst("#4d1a1a", ground)
-    assert distance < DE_FLOOR, (
-        f"the retired dark red reads {distance:.2f} from {ground} at its "
-        f"worst ({eye}), which is over the floor -- so the ground rule is "
-        f"not measuring what it was written to measure.")
-    assert eye == "achromatopsia", (
-        f"the retired dark red is closest to the panel under {eye}, not "
-        f"achromatopsia. The simulation set has changed shape.")
+    for fill, (mode, collapse, want_worst, want_normal, want_text) in \
+            RETIRED_FILLS.items():
+        pal = palette(mode)
+        ground, ink = pal[GROUND_KEY], pal[INK_KEY]
+
+        assert simulate(fill, "achromatopsia") == collapse, (
+            f"{fill} collapses to {simulate(fill, 'achromatopsia')} under "
+            f"achromatopsia, not {collapse} as this file says. A figure "
+            f"describing one value with another value's measurement is the "
+            f"defect this table exists to stop.")
+
+        distance, eye = worst(fill, ground)
+        assert eye == "achromatopsia", (
+            f"{fill} is closest to its pane under {eye}, not achromatopsia. "
+            f"The simulation set has changed shape.")
+        assert abs(distance - want_worst) < 0.005, (
+            f"{fill} reads {distance:.2f} from {ground} at its worst, and "
+            f"this file says {want_worst}. One of them is stale.")
+        assert distance < DE_FLOOR, (
+            f"{fill} reads {distance:.2f} from {ground}, over the floor -- "
+            f"so the ground rule is not measuring what it was written to "
+            f"measure.")
+
+        assert abs(ciede2000(fill, ground) - want_normal) < 0.005, (
+            f"{fill} reads {ciede2000(fill, ground):.2f} from {ground} in "
+            f"normal vision, and this file says {want_normal}.")
+        assert abs(contrast(fill, ink) - want_text) < 0.00005, (
+            f"{fill} reads {contrast(fill, ink):.4f} against {ink}, and this "
+            f"file says {want_text}. That figure is the one the original "
+            f"round cited to show the fill had been checked; it was the "
+            f"wrong value's.")
+
+    assert len(RETIRED_FILLS) == 2, (
+        "RETIRED_FILLS should hold both halves of the pair that failed. One "
+        "entry means a mode is being described and not measured -- the "
+        "original round cited only the dark half and never noticed the light "
+        "one failed too.")
 
 
 def test_every_fill_clears_the_ink_drawn_on_it():
@@ -414,10 +465,11 @@ def test_every_fill_clears_the_ink_drawn_on_it():
 
 
 def test_every_fill_is_visible_against_its_own_pane():
-    """The rule the old dark red failed at 0.31.
+    """The rule the old dark red failed at 5.03, and its light partner at 4.27.
 
-    Measured under all five, because the failure was invisible under four of
-    them: '#4d1a1a' reads 15.87 from the panel in normal vision.
+    Measured under all five, because the failure is invisible under four of
+    them: '#4d1a1a' reads 20.85 from the panel in normal vision and 5.03 at
+    its worst. The figures are pinned in RETIRED_FILLS above.
     """
     bad = []
     for mode in ("DARK", "LIGHT"):
