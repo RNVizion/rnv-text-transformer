@@ -2,6 +2,8 @@
 """
 RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP
 
+Built from: rnv-text-transformer@179553f
+
 Correct four figures that described one colour using another colour's
 measurements, and pin every such figure in an assertion so it cannot go wrong
 quietly again.
@@ -103,6 +105,21 @@ WANT_FILLS = {
     "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),
     "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),
 }
+
+#: What this round deliberately did not touch. Printed at the end of every
+#: run, because silence about the untouched reads as "there was nothing else"
+#: -- a claim a round is not entitled to make by saying nothing.
+LEFT_ALONE = (
+    "every value that RENDERS. The six diff fills and two regex fills are "
+    "asserted unchanged; this round moves prose and one test body.",
+    "the light partner's own retirement. '#f8d7da' is recorded in "
+    "RETIRED_FILLS and was already replaced by RNV-DIFF-FLOORS; nothing "
+    "about it moves here.",
+    "the 8.40 bar and the 4.5 floor. Both are the register's, not this "
+    "repository's, and a round that corrects a figure does not get to "
+    "retune the rule the figure was measured against.",
+    "utils/dialog_styles.py, read by checks() and never written.",
+)
 
 
 EDITS = [('tests/conftest.py', "# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", "# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired\n# SEMANTIC_DIFF_REMOVED '#4d1a1a' belonged to a different hex: a candidate\n# derived during RNV-DIFF-FLOORS and rejected. 0.31, #181818, 15.87 and a\n# text contrast of 12.97 are all '#2e0f10'. The true readings are 5.03,\n# #292929, 20.85 and 10.4591, and the defect was real but overstated -- a\n# faint band, not an absent one. Its light partner '#f8d7da' failed the same\n# rule at 4.27 and went unmentioned. tests/test_diff_floors.py now pins every\n# figure it prints about a retired value in RETIRED_FILLS and asserts them,\n# because prose cannot be wrong loudly and an assertion can.\n# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", 1), ('utils/colors.py', "# WHAT WAS WRONG WITH THE OLD SIX. '#4d1a1a' collapsed to #181818 under\n# achromatopsia, on a panel that collapses to #191919: CIEDE2000 0.31, so a\n# deleted line carried no visible highlight at all. The added/changed pair\n# read 8.08 dark and 7.81 light, both under the bar. A first re-derivation\n# missed both, because it measured pairs in dE76 and read them against a bar\n# published in CIEDE2000, and never measured a fill against its ground under\n# any simulation at all.\n", "# WHAT WAS WRONG WITH THE OLD SIX. Two of them failed the ground rule under\n# achromatopsia, where every colour collapses to luma:\n#\n#   '#4d1a1a' dark    -> #292929 on a #191919 panel   CIEDE2000 5.03\n#   '#f8d7da' light   -> #e1e1e1 on a #f5f5f5 pane    CIEDE2000 4.27\n#\n# Both under the 8.40 bar, so both were genuinely too near the surface they\n# sat on -- a faint band rather than a highlight. Neither was invisible; the\n# values that were are in the pinned table in tests/test_diff_floors.py.\n#\n# The added/changed pair read 8.08 dark and 7.81 light, both under the bar. A\n# first re-derivation missed all of it, because it measured pairs in dE76 and\n# read them against a bar published in CIEDE2000, and never measured a fill\n# against its ground under any simulation at all.\n#\n# THIS PARAGRAPH WAS ITSELF WRONG FOR A DAY, 2026-09-13 (RNV-FIGURE-PIN). It\n# described '#4d1a1a' with four figures -- 0.31, #181818, 15.87, and a text\n# contrast of 12.97 -- every one of which belonged to '#2e0f10', a candidate\n# derived during the same round and rejected. The substitution was of the\n# whole measurement, not of one digit, and nothing checked it, so it read as\n# measured and travelled into two delivery scripts and two project notes. It\n# also overstated the defect: 5.03 is faint, 0.31 is absent. The figures now\n# live in an assertion; see RETIRED_FILLS in the guard.\n", 1), ('tests/test_diff_floors.py', "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #181818, on a panel that collapses to #191919 -- CIEDE2000 **0.31**. A\n     deleted line carried no visible highlight at all. Contrast against the\n     TEXT was 12.97 and had been checked; the fill had never been measured\n     against the GROUND under a simulation, because the pairs were and it\n     read as though everything had been.\n", "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #292929, on a panel that collapses to #191919 -- CIEDE2000 **5.03**,\n     under the 8.40 bar. A deleted line carried a band too faint to read as a\n     highlight. Its light partner '#f8d7da' failed the same way at **4.27**.\n     Contrast against the TEXT was 10.4591 and had been checked; the fill had\n     never been measured against the GROUND under a simulation, because the\n     pairs were and it read as though everything had been.\n\n     THOSE FOUR FIGURES WERE WRONG HERE FOR A DAY. This paragraph gave 0.31,\n     #181818, 15.87 and 12.97 -- all of them '#2e0f10', a candidate derived\n     in the same round and rejected. Nothing checked them, so they read as\n     measured. RETIRED_FILLS below now pins every figure this file prints\n     about a retired value, and test_the_instrument_can_fail asserts them.\n", 1), ('tests/test_diff_floors.py', 'def test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    \'#4d1a1a\' is the value this round retired, and the reason: under\n    achromatopsia it is #181818 against a #191919 panel. If the ground rule\n    below cannot see that, it cannot see anything.\n    """\n    ground = palette("DARK")[GROUND_KEY]\n    distance, eye = worst("#4d1a1a", ground)\n    assert distance < DE_FLOOR, (\n        f"the retired dark red reads {distance:.2f} from {ground} at its "\n        f"worst ({eye}), which is over the floor -- so the ground rule is "\n        f"not measuring what it was written to measure.")\n    assert eye == "achromatopsia", (\n        f"the retired dark red is closest to the panel under {eye}, not "\n        f"achromatopsia. The simulation set has changed shape.")\n', '#: The fills RNV-DIFF-FLOORS retired, and every figure this file prints about\n#: them: mode, what it collapses to under achromatopsia, its worst distance\n#: from its own pane, its distance in normal vision, and its contrast against\n#: the ink. RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN.\n#:\n#: PINNED RATHER THAN NARRATED, and the reason is this table\'s own history.\n#: The first version of this guard described \'#4d1a1a\' with four figures that\n#: all belonged to a different hex -- a candidate derived during the same\n#: round and rejected. Prose cannot be wrong loudly. An assertion can.\nRETIRED_FILLS = {\n    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),\n    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),\n}\n\n\ndef test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    Every figure in RETIRED_FILLS is checked here against the instrument this\n    file ships, so a number quoted in a docstring is a number a test agrees\n    with. If the ground rule cannot still see why these two were retired, it\n    cannot see anything.\n    """\n    for fill, (mode, collapse, want_worst, want_normal, want_text) in \\\n            RETIRED_FILLS.items():\n        pal = palette(mode)\n        ground, ink = pal[GROUND_KEY], pal[INK_KEY]\n\n        assert simulate(fill, "achromatopsia") == collapse, (\n            f"{fill} collapses to {simulate(fill, \'achromatopsia\')} under "\n            f"achromatopsia, not {collapse} as this file says. A figure "\n            f"describing one value with another value\'s measurement is the "\n            f"defect this table exists to stop.")\n\n        distance, eye = worst(fill, ground)\n        assert eye == "achromatopsia", (\n            f"{fill} is closest to its pane under {eye}, not achromatopsia. "\n            f"The simulation set has changed shape.")\n        assert abs(distance - want_worst) < 0.005, (\n            f"{fill} reads {distance:.2f} from {ground} at its worst, and "\n            f"this file says {want_worst}. One of them is stale.")\n        assert distance < DE_FLOOR, (\n            f"{fill} reads {distance:.2f} from {ground}, over the floor -- "\n            f"so the ground rule is not measuring what it was written to "\n            f"measure.")\n\n        assert abs(ciede2000(fill, ground) - want_normal) < 0.005, (\n            f"{fill} reads {ciede2000(fill, ground):.2f} from {ground} in "\n            f"normal vision, and this file says {want_normal}.")\n        assert abs(contrast(fill, ink) - want_text) < 0.00005, (\n            f"{fill} reads {contrast(fill, ink):.4f} against {ink}, and this "\n            f"file says {want_text}. That figure is the one the original "\n            f"round cited to show the fill had been checked; it was the "\n            f"wrong value\'s.")\n\n    assert len(RETIRED_FILLS) == 2, (\n        "RETIRED_FILLS should hold both halves of the pair that failed. One "\n        "entry means a mode is being described and not measured -- the "\n        "original round cited only the dark half and never noticed the light "\n        "one failed too.")\n', 1), ('tests/test_diff_floors.py', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 0.31.\n\n    Measured under all five, because the failure was invisible under four of\n    them: \'#4d1a1a\' reads 15.87 from the panel in normal vision.\n    """\n', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 5.03, and its light partner at 4.27.\n\n    Measured under all five, because the failure is invisible under four of\n    them: \'#4d1a1a\' reads 20.85 from the panel in normal vision and 5.03 at\n    its worst. The figures are pinned in RETIRED_FILLS above.\n    """\n', 1)]
@@ -323,11 +340,128 @@ def checks(tree) -> None:
 
 
 # ------------------------------------------------------------------ plumbing
+#: EXIT CODES ARE NAMED, and every path out of this script takes one of them.
+#:
+#: The version of this harness before 2026-09-15 exited 1 for "already
+#: applied", 1 for "wrong directory" and 1 for a failing guard, so a finished
+#: round and a broken round were indistinguishable from the shell. Three
+#: conditions, one code, and the two that are not failures were the majority.
+#:
+#:   0  complete and clean   applied and green, already applied, --check passed
+#:   1  something disagrees  a guard failed, a suite failed, an anchor moved
+#:   2  could not run at all  wrong directory, wrong repository, environment
+#:   3  ran but incomplete   the suite started and Python aborted natively
+#:
+#: An unrecognised code is a bug in this file and main() says so rather than
+#: passing it through, because a code that falls through every branch is the
+#: original defect returning.
+EXIT_CLEAN = 0
+EXIT_DISAGREES = 1
+EXIT_CANNOT_RUN = 2
+EXIT_INCOMPLETE = 3
+
+_EXIT_NAMES = {
+    EXIT_CLEAN: "clean",
+    EXIT_DISAGREES: "something disagrees",
+    EXIT_CANNOT_RUN: "could not run",
+    EXIT_INCOMPLETE: "ran but did not finish",
+}
+
+
+class Stop(Exception):
+    """A deliberate exit carrying one of the named codes above.
+
+    Replaces SystemExit for every stop this harness OWNS. A bare SystemExit
+    raised inside a round's own checks() still means "a guard said no" and
+    main() maps it to EXIT_DISAGREES, which is what it exited as before.
+    """
+
+    def __init__(self, code: int, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+
+
+#: TWO DISTINCTIVE PATHS PER REPOSITORY, used only to recognise the WRONG one.
+#:
+#: Two rather than one because a single shared filename is not a discriminator
+#: -- every app here has ui/ and core/ and tests/conftest.py.
+#:
+#: This table is consulted for POSITIVE EVIDENCE OF THE WRONG REPOSITORY and
+#: never as a requirement that the right one look a particular way. A renamed
+#: file would otherwise refuse a correct checkout, and a gate that refuses good
+#: work is a gate that gets loosened until it denies nothing. Stale entries
+#: therefore weaken DETECTION, not correctness: a wrong repo the table misses
+#: is still caught by the anchors, one code later and with worse attribution.
+FINGERPRINTS = {
+    "rnv-color-mixer": ("core/image_handler.py", "ui/canvas_view.py"),
+    "rnv-color-palette-manager": ("core/color_extractor.py",
+                                  "ui/batch_export_dialog.py"),
+    "rnv-color-picker": ("core/hilbert_curve.py", "ui/color_swatch_widget.py"),
+    "rnv-icon-builder": ("core/icon_builder_core.py", "core/project_manager.py"),
+    "rnv-text-transformer": ("core/diff_engine.py", "core/text_cleaner.py"),
+}
+
+
 def refuse_to_shadow() -> None:
     name = Path(__file__).name
     if name in SHADOWS:
-        sys.exit(f"refusing to run as {name} -- it would shadow a module on "
-                 f"sys.path. Rename to up.py and run again.")
+        raise Stop(EXIT_CANNOT_RUN,
+                   f"refusing to run as {name} -- it would shadow a module on "
+                   f"sys.path. Rename to up.py and run again.")
+
+
+def _remote_repo(root: Path) -> str | None:
+    """The repository this checkout points at, or None if git cannot say.
+
+    None is not a finding. A tree with no git, no origin, or a git that is not
+    installed is a checkout this script can still be correct about, and
+    refusing it would be a refusal where an answer was available.
+    """
+    try:
+        out = subprocess.run(["git", "-C", str(root), "remote", "get-url",
+                              "origin"], capture_output=True, text=True,
+                             timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    url = out.stdout.strip()
+    if not url:
+        return None
+    name = url.rstrip("/").rsplit("/", 1)[-1]
+    return name[:-4] if name.endswith(".git") else name
+
+
+def refuse_wrong_repository(root: Path) -> None:
+    """Stop when this is a checkout of a DIFFERENT repository in the fleet.
+
+    WHY THIS EXISTS AS A CHECK RATHER THAN A CONSTANT. REPO was declared at the
+    top of every delivered script and consumed by nothing -- two occurrences,
+    the assignment and an f-string in an error message, and zero comparisons.
+    It read as a safety check for weeks and was a label. A delivery script for
+    one repository ended up committed at another's root, and nothing in the
+    script could have said so.
+    """
+    seen = _remote_repo(root)
+    if seen is not None and seen != REPO and seen in FINGERPRINTS:
+        raise Stop(EXIT_CANNOT_RUN,
+                   f"this is a {seen} checkout and this script is for {REPO} "
+                   f"(git says origin is {seen}).\n\n"
+                   f"Nothing was read and nothing was written.")
+
+    if seen == REPO:
+        return                       # git answered; no need to guess
+
+    for other, paths in FINGERPRINTS.items():
+        if other == REPO:
+            continue
+        if all((root / p).exists() for p in paths):
+            raise Stop(EXIT_CANNOT_RUN,
+                       f"this looks like a {other} checkout and this script "
+                       f"is for {REPO}.\n\n"
+                       f"Both of {', '.join(paths)} are here, and they exist "
+                       f"in no other repository in the fleet. Nothing was "
+                       f"read and nothing was written.")
 
 
 class Tree:
@@ -343,7 +477,7 @@ class Tree:
         if rel not in self.files:
             p = self.root / rel
             if not p.exists():
-                raise SystemExit(f"missing file: {rel}")
+                raise Stop(EXIT_DISAGREES, f"missing file: {rel}")
             self.files[rel] = p.read_text(encoding="utf-8")
         return self.files[rel]
 
@@ -360,7 +494,8 @@ class Tree:
         needed to be able to.
         """
         if not (self.root / rel).exists() and rel not in self.files:
-            raise SystemExit(f"cannot delete {rel}: it is not in this checkout")
+            raise Stop(EXIT_DISAGREES,
+                       f"cannot delete {rel}: it is not in this checkout")
         self.files.pop(rel, None)
         self.deleted.add(rel)
 
@@ -368,10 +503,10 @@ class Tree:
         src = self.read(rel)
         found = src.count(old)
         if found != times:
-            raise SystemExit(
-                f"{rel}: expected {times} occurrence(s) of the anchor, found "
-                f"{found}. The file moved; re-derive this edit before trusting "
-                f"the script.")
+            raise Stop(EXIT_DISAGREES,
+                       f"{rel}: expected {times} occurrence(s) of the anchor, "
+                       f"found {found}. The file moved; re-derive this edit "
+                       f"before trusting the script.")
         self.write(rel, src.replace(old, new, times))
 
     def flush(self) -> list[str]:
@@ -405,7 +540,8 @@ def _tail(out: str, lines: int = 40) -> str:
 
 
 def _outcome(code: int, out: str) -> str:
-    """"pass", "fail", "abort" or "env" -- only exit code 1 means a test failed.
+    """"pass", "fail", "abort", "killed" or "env" -- only exit code 1 means a
+    test failed.
 
     pytest exits 0 passed, 1 tests failed, 2 interrupted, 3 internal error,
     4 usage error, 5 nothing collected; a native abort arrives as 134 or -6.
@@ -421,6 +557,17 @@ def _outcome(code: int, out: str) -> str:
     if code == 1 and "INTERNALERROR" not in out:
         return "fail"
     return "env"
+
+
+#: Each suite outcome maps to exactly one named exit code, in one place, so a
+#: new outcome cannot quietly inherit somebody else's meaning.
+_OUTCOME_EXIT = {
+    "pass": EXIT_CLEAN,
+    "fail": EXIT_DISAGREES,
+    "abort": EXIT_INCOMPLETE,
+    "killed": EXIT_CANNOT_RUN,
+    "env": EXIT_CANNOT_RUN,
+}
 
 
 ENV_HELP = """\
@@ -486,6 +633,7 @@ def run(label: str, args: list[str]) -> tuple[int, str]:
 
 
 def _step(label: str, args: list[str]) -> int:
+    """Run one suite and return a NAMED exit code, not pytest's raw one."""
     code, out = run(label, args)
     verdict = _outcome(code, out)
     print(_tail(out) if verdict != "pass"
@@ -499,7 +647,23 @@ def _step(label: str, args: list[str]) -> int:
     elif verdict == "fail":
         print("\nFAILED -- the suite is not green. Nothing was reverted; "
               "`git diff` shows exactly what landed.")
-    return code
+    return _OUTCOME_EXIT[verdict]
+
+
+def _left_alone() -> None:
+    """Say what this round deliberately did not touch.
+
+    Silence about the untouched reads as "there was nothing else", which is a
+    claim no round is entitled to make by saying nothing.
+    """
+    stated = globals().get("LEFT_ALONE")
+    if stated:
+        print("\nleft alone, deliberately:")
+        for line in stated:
+            print(f"  - {line}")
+    else:
+        print("\nleft alone: NOT DECLARED by this round. Read the diff rather "
+              "than reading this silence as 'nothing else was in scope'.")
 
 
 def verify() -> int:
@@ -528,29 +692,53 @@ def verify() -> int:
     guard_cmd = globals().get("GUARD_CMD") or [
         sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", GUARD]
     code = _step("guard", guard_cmd)
-    if code != 0:
+    if code != EXIT_CLEAN:
         return code
     for label, args in SUITES:
         code = _step(label, args)
-        if code != 0:
+        if code != EXIT_CLEAN:
             return code
     print("\nGreen.")
-    return 0
+    return EXIT_CLEAN
 
 
 def apply(check_only: bool) -> int:
     root = Path.cwd()
+
+    # ORDER IS LOAD-BEARING and is pinned by a test. The repository check runs
+    # BEFORE the sentinel and before any anchor, because every one of those
+    # would also stop a wrong-repository run -- with the wrong code and the
+    # wrong reason. A protection that works while reporting the wrong cause
+    # files a placement defect as a content defect.
+    refuse_wrong_repository(root)
+
     if not (root / SENTINEL_FILE).exists():
         # A script whose sentinel file is created by an EARLIER script cannot
         # tell "wrong directory" from "prerequisite not run", and the default
         # message asserts the first while the second is more likely. Such a
         # script sets MISSING_HELP and says which one to run.
-        raise SystemExit(globals().get("MISSING_HELP") or
-                         f"run this from the root of a {REPO} checkout "
-                         f"(no {SENTINEL_FILE} here)")
+        raise Stop(EXIT_CANNOT_RUN,
+                   globals().get("MISSING_HELP") or
+                   f"run this from the root of a {REPO} checkout "
+                   f"(no {SENTINEL_FILE} here)")
+
     if SENTINEL in (root / SENTINEL_FILE).read_text(encoding="utf-8"):
-        raise SystemExit(f"already applied -- {SENTINEL!r} is present in "
-                         f"{SENTINEL_FILE}")
+        # ALREADY APPLIED IS A NO-OP, NOT A FAILURE. It used to exit 1, which
+        # is the code for "something disagrees" -- so running a finished round
+        # a second time reported the same thing as a broken one.
+        #
+        # It re-runs the suites rather than returning 0 immediately, because a
+        # 0 that did not look is worth less than it reads as. Exiting clean
+        # here means the tree is in the intended state AND the suites agree.
+        print(f"already applied -- {SENTINEL!r} is present in "
+              f"{SENTINEL_FILE}.")
+        if check_only:
+            print("--check: nothing to rehearse, nothing written.")
+            _left_alone()
+            return EXIT_CLEAN
+        print("Nothing to write. Re-checking the tree instead, so a clean "
+              "exit here means the round still holds.\n")
+        return verify()
 
     tree = Tree(root)
     edits(tree)
@@ -568,10 +756,13 @@ def apply(check_only: bool) -> int:
     if check_only:
         print("--check: every edit composes and every guard passes. "
               "Nothing written.")
-        return 0
+        _left_alone()
+        return EXIT_CLEAN
 
     touched = tree.flush()
-    print("wrote: " + ", ".join(touched) + "\n")
+    print("wrote: " + ", ".join(touched))
+    _left_alone()
+    print()
     return verify()
 
 
@@ -582,20 +773,54 @@ def finish() -> None:
 
 
 def main() -> int:
-    refuse_to_shadow()
-    ap = argparse.ArgumentParser(description=DESCRIPTION)
-    ap.add_argument("--check", action="store_true",
-                    help="rehearse every edit in memory, write nothing")
-    ap.add_argument("--verify", action="store_true",
-                    help="run the suites only, change nothing")
-    ap.add_argument("--finish", action="store_true", help="delete this script")
-    args = ap.parse_args()
-    if args.finish:
-        finish()
-        return 0
-    if args.verify:
-        return verify()
-    return apply(args.check)
+    try:
+        refuse_to_shadow()
+        ap = argparse.ArgumentParser(description=DESCRIPTION)
+        ap.add_argument("--check", action="store_true",
+                        help="rehearse every edit in memory, write nothing")
+        ap.add_argument("--verify", action="store_true",
+                        help="run the suites only, change nothing")
+        ap.add_argument("--finish", action="store_true",
+                        help="delete this script")
+        ap.add_argument("--exit-codes", action="store_true",
+                        help="print what each exit code means and stop")
+        args = ap.parse_args()
+        if args.exit_codes:
+            for code, name in sorted(_EXIT_NAMES.items()):
+                print(f"  {code}  {name}")
+            return EXIT_CLEAN
+        if args.finish:
+            finish()
+            return EXIT_CLEAN
+        if args.verify:
+            code = verify()
+        else:
+            code = apply(args.check)
+    except Stop as stop:
+        print(stop, file=sys.stderr)
+        code = stop.code
+    except SystemExit as exc:
+        # A round's own checks() raises SystemExit to mean "a guard said no",
+        # which is what it exited as before this taxonomy existed. Mapped
+        # explicitly rather than left to Python's default, so the meaning is
+        # written down somewhere instead of inherited from the interpreter.
+        if isinstance(exc.code, int) and exc.code in _EXIT_NAMES:
+            code = exc.code
+        else:
+            if exc.code not in (None, 0):
+                print(exc.code, file=sys.stderr)
+            code = EXIT_DISAGREES if exc.code not in (None, 0) else EXIT_CLEAN
+
+    if code not in _EXIT_NAMES:
+        # An unnamed code that falls through every branch is the original bug
+        # returning. Refuse to pass it on.
+        print(f"\nBUG IN THIS SCRIPT: it tried to exit {code!r}, which is not "
+              f"one of its own named codes. Treating it as "
+              f"'could not run'.", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    if code != EXIT_CLEAN:
+        print(f"\nexit {code} -- {_EXIT_NAMES[code]}", file=sys.stderr)
+    return code
 
 
 if __name__ == "__main__":
