@@ -75,6 +75,15 @@ from utils.colors import (
     BRAND_DARK_GOLD,
     BRAND_DARK_GOLD_DEEP,
     BRAND_DARK_GOLD_PRESSED,
+    with_alpha,
+    IMAGE_FIELD_ALPHA,
+    IMAGE_LABEL_ALPHA,
+    IMAGE_CHECKBOX_ALPHA,
+    SCROLLBAR_BORDER_ALPHA,
+    SCROLLBAR_HANDLE_ALPHA,
+    DROPDOWN_BG_ALPHA,
+    DROPDOWN_SELECTION_ALPHA,
+    DROPDOWN_BORDER_ALPHA,
 )
 
 
@@ -228,16 +237,24 @@ class DialogStyleManager:
         # Regex builder match highlight
         'regex_match_bg': SEMANTIC_REGEX_MATCH,
 
-        # Image mode semi-transparent overlay values (rgba — used only in image mode)
-        'image_overlay_bg':            'rgba(0, 0, 0, 171)',
-        'image_overlay_bg_dark':       'rgba(26, 26, 26, 191)',
-        'image_overlay_checkbox':      'rgba(0, 0, 0, 100)',
-        'image_scrollbar_border':      'rgba(51, 51, 51, 100)',
-        'image_scrollbar_handle':      'rgba(80, 80, 80, 150)',
+        # Image mode semi-transparent overlay values -- used only in image
+        # mode. DERIVED: a named colour at a declared alpha, so a register
+        # move reaches them (RNV-DERIVE-ALPHA, 2026-09-25).
+        'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),
+        'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),
+        'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),
+        'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
+        # RNV-COLLAPSE-505050, closed here 2026-09-25: this was
+        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
+        # 2026-09-02 and left behind because nothing decoded rgba().
+        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
+        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.
+        # Left as written: #646464 is on no register row, so there is
+        # nothing to derive it from. See tests/test_derived_values.py.
         'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',
-        'image_dropdown_bg':           'rgba(0, 0, 0, 131)',
-        'image_dropdown_selection':    'rgba(51, 51, 51, 200)',
-        'image_dropdown_border':       'rgba(51, 51, 51, 150)',
+        'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
+        'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
+        'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
     }
     
     LIGHT: ClassVar[dict[str, str]] = {
@@ -330,17 +347,24 @@ class DialogStyleManager:
         # Regex builder match highlight
         'regex_match_bg': SEMANTIC_REGEX_MATCH_LIGHT,
 
-        # Image mode semi-transparent overlay values (rgba — used only in image mode)
-        # Same values as DARK since image mode always uses dark-based overlays
-        'image_overlay_bg':            'rgba(0, 0, 0, 171)',
-        'image_overlay_bg_dark':       'rgba(26, 26, 26, 191)',
-        'image_overlay_checkbox':      'rgba(0, 0, 0, 100)',
-        'image_scrollbar_border':      'rgba(51, 51, 51, 100)',
-        'image_scrollbar_handle':      'rgba(80, 80, 80, 150)',
+        # Image mode semi-transparent overlay values -- used only in image
+        # mode. Same derivations as DARK since image mode always uses
+        # dark-based overlays; image mode reads DARK, so nothing reads these.
+        'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),
+        'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),
+        'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),
+        'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
+        # RNV-COLLAPSE-505050, closed here 2026-09-25: this was
+        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
+        # 2026-09-02 and left behind because nothing decoded rgba().
+        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
+        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.
+        # Left as written: #646464 is on no register row, so there is
+        # nothing to derive it from. See tests/test_derived_values.py.
         'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',
-        'image_dropdown_bg':           'rgba(0, 0, 0, 131)',
-        'image_dropdown_selection':    'rgba(51, 51, 51, 200)',
-        'image_dropdown_border':       'rgba(51, 51, 51, 150)',
+        'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
+        'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
+        'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
     }
     
     # ==================== PUBLIC METHODS ====================

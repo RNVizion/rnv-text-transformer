@@ -546,6 +546,52 @@ def with_alpha(color: str, alpha: int) -> str:
     return f"#{alpha:02X}{rgb}"
 
 
+# ==================== COMPOSITE ALPHAS ====================
+#
+# A composite is a named colour AT AN ALPHA: with_alpha(BASE, ALPHA). The colour
+# half is a name, so a register move reaches it; the alpha half is one of these,
+# so the same move carries every alpha form of that colour with it. Until
+# 2026-09-25 image mode wrote all of them out as rgba() and nothing related
+# 'rgba(26, 26, 26, 191)' to BRAND_BLACK.
+#
+# Each byte is the one the literal it replaced already carried. They were all
+# integers, so nothing was measured and nothing rounds.
+#
+# TWO BYTES APPEAR TWICE, UNDER DIFFERENT NAMES, ON PURPOSE. The scrollbar edge
+# and the checkbox ground are both 100; the scrollbar handle and the dropdown
+# edge are both 150. Identical numbers doing unrelated jobs stay separate, or
+# retuning one silently retunes the other.
+
+IMAGE_FIELD_ALPHA: Final[int] = 0xAB
+"""171. The input field, its label and the label bar, in image mode (TRUE_BLACK)."""
+
+IMAGE_LABEL_ALPHA: Final[int] = 0xBF
+"""191. The status, output and stats labels in image mode (BRAND_BLACK)."""
+
+IMAGE_CHECKBOX_ALPHA: Final[int] = 0x64
+"""100. The checkbox indicator's ground in image mode (TRUE_BLACK)."""
+
+SCROLLBAR_BORDER_ALPHA: Final[int] = 0x64
+"""100. The image-mode scrollbar edge (APP_BORDER)."""
+
+SCROLLBAR_HANDLE_ALPHA: Final[int] = 0x96
+"""150. The image-mode scrollbar handle (GREY_44). The byte all five
+applications use; its colour was #505050 until 2026-09-25."""
+
+DROPDOWN_BG_ALPHA: Final[int] = 0x83
+"""131. The image-mode dropdown list's ground (TRUE_BLACK)."""
+
+DROPDOWN_SELECTION_ALPHA: Final[int] = 0xC8
+"""200. The image-mode dropdown selection (APP_BORDER)."""
+
+DROPDOWN_BORDER_ALPHA: Final[int] = 0x96
+"""150. The image-mode dropdown list's edge (APP_BORDER)."""
+
+DRAG_HIGHLIGHT_ALPHA: Final[int] = 0xBF
+"""191, 75%. The drop-target highlight on a text pane (BRAND_GOLD). The one
+composite this application already derived; its byte was written in place."""
+
+
 # ==================== PROVENANCE ====================
 #
 # Where every colour constant in this module comes from. Declarative and
@@ -622,6 +668,15 @@ __all__ = [
     'BRAND_DARK_GOLD_PRESSED',
     'lighten',
     'with_alpha',
+    'IMAGE_FIELD_ALPHA',
+    'IMAGE_LABEL_ALPHA',
+    'IMAGE_CHECKBOX_ALPHA',
+    'SCROLLBAR_BORDER_ALPHA',
+    'SCROLLBAR_HANDLE_ALPHA',
+    'DROPDOWN_BG_ALPHA',
+    'DROPDOWN_SELECTION_ALPHA',
+    'DROPDOWN_BORDER_ALPHA',
+    'DRAG_HIGHLIGHT_ALPHA',
     'TRUE_BLACK',
     'WHITE',
     'BRAND_BLACK',

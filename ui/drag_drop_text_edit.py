@@ -19,7 +19,8 @@ from PyQt6.QtWidgets import QTextEdit, QApplication, QMenu
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QAction
 
-from utils.colors import BRAND_GOLD, TRUE_BLACK, with_alpha
+from utils.colors import (BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA, TRUE_BLACK,
+                          with_alpha)
 from utils.config import SUPPORTED_FORMATS
 from utils.dialog_styles import DialogStyleManager
 
@@ -54,7 +55,7 @@ class DragDropTextEdit(QTextEdit):
     # Qt #AARRGGBB, primary brand at 75% alpha. Not a six-digit hex: the
     # alpha channel comes first, so a plain #[0-9a-f]{6} search will neither
     # find it nor safely rewrite it.
-    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, 0xBF)
+    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA)
 
     # Drag highlight style
     _DRAG_HIGHLIGHT_STYLE: str = f"""
