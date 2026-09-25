@@ -1,397 +1,224 @@
-#!/usr/bin/env python3
-"""
-RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP
+"""derive every image-mode alpha colour from its base
 
-Built from: rnv-text-transformer@179553f
-
-Correct four figures that described one colour using another colour's
-measurements, and pin every such figure in an assertion so it cannot go wrong
-quietly again.
-
-    python up.py             # apply, then verify
+    python up.py             # apply, then run the guard and CI's two commands
     python up.py --check     # rehearse every edit in memory, write nothing
-    python up.py --verify    # run the suites only, change nothing
-    python up.py --finish    # delete this file
+    python up.py --verify    # run the guard and CI's commands, change nothing
 
-WHY
+For rnv-text-transformer, derived against a fresh clone at the live head.
 
-RNV-DIFF-FLOORS retired SEMANTIC_DIFF_REMOVED '#4d1a1a' and explained why with
-four numbers:
+RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP. This script is a delivery tool, not
+application source, and it names what it retires. That marker is what tells
+this fleet's scanners to skip it.
 
-    collapses to #181818, on a panel that collapses to #191919 -- CIEDE2000 0.31
-    reads 15.87 from the panel in normal vision
-    contrast against the TEXT was 12.97
+RULED 2026-09-24. Every image-mode colour written at an alpha becomes
+with_alpha(BASE, ALPHA) -- this application's own helper -- so a change to a
+base ripples to every alpha form of it. One pixel moves, by ruling: the
+image scrollbar handle leaves #505050 for GREY_44 at the same alpha, 150.
 
-**Every one of them belongs to '#2e0f10'** -- a candidate derived during that
-same round and rejected when a metric error was found in it. The substitution
-was of the whole measurement, not of one digit. Nothing checked it, so it read
-as measured and travelled into utils/colors.py, three places in
-tests/test_diff_floors.py, two delivery scripts and two project notes.
-
-The true readings for '#4d1a1a':
-
-    collapses to #292929 on #191919            CIEDE2000  5.03   (floor 8.40)
-    normal vision                                        20.85
-    contrast against #dddddd                            10.4591
-
-THE DEFECT WAS REAL AND WAS OVERSTATED. 5.03 is under the bar, so retiring the
-value was right and every replacement stands. But 5.03 is a band too faint to
-read as a highlight; 0.31 is an absent one. The round claimed the stronger
-thing on the strength of a figure it did not own.
-
-AND IT MISSED THE SECOND INSTANCE. '#f8d7da', the light half of the same role,
-fails the same rule at **4.27** and was never mentioned. So the round cited
-the wrong evidence for its case and walked past the right evidence beside it.
-
-WHAT CHANGES
-
-Nothing that renders. No value moves, no rule changes, no palette key is added
-or removed. This is one comment block, two docstrings, and one test body.
-
-THE TEST BODY IS THE POINT. tests/test_diff_floors.py gains RETIRED_FILLS --
-every figure the file prints about a retired value: the collapse hex, the
-worst distance from its own pane, the normal-vision distance, and the contrast
-against the ink. test_the_instrument_can_fail asserts all of them against the
-instrument the file ships, so a figure in a docstring is now a figure a test
-agrees with.
-
-It also asserts the table holds TWO entries, because the original round
-described one mode and never measured the other.
-
-FALSIFIED SIX WAYS, and the first tamper is the original mistake re-made:
-0.31 put back for '#4d1a1a'. Also the wrong collapse hex, the wrong text
-contrast, the wrong normal-vision reading, dropping the light half the way the
-original round dropped it, and describing a retired value as clearing the
-floor it was retired for. All six land red in test_the_instrument_can_fail.
+One unread key is left as it is, and pinned unread. The snapshot is edited,
+not regenerated: sixteen named lines, so anything else that moved still fails.
 """
 from __future__ import annotations
 
 import argparse
 import ast
-import math
 import os
+import pathlib
 import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-REPO = "rnv-text-transformer"
+REPO = 'rnv-text-transformer'
+SENTINEL = 'RNV-DERIVE-ALPHA'
 SENTINEL_FILE = "tests/conftest.py"
-SENTINEL = "RNV-FIGURE-PIN"
-GUARD = "tests/test_diff_floors.py"
-DESCRIPTION = "correct four misattributed figures and pin them in an assertion"
-SUITES = [("\"pytest tests/\"",
-           [sys.executable, "-m", "pytest", "tests/", "-q", "-p",
-            "no:cacheprovider"]),
-          ("\"the LOCKED file\"",
-           [sys.executable, "-m", "pytest", "test_rnv_text_transformer.py",
-            "-q", "-p", "no:cacheprovider", "--timeout=120"])]
+GUARD = "tests/test_derived_values.py"
+DESCRIPTION = 'derive every image-mode alpha colour from its base'
 
-SHADOWS = {"colors.py", "config.py", "conftest.py", "run_tests.py"}
+#: EXACTLY WHAT CI RUNS, both steps, under coverage as the workflow does. The
+#: first is the locked root suite, which `pytest tests/` never reaches -- the
+#: icon-builder round went red in CI on exactly that.
+_COV = [sys.executable, "-m", "coverage", "run", "--source=core,utils,ui,cli",
+        "--branch"]
+SUITES = [
+    ("CI step 1: unittest test_rnv_text_transformer",
+     _COV[:4] + ["--data-file=.coverage.unittest"] + _COV[4:]
+     + ["-m", "unittest", "test_rnv_text_transformer"]),
+    ("CI step 2: pytest tests/ --benchmark-disable",
+     _COV[:4] + ["--data-file=.coverage.pytest"] + _COV[4:]
+     + ["-m", "pytest", "tests/", "--benchmark-disable"]),
+]
 
-MISSING_HELP = (
-    "run this from the root of a rnv-text-transformer checkout "
-    "(no tests/conftest.py here).\n\n"
-    "This round corrects figures installed by RNV-DIFF-FLOORS and widened by "
-    "RNV-REGEX-FLOOR; both must have landed first.")
+#: The workflow SUITES was written from, by content hash.
+CI_MIRRORS = {'.github/workflows/tests.yml': '22c4f261f69cda029e0801f148e9b061e3bd65b5c9472b1bf321fc998b5a0434'}
 
-#: The figures this round writes, and what they describe:
-#:   fill -> (mode, achromatopsia collapse, worst dE, normal dE, text contrast)
-#: checks() re-derives every one against the tree it is about to write. A
-#: round whose entire subject is a number nobody checked has no business
-#: taking its own numbers on trust.
-WANT_FILLS = {
-    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),
-    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),
-}
+SHADOWS = {"colors.py", "conftest.py", "dialog_styles.py",
+           "test_rnv_text_transformer.py"}
 
-#: What this round deliberately did not touch. Printed at the end of every
-#: run, because silence about the untouched reads as "there was nothing else"
-#: -- a claim a round is not entitled to make by saying nothing.
-LEFT_ALONE = (
-    "every value that RENDERS. The six diff fills and two regex fills are "
-    "asserted unchanged; this round moves prose and one test body.",
-    "the light partner's own retirement. '#f8d7da' is recorded in "
-    "RETIRED_FILLS and was already replaced by RNV-DIFF-FLOORS; nothing "
-    "about it moves here.",
-    "the 8.40 bar and the 4.5 floor. Both are the register's, not this "
-    "repository's, and a round that corrects a figure does not get to "
-    "retune the rule the figure was measured against.",
-    "utils/dialog_styles.py, read by checks() and never written.",
-)
+LEFT_ALONE = [
+    "image_scrollbar_handle_hover, rgba(100, 100, 100, 200), in both dicts. "
+    "Nothing reads it; the image scrollbar hovers from DARK's accent. It has "
+    "no register row to follow, and the painted gold cannot go in LIGHT -- a "
+    "third gold there breaks the two-golds rule. Remove it, or keep it: a "
+    "ruling. A test now fails if anything starts reading it.",
+    "LIGHT's nine image keys. Image mode reads DARK, so nothing reads them; "
+    "they take the same derivations so the two dicts stay one statement.",
+    "with_alpha()'s spelling -- alpha upper case, colour as given, "
+    "'#BF1a1a1a'. It is this application's existing helper and output; "
+    "whether eight-digit hex falls under the register's lower-case rule is "
+    "a question for rnv-brand, and it has not ruled.",
+    "the picker and the mixer, which each get their own round; the palette "
+    "manager's round was delivered separately.",
+    "the chart's element resolver, which must learn that a derived value is "
+    "a call -- here with_alpha(), in the icon builder and the palette "
+    "manager translucent().",
+]
 
-
-EDITS = [('tests/conftest.py', "# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", "# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired\n# SEMANTIC_DIFF_REMOVED '#4d1a1a' belonged to a different hex: a candidate\n# derived during RNV-DIFF-FLOORS and rejected. 0.31, #181818, 15.87 and a\n# text contrast of 12.97 are all '#2e0f10'. The true readings are 5.03,\n# #292929, 20.85 and 10.4591, and the defect was real but overstated -- a\n# faint band, not an absent one. Its light partner '#f8d7da' failed the same\n# rule at 4.27 and went unmentioned. tests/test_diff_floors.py now pins every\n# figure it prints about a retired value in RETIRED_FILLS and asserts them,\n# because prose cannot be wrong loudly and an assertion can.\n# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',\n# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000\n", 1), ('utils/colors.py', "# WHAT WAS WRONG WITH THE OLD SIX. '#4d1a1a' collapsed to #181818 under\n# achromatopsia, on a panel that collapses to #191919: CIEDE2000 0.31, so a\n# deleted line carried no visible highlight at all. The added/changed pair\n# read 8.08 dark and 7.81 light, both under the bar. A first re-derivation\n# missed both, because it measured pairs in dE76 and read them against a bar\n# published in CIEDE2000, and never measured a fill against its ground under\n# any simulation at all.\n", "# WHAT WAS WRONG WITH THE OLD SIX. Two of them failed the ground rule under\n# achromatopsia, where every colour collapses to luma:\n#\n#   '#4d1a1a' dark    -> #292929 on a #191919 panel   CIEDE2000 5.03\n#   '#f8d7da' light   -> #e1e1e1 on a #f5f5f5 pane    CIEDE2000 4.27\n#\n# Both under the 8.40 bar, so both were genuinely too near the surface they\n# sat on -- a faint band rather than a highlight. Neither was invisible; the\n# values that were are in the pinned table in tests/test_diff_floors.py.\n#\n# The added/changed pair read 8.08 dark and 7.81 light, both under the bar. A\n# first re-derivation missed all of it, because it measured pairs in dE76 and\n# read them against a bar published in CIEDE2000, and never measured a fill\n# against its ground under any simulation at all.\n#\n# THIS PARAGRAPH WAS ITSELF WRONG FOR A DAY, 2026-09-13 (RNV-FIGURE-PIN). It\n# described '#4d1a1a' with four figures -- 0.31, #181818, 15.87, and a text\n# contrast of 12.97 -- every one of which belonged to '#2e0f10', a candidate\n# derived during the same round and rejected. The substitution was of the\n# whole measurement, not of one digit, and nothing checked it, so it read as\n# measured and travelled into two delivery scripts and two project notes. It\n# also overstated the defect: 5.03 is faint, 0.31 is absent. The figures now\n# live in an assertion; see RETIRED_FILLS in the guard.\n", 1), ('tests/test_diff_floors.py', "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #181818, on a panel that collapses to #191919 -- CIEDE2000 **0.31**. A\n     deleted line carried no visible highlight at all. Contrast against the\n     TEXT was 12.97 and had been checked; the fill had never been measured\n     against the GROUND under a simulation, because the pairs were and it\n     read as though everything had been.\n", "  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to\n     #292929, on a panel that collapses to #191919 -- CIEDE2000 **5.03**,\n     under the 8.40 bar. A deleted line carried a band too faint to read as a\n     highlight. Its light partner '#f8d7da' failed the same way at **4.27**.\n     Contrast against the TEXT was 10.4591 and had been checked; the fill had\n     never been measured against the GROUND under a simulation, because the\n     pairs were and it read as though everything had been.\n\n     THOSE FOUR FIGURES WERE WRONG HERE FOR A DAY. This paragraph gave 0.31,\n     #181818, 15.87 and 12.97 -- all of them '#2e0f10', a candidate derived\n     in the same round and rejected. Nothing checked them, so they read as\n     measured. RETIRED_FILLS below now pins every figure this file prints\n     about a retired value, and test_the_instrument_can_fail asserts them.\n", 1), ('tests/test_diff_floors.py', 'def test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    \'#4d1a1a\' is the value this round retired, and the reason: under\n    achromatopsia it is #181818 against a #191919 panel. If the ground rule\n    below cannot see that, it cannot see anything.\n    """\n    ground = palette("DARK")[GROUND_KEY]\n    distance, eye = worst("#4d1a1a", ground)\n    assert distance < DE_FLOOR, (\n        f"the retired dark red reads {distance:.2f} from {ground} at its "\n        f"worst ({eye}), which is over the floor -- so the ground rule is "\n        f"not measuring what it was written to measure.")\n    assert eye == "achromatopsia", (\n        f"the retired dark red is closest to the panel under {eye}, not "\n        f"achromatopsia. The simulation set has changed shape.")\n', '#: The fills RNV-DIFF-FLOORS retired, and every figure this file prints about\n#: them: mode, what it collapses to under achromatopsia, its worst distance\n#: from its own pane, its distance in normal vision, and its contrast against\n#: the ink. RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN.\n#:\n#: PINNED RATHER THAN NARRATED, and the reason is this table\'s own history.\n#: The first version of this guard described \'#4d1a1a\' with four figures that\n#: all belonged to a different hex -- a candidate derived during the same\n#: round and rejected. Prose cannot be wrong loudly. An assertion can.\nRETIRED_FILLS = {\n    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),\n    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),\n}\n\n\ndef test_the_instrument_can_fail():\n    """A floor nothing can breach is decoration.\n\n    Every figure in RETIRED_FILLS is checked here against the instrument this\n    file ships, so a number quoted in a docstring is a number a test agrees\n    with. If the ground rule cannot still see why these two were retired, it\n    cannot see anything.\n    """\n    for fill, (mode, collapse, want_worst, want_normal, want_text) in \\\n            RETIRED_FILLS.items():\n        pal = palette(mode)\n        ground, ink = pal[GROUND_KEY], pal[INK_KEY]\n\n        assert simulate(fill, "achromatopsia") == collapse, (\n            f"{fill} collapses to {simulate(fill, \'achromatopsia\')} under "\n            f"achromatopsia, not {collapse} as this file says. A figure "\n            f"describing one value with another value\'s measurement is the "\n            f"defect this table exists to stop.")\n\n        distance, eye = worst(fill, ground)\n        assert eye == "achromatopsia", (\n            f"{fill} is closest to its pane under {eye}, not achromatopsia. "\n            f"The simulation set has changed shape.")\n        assert abs(distance - want_worst) < 0.005, (\n            f"{fill} reads {distance:.2f} from {ground} at its worst, and "\n            f"this file says {want_worst}. One of them is stale.")\n        assert distance < DE_FLOOR, (\n            f"{fill} reads {distance:.2f} from {ground}, over the floor -- "\n            f"so the ground rule is not measuring what it was written to "\n            f"measure.")\n\n        assert abs(ciede2000(fill, ground) - want_normal) < 0.005, (\n            f"{fill} reads {ciede2000(fill, ground):.2f} from {ground} in "\n            f"normal vision, and this file says {want_normal}.")\n        assert abs(contrast(fill, ink) - want_text) < 0.00005, (\n            f"{fill} reads {contrast(fill, ink):.4f} against {ink}, and this "\n            f"file says {want_text}. That figure is the one the original "\n            f"round cited to show the fill had been checked; it was the "\n            f"wrong value\'s.")\n\n    assert len(RETIRED_FILLS) == 2, (\n        "RETIRED_FILLS should hold both halves of the pair that failed. One "\n        "entry means a mode is being described and not measured -- the "\n        "original round cited only the dark half and never noticed the light "\n        "one failed too.")\n', 1), ('tests/test_diff_floors.py', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 0.31.\n\n    Measured under all five, because the failure was invisible under four of\n    them: \'#4d1a1a\' reads 15.87 from the panel in normal vision.\n    """\n', 'def test_every_fill_is_visible_against_its_own_pane():\n    """The rule the old dark red failed at 5.03, and its light partner at 4.27.\n\n    Measured under all five, because the failure is invisible under four of\n    them: \'#4d1a1a\' reads 20.85 from the panel in normal vision and 5.03 at\n    its worst. The figures are pinned in RETIRED_FILLS above.\n    """\n', 1)]
+GUARD_SOURCE = '"""Derived values: a colour that is a named colour AT AN ALPHA.\n\nImage mode draws its chrome translucent, and until 2026-09-25 every one of\nthose values was written out: \'rgba(26, 26, 26, 191)\' beside BRAND_BLACK, with\nnothing relating the two. A change to BRAND_BLACK would have reached every\nopaque use of it and none of these. Each is now with_alpha(BASE, ALPHA) -- the\nhelper this application already had, and already used for the drag highlight\n-- so the register row carries every alpha form of its colour.\n\nWHAT MOVES A PIXEL: ONE THING, BY RULING. The image-mode scrollbar handle\nleaves #505050 for GREY_44, closing RNV-COLLAPSE-505050 here; its alpha stays\nat 150. Everything else keeps its colour and its alpha byte, respelled from\nrgba() to #AARRGGBB -- the same pixels, in the one spelling QColor() can also\nread. test_nothing_moved_that_was_not_ruled holds that to the byte.\n\nAND ONE KEY THAT NOTHING READS, LEFT AS IT IS. image_scrollbar_handle_hover\nholds rgba(100, 100, 100, 200), a grey on no register row, while the image\nscrollbar\'s hover is painted from DARK\'s \'accent\' -- BRAND_GOLD, ruled\n2026-09-12. It is not derived, because there is no row for it to follow; and\nit cannot simply take the painted gold, because LIGHT carries the same image\nkeys and a BRAND_GOLD there is a third gold in a mode the brand allows two.\nA test pins that nothing reads it.\n"""\nfrom __future__ import annotations\n\nimport ast\nimport pathlib\nimport re\n\nfrom utils import colors\nfrom utils.colors import with_alpha\nfrom utils.dialog_styles import DialogStyleManager\n\nROOT = pathlib.Path(__file__).resolve().parents[1]\nSTYLES = ROOT / "utils" / "dialog_styles.py"\nDRAG = ROOT / "ui" / "drag_drop_text_edit.py"\nPALETTES = {"DARK": DialogStyleManager.DARK, "LIGHT": DialogStyleManager.LIGHT}\n\n#: constant -> the byte. Every one is the integer alpha the rgba() literal it\n#: replaced already carried: nothing was fractional, so nothing was measured\n#: and nothing rounds.\nALPHAS = {\n    "IMAGE_FIELD_ALPHA": 0xAB,\n    "IMAGE_LABEL_ALPHA": 0xBF,\n    "IMAGE_CHECKBOX_ALPHA": 0x64,\n    "SCROLLBAR_BORDER_ALPHA": 0x64,\n    "SCROLLBAR_HANDLE_ALPHA": 0x96,\n    "DROPDOWN_BG_ALPHA": 0x83,\n    "DROPDOWN_SELECTION_ALPHA": 0xC8,\n    "DROPDOWN_BORDER_ALPHA": 0x96,\n    "DRAG_HIGHLIGHT_ALPHA": 0xBF,\n}\n\n#: What each image value is MADE OF: the constant its colour comes from, and its\n#: alpha byte -- the byte its rgba() literal already carried, and the colour\n#: that literal spelled, except the scrollbar handle\'s, which was ruled.\n#: By NAME, not by hex: see test_nothing_moved_that_was_not_ruled.\nMADE_OF = {\n    "image_overlay_bg": ("TRUE_BLACK", 171),\n    "image_overlay_bg_dark": ("BRAND_BLACK", 191),\n    "image_overlay_checkbox": ("TRUE_BLACK", 100),\n    "image_scrollbar_border": ("APP_BORDER", 100),\n    "image_scrollbar_handle": ("GREY_44", 150),     # was #505050, ruled\n    "image_dropdown_bg": ("TRUE_BLACK", 131),\n    "image_dropdown_selection": ("APP_BORDER", 200),\n    "image_dropdown_border": ("APP_BORDER", 150),\n}\nUNREAD = "image_scrollbar_handle_hover"\n\n_HEX8 = re.compile(r"^#([0-9a-fA-F]{2})([0-9a-fA-F]{6})$")\n_COMPOSED = re.compile(r"#[0-9a-fA-F]{8}\\b|\\brgba\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}"\n                       r"\\s*,\\s*\\d{1,3}\\s*,\\s*[0-9]*\\.?[0-9]+\\s*\\)")\n_HEX = re.compile(r"#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\\b")\n_FUNC = re.compile(r"\\brgba?\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})"\n                   r"\\s*(?:,\\s*[0-9]*\\.?[0-9]+\\s*)?\\)")\nSKIP_DIRS = {".git", "tests", "build", "dist", ".venv", "venv", "__pycache__"}\n\n\ndef decompose(value: str) -> tuple[str, int] | None:\n    """(base \'#rrggbb\', alpha byte) -- taken apart, never rebuilt, so a fault\n    in with_alpha() cannot also be a fault here."""\n    m = _HEX8.match(value)\n    if m:\n        return "#" + m.group(2).lower(), int(m.group(1), 16)\n    return None\n\n\ndef _parts_of(spelled: str) -> tuple[str, int]:\n    """(base, alpha byte) for any composed spelling, with Qt\'s own reading of a\n    fractional alpha: it TRUNCATES, so 0.3 is 76."""\n    if spelled.startswith("#"):\n        return "#" + spelled[3:].lower(), int(spelled[1:3], 16)\n    numbers = re.findall(r"[0-9]*\\.?[0-9]+", spelled)\n    r, g, b = (int(x) for x in numbers[:3])\n    a = numbers[3]\n    return "#%02x%02x%02x" % (r, g, b), (int(float(a) * 255) if "." in a\n                                         else int(a))\n\n\ndef colours_in(text: str) -> set[str]:\n    """Every colour in a string, as #rrggbb. #AARRGGBB is alpha FIRST."""\n    found = set()\n    for m in _HEX.finditer(text):\n        h = m.group(0)[1:].lower()\n        h = h[2:] if len(h) == 8 else ("".join(c * 2 for c in h) if len(h) == 3 else h)\n        found.add("#" + h)\n    for m in _FUNC.finditer(text):\n        channels = [int(g) for g in m.groups()]\n        if all(c <= 255 for c in channels):\n            found.add("#%02x%02x%02x" % tuple(channels))\n    return found\n\n\ndef _sources():\n    """Application source: not tests, not a root test suite, not a delivery\n    script. Yields (relative path, parsed tree)."""\n    for path in sorted(ROOT.rglob("*.py")):\n        rel = path.relative_to(ROOT)\n        if any(p in SKIP_DIRS for p in rel.parts):\n            continue\n        if len(rel.parts) == 1 and rel.name.startswith(("test_", "up")):\n            continue\n        text = path.read_bytes().decode("utf-8-sig", errors="replace")\n        if "RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP" in text:\n            continue\n        yield rel, ast.parse(text)\n\n\ndef _bare_strings(tree: ast.AST) -> set[int]:\n    """Docstrings and every other string nobody evaluates -- mentions."""\n    bare = set()\n    for node in ast.walk(tree):\n        body = getattr(node, "body", None)\n        if isinstance(body, list):\n            for st in body:\n                if isinstance(st, ast.Expr) and isinstance(st.value, ast.Constant):\n                    bare.add(id(st.value))\n    return bare\n\n\ndef _derived():\n    """(where, call node, resolved value) for every with_alpha() call in the\n    palettes and in the drag highlight."""\n    out = []\n    tree = ast.parse(STYLES.read_text(encoding="utf-8-sig"))\n    cls = next(n for n in tree.body\n               if isinstance(n, ast.ClassDef) and n.name == "DialogStyleManager")\n    for node in cls.body:\n        if not isinstance(node, (ast.Assign, ast.AnnAssign)):\n            continue\n        target = node.targets[0] if isinstance(node, ast.Assign) else node.target\n        name = getattr(target, "id", None)\n        if name in PALETTES and isinstance(node.value, ast.Dict):\n            for k, v in zip(node.value.keys, node.value.values):\n                if isinstance(v, ast.Call) and getattr(v.func, "id", None) == "with_alpha":\n                    out.append((f"{name}[{k.value!r}]", v, PALETTES[name][k.value]))\n    drag = ast.parse(DRAG.read_text(encoding="utf-8-sig"))\n    for node in ast.walk(drag):\n        if (isinstance(node, ast.AnnAssign) and getattr(node.target, "id", None)\n                == "_DRAG_HIGHLIGHT" and isinstance(node.value, ast.Call)):\n            from ui.drag_drop_text_edit import DragDropTextEdit\n            out.append(("DragDropTextEdit._DRAG_HIGHLIGHT", node.value,\n                        DragDropTextEdit._DRAG_HIGHLIGHT))\n    return out\n\n\n# ------------------------------------------------------------ guard the guard\n\ndef test_with_alpha_composes_alpha_first():\n    """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and\n    the wrong one, which is the failure that does not look like a failure."""\n    assert with_alpha("#1a1a1a", 0xBF) == "#BF1a1a1a"\n    assert decompose(with_alpha("#d2bc93", 0x33)) == ("#d2bc93", 0x33)\n    assert decompose(with_alpha("444444", 0x96)) == ("#444444", 0x96)\n\n\ndef test_the_alphas_are_the_declared_bytes():\n    for name, byte in ALPHAS.items():\n        assert hasattr(colors, name), f"utils.colors has no {name}"\n        value = getattr(colors, name)\n        assert type(value) is int, f"{name} is {value!r}, not an int byte"\n        assert value == byte, f"{name} is {value:#x}, declared {byte:#x}"\n\n\ndef test_the_derivation_sweep_is_looking():\n    """Every check below iterates _derived(). If it came back empty they\n    would all pass over nothing."""\n    where = {w for w, _c, _v in _derived()}\n    want = {f"{p}[{k!r}]" for p in PALETTES for k in MADE_OF}\n    want.add("DragDropTextEdit._DRAG_HIGHLIGHT")\n    assert want <= where, sorted(want - where)\n\n\n# ----------------------------------------------------------- the derivations\n\ndef test_every_derived_value_names_constants_that_exist():\n    """with_alpha(BASE, ALPHA) where both are names: a literal in either\n    position is the thing this round removed."""\n    bad = []\n    for where, call, _value in _derived():\n        if len(call.args) != 2 or call.keywords:\n            bad.append(f"{where}: {ast.unparse(call)} is not (BASE, ALPHA)")\n            continue\n        base, alpha = call.args\n        for pos, arg in (("base", base), ("alpha", alpha)):\n            if not isinstance(arg, ast.Name):\n                bad.append(f"{where}: the {pos} is {ast.unparse(arg)}, not a name")\n            elif not hasattr(colors, arg.id):\n                bad.append(f"{where}: the {pos} names {arg.id}, which "\n                           f"utils.colors does not define")\n        if isinstance(base, ast.Name) and hasattr(colors, base.id):\n            if not re.fullmatch(r"#[0-9a-fA-F]{6}", str(getattr(colors, base.id))):\n                bad.append(f"{where}: the base {base.id} is not a six-digit colour")\n        if isinstance(alpha, ast.Name) and alpha.id not in ALPHAS:\n            bad.append(f"{where}: the alpha {alpha.id} is not a declared "\n                       f"composite alpha")\n    assert not bad, "derived values that do not derive:\\n  " + "\\n  ".join(bad)\n\n\ndef test_every_derived_value_decomposes_to_its_base_and_its_alpha():\n    """TAKEN APART, not rebuilt -- the entry IS with_alpha()\'s output, so\n    recomputing it would compare the call with itself."""\n    wrong = []\n    for where, call, value in _derived():\n        base, alpha = call.args\n        parts = decompose(value)\n        want = (getattr(colors, base.id).lower(), getattr(colors, alpha.id))\n        if parts != want:\n            wrong.append(f"{where} is {value!r}, which takes apart to {parts}, "\n                         f"not {base.id}/{alpha.id} {want}")\n    assert not wrong, "derived values that do not match:\\n  " + "\\n  ".join(wrong)\n\n\ndef test_no_composed_literal_is_left_in_the_application():\n    """The completeness half. Every EVALUATED string in the application\'s own\n    source that spells a named colour at an alpha. Docstrings are mentions --\n    utils/colors.py shows \'#BFd2bc93\' as an example, and that is prose.\n    Alpha 0 is not a colour; a base no constant names has no row to follow."""\n    named = {v.lower() for n, v in vars(colors).items()\n             if n.isupper() and isinstance(v, str)\n             and re.fullmatch(r"#[0-9a-fA-F]{6}", v)}\n    strays, files = [], 0\n    for rel, tree in _sources():\n        files += 1\n        bare = _bare_strings(tree)\n        for node in ast.walk(tree):\n            if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):\n                continue\n            if id(node) in bare:\n                continue\n            for spelled in _COMPOSED.findall(node.value):\n                base, alpha = _parts_of(spelled)\n                if alpha and base in named:\n                    strays.append(f"{rel}:{node.lineno}  {spelled}")\n    assert files >= 40, f"only {files} files swept -- the walk has gone blind"\n    assert not strays, ("composed values still written out rather than "\n                        "derived:\\n  " + "\\n  ".join(strays))\n\n\n# --------------------------------------------------- what moved, and what not\n\ndef test_the_scrollbar_handle_is_grey_44_at_150():\n    """RNV-COLLAPSE-505050, closed here 2026-09-25. Ruled 2026-09-02, and\n    written out as rgba(80, 80, 80, 150) in both palettes until now."""\n    for mode, palette in PALETTES.items():\n        assert decompose(palette["image_scrollbar_handle"]) == (\n            colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA), mode\n    assert colors.SCROLLBAR_HANDLE_ALPHA == 150\n\n\ndef test_nothing_moved_that_was_not_ruled():\n    """Each image value, held to what it is MADE OF: the constant its colour\n    comes from and its alpha byte.\n\n    BY NAME, NOT BY HEX, and that is the point of the round. A register move\n    is meant to pass straight through these values; a test that pinned\n    \'#333333\' would fail the first time one did and ask a person to edit it\n    by hand -- the job derivation exists to remove. What this DOES catch is a\n    value quietly re-made from something else, which the decomposition check\n    accepts as long as source and value agree with each other.\n\n    The byte-for-byte before-and-after was checked once, by the delivery\n    script, against the edited module before it was written."""\n    for mode, palette in PALETTES.items():\n        for key, (base, alpha) in MADE_OF.items():\n            assert decompose(palette[key]) == (getattr(colors, base).lower(), alpha), (\n                f"{mode}[{key!r}] is {palette[key]}, which is not {base} at "\n                f"{alpha}")\n    from ui.drag_drop_text_edit import DragDropTextEdit\n    assert decompose(DragDropTextEdit._DRAG_HIGHLIGHT) == (colors.BRAND_GOLD, 0xBF)\n\n\ndef test_the_unread_hover_key_stays_unread():\n    """image_scrollbar_handle_hover is read by nothing: the image scrollbar\n    hovers from DARK\'s \'accent\', BRAND_GOLD, ruled 2026-09-12. It still holds\n    rgba(100, 100, 100, 200) -- a grey on no register row, left because there\n    is nothing to derive it from and the gold would be a third gold in LIGHT.\n\n    If anything starts reading it, this fails: the value would then be a grey\n    hover on screen, against the gold ruling, and it has to be decided rather\n    than inherited."""\n    assert DialogStyleManager.DARK["accent"] == colors.BRAND_GOLD\n    readers, keys = [], 0\n    for rel, tree in _sources():\n        # the dict KEYS that declare it are not reads; anything else is,\n        # including a lookup inside dialog_styles.py itself\n        declared = {id(k) for node in ast.walk(tree) if isinstance(node, ast.Dict)\n                    for k in node.keys if k is not None}\n        for node in ast.walk(tree):\n            if isinstance(node, ast.Constant) and node.value == UNREAD:\n                if id(node) in declared:\n                    keys += 1\n                else:\n                    readers.append(f"{rel}:{node.lineno}")\n    assert keys == 2, f"expected the key declared in DARK and LIGHT, found {keys}"\n    assert not readers, f"{UNREAD} is read now: {readers}"\n\n\ndef test_the_collapsed_value_is_gone_in_every_spelling():\n    """#505050 in any string spelling -- #rgb, #rrggbb, #aarrggbb, rgb(),\n    rgba() -- or as integers in a tuple or a QColor call. The sweeps that\n    reported it gone elsewhere compared quoted six-digit hex and nothing\n    else; that is how it survived three weeks after its ruling."""\n    found = []\n    for rel, tree in _sources():\n        bare = _bare_strings(tree)\n        for node in ast.walk(tree):\n            if (isinstance(node, ast.Constant) and isinstance(node.value, str)\n                    and id(node) not in bare and "#505050" in colours_in(node.value)):\n                found.append(f"{rel}:{node.lineno}  {node.value[:40]!r}")\n            values = None\n            if isinstance(node, (ast.Tuple, ast.List)) and len(node.elts) in (3, 4):\n                values = node.elts\n            elif isinstance(node, ast.Call) and len(node.args) >= 3 and (\n                    getattr(node.func, "id", None) or getattr(node.func, "attr", None)\n                    ) in ("QColor", "fromRgb", "QPen", "QBrush"):\n                values = node.args\n            if values:\n                ints = tuple(v.value for v in values[:3]\n                             if isinstance(v, ast.Constant) and type(v.value) is int)\n                if ints == (80, 80, 80):\n                    found.append(f"{rel}:{node.lineno}  (80, 80, 80)")\n    assert not found, "#505050 is still here:\\n  " + "\\n  ".join(found)\n    assert colours_in("rgba(80, 80, 80, 150)") == {"#505050"}, "the decoder is blind"\n\n# RNV-DERIVE-ALPHA\n'
 
 
 def edits(tree) -> None:
-    for rel, old, new, times in EDITS:
-        tree.sub(rel, old, new, times)
-    by_file: dict = {}
-    for rel, *_ in EDITS:
-        by_file[rel] = by_file.get(rel, 0) + 1
-    print("  " + ", ".join(f"{n} in {rel}" for rel, n in sorted(by_file.items())))
-
-# --------------------------------------------------- the arithmetic, again
-# A second copy of what the guard holds, deliberately: checks() runs against
-# the in-memory tree before utils/colors.py on disk carries the new value, so
-# it cannot import the guard and ask it, and a check that read the old file
-# would pass on the wrong number.
-MATRICES = {
-    "protanopia":   ((0.567, 0.433, 0.000), (0.558, 0.442, 0.000),
-                     (0.000, 0.242, 0.758)),
-    "deuteranopia": ((0.625, 0.375, 0.000), (0.700, 0.300, 0.000),
-                     (0.000, 0.300, 0.700)),
-    "tritanopia":   ((0.950, 0.050, 0.000), (0.000, 0.433, 0.567),
-                     (0.000, 0.475, 0.525)),
-}
-VISION = ("normal", "protanopia", "deuteranopia", "tritanopia", "achromatopsia")
-
-
-def _rgb(h):
-    h = h.lstrip("#")
-    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
-
-
-def _hx(t):
-    return "#%02x%02x%02x" % t
-
-
-def _contrast(a, b):
-    def lum(c):
-        def f(v):
-            v /= 255.0
-            return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
-        return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2])
-    la, lb = lum(_rgb(a)), lum(_rgb(b))
-    hi, lo = max(la, lb), min(la, lb)
-    return math.floor((hi + 0.05) / (lo + 0.05) * 10000) / 10000
-
-
-def _sim(h, kind):
-    if kind == "normal":
-        return h.lower()
-    r, g, b = _rgb(h)
-    if kind == "achromatopsia":
-        y = int(0.299 * r + 0.587 * g + 0.114 * b)
-        return _hx((y, y, y))
-    m = MATRICES[kind]
-    rf, gf, bf = r / 255.0, g / 255.0, b / 255.0
-    return _hx(tuple(int(max(0.0, min(1.0, row[0] * rf + row[1] * gf
-                                      + row[2] * bf)) * 255) for row in m))
-
-
-def _lab(h):
-    def f(v):
-        v /= 255.0
-        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
-    r, g, b = (f(v) for v in _rgb(h))
-    x = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047
-    y = (0.2126729 * r + 0.7151522 * g + 0.0721750 * b)
-    z = (0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / 1.08883
-
-    def g_(t):
-        return t ** (1 / 3) if t > 216 / 24389 else (841 / 108) * t + 4 / 29
-    fx, fy, fz = g_(x), g_(y), g_(z)
-    return 116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)
-
-
-def _de2000(one, two):
-    l1, a1, b1 = _lab(one)
-    l2, a2, b2 = _lab(two)
-    c1, c2 = math.hypot(a1, b1), math.hypot(a2, b2)
-    cb = (c1 + c2) / 2
-    g = 0.5 * (1 - math.sqrt(cb ** 7 / (cb ** 7 + 25 ** 7))) if cb else 0.5
-    a1p, a2p = (1 + g) * a1, (1 + g) * a2
-    c1p, c2p = math.hypot(a1p, b1), math.hypot(a2p, b2)
-    h1p = math.degrees(math.atan2(b1, a1p)) % 360 if (a1p or b1) else 0.0
-    h2p = math.degrees(math.atan2(b2, a2p)) % 360 if (a2p or b2) else 0.0
-    dlp, dcp = l2 - l1, c2p - c1p
-    if c1p * c2p == 0:
-        dhp = 0.0
-    else:
-        d = h2p - h1p
-        dhp = d - 360 if d > 180 else (d + 360 if d < -180 else d)
-    dhp2 = 2 * math.sqrt(c1p * c2p) * math.sin(math.radians(dhp) / 2)
-    lbp, cbp = (l1 + l2) / 2, (c1p + c2p) / 2
-    if c1p * c2p == 0:
-        hbp = h1p + h2p
-    else:
-        s = h1p + h2p
-        hbp = ((s + 360) / 2 if s < 360 else (s - 360) / 2) \
-            if abs(h1p - h2p) > 180 else s / 2
-    t = (1 - 0.17 * math.cos(math.radians(hbp - 30))
-         + 0.24 * math.cos(math.radians(2 * hbp))
-         + 0.32 * math.cos(math.radians(3 * hbp + 6))
-         - 0.20 * math.cos(math.radians(4 * hbp - 63)))
-    dth = 30 * math.exp(-(((hbp - 275) / 25) ** 2))
-    rc = 2 * math.sqrt(cbp ** 7 / (cbp ** 7 + 25 ** 7)) if cbp else 0.0
-    sl = 1 + (0.015 * (lbp - 50) ** 2) / math.sqrt(20 + (lbp - 50) ** 2)
-    sc, sh = 1 + 0.045 * cbp, 1 + 0.015 * cbp * t
-    rt = -math.sin(math.radians(2 * dth)) * rc
-    return math.sqrt((dlp / sl) ** 2 + (dcp / sc) ** 2 + (dhp2 / sh) ** 2
-                     + rt * (dcp / sc) * (dhp2 / sh))
-
-
-def _worst(one, two):
-    return min((_de2000(_sim(one, v), _sim(two, v)), v) for v in VISION)
-
-
-def _constants(text):
-    out = {}
-    for node in ast.walk(ast.parse(text)):
-        if (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
-                and isinstance(node.value, ast.Constant)
-                and isinstance(node.value.value, str)
-                and re.fullmatch(r"#[0-9a-fA-F]{6}", node.value.value)):
-            out[node.target.id] = node.value.value.lower()
-    return out
-
-
-def _palette(text, which, consts):
-    out = {}
-    for node in ast.walk(ast.parse(text)):
-        if (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
-                and node.target.id == which and isinstance(node.value, ast.Dict)):
-            for k, v in zip(node.value.keys, node.value.values):
-                if not isinstance(k, ast.Constant):
-                    continue
-                if isinstance(v, ast.Name) and v.id in consts:
-                    out[k.value] = consts[v.id]
-                elif (isinstance(v, ast.Constant) and isinstance(v.value, str)
-                      and re.fullmatch(r"#[0-9a-fA-F]{6}", v.value)):
-                    out[k.value] = v.value.lower()
-    return out
-
+    """Every substitution, against the in-memory tree. Each anchor is
+    checked for its exact count before anything is written."""
+    tree.sub('utils/colors.py',
+             '    return f"#{alpha:02X}{rgb}"\n\n\n# ==================== PROVENANCE ====================\n',
+             '    return f"#{alpha:02X}{rgb}"\n\n\n# ==================== COMPOSITE ALPHAS ====================\n#\n# A composite is a named colour AT AN ALPHA: with_alpha(BASE, ALPHA). The colour\n# half is a name, so a register move reaches it; the alpha half is one of these,\n# so the same move carries every alpha form of that colour with it. Until\n# 2026-09-25 image mode wrote all of them out as rgba() and nothing related\n# \'rgba(26, 26, 26, 191)\' to BRAND_BLACK.\n#\n# Each byte is the one the literal it replaced already carried. They were all\n# integers, so nothing was measured and nothing rounds.\n#\n# TWO BYTES APPEAR TWICE, UNDER DIFFERENT NAMES, ON PURPOSE. The scrollbar edge\n# and the checkbox ground are both 100; the scrollbar handle and the dropdown\n# edge are both 150. Identical numbers doing unrelated jobs stay separate, or\n# retuning one silently retunes the other.\n\nIMAGE_FIELD_ALPHA: Final[int] = 0xAB\n"""171. The input field, its label and the label bar, in image mode (TRUE_BLACK)."""\n\nIMAGE_LABEL_ALPHA: Final[int] = 0xBF\n"""191. The status, output and stats labels in image mode (BRAND_BLACK)."""\n\nIMAGE_CHECKBOX_ALPHA: Final[int] = 0x64\n"""100. The checkbox indicator\'s ground in image mode (TRUE_BLACK)."""\n\nSCROLLBAR_BORDER_ALPHA: Final[int] = 0x64\n"""100. The image-mode scrollbar edge (APP_BORDER)."""\n\nSCROLLBAR_HANDLE_ALPHA: Final[int] = 0x96\n"""150. The image-mode scrollbar handle (GREY_44). The byte all five\napplications use; its colour was #505050 until 2026-09-25."""\n\nDROPDOWN_BG_ALPHA: Final[int] = 0x83\n"""131. The image-mode dropdown list\'s ground (TRUE_BLACK)."""\n\nDROPDOWN_SELECTION_ALPHA: Final[int] = 0xC8\n"""200. The image-mode dropdown selection (APP_BORDER)."""\n\nDROPDOWN_BORDER_ALPHA: Final[int] = 0x96\n"""150. The image-mode dropdown list\'s edge (APP_BORDER)."""\n\nDRAG_HIGHLIGHT_ALPHA: Final[int] = 0xBF\n"""191, 75%. The drop-target highlight on a text pane (BRAND_GOLD). The one\ncomposite this application already derived; its byte was written in place."""\n\n\n# ==================== PROVENANCE ====================\n', 1)
+    tree.sub('utils/colors.py',
+             "    'lighten',\n    'with_alpha',\n",
+             "    'lighten',\n    'with_alpha',\n    'IMAGE_FIELD_ALPHA',\n    'IMAGE_LABEL_ALPHA',\n    'IMAGE_CHECKBOX_ALPHA',\n    'SCROLLBAR_BORDER_ALPHA',\n    'SCROLLBAR_HANDLE_ALPHA',\n    'DROPDOWN_BG_ALPHA',\n    'DROPDOWN_SELECTION_ALPHA',\n    'DROPDOWN_BORDER_ALPHA',\n    'DRAG_HIGHLIGHT_ALPHA',\n", 1)
+    tree.sub('utils/dialog_styles.py',
+             '    BRAND_DARK_GOLD_PRESSED,\n)\n',
+             '    BRAND_DARK_GOLD_PRESSED,\n    with_alpha,\n    IMAGE_FIELD_ALPHA,\n    IMAGE_LABEL_ALPHA,\n    IMAGE_CHECKBOX_ALPHA,\n    SCROLLBAR_BORDER_ALPHA,\n    SCROLLBAR_HANDLE_ALPHA,\n    DROPDOWN_BG_ALPHA,\n    DROPDOWN_SELECTION_ALPHA,\n    DROPDOWN_BORDER_ALPHA,\n)\n', 1)
+    tree.sub('utils/dialog_styles.py',
+             "        # Image mode semi-transparent overlay values (rgba — used only in image mode)\n        'image_overlay_bg':            'rgba(0, 0, 0, 171)',\n        'image_overlay_bg_dark':       'rgba(26, 26, 26, 191)',\n        'image_overlay_checkbox':      'rgba(0, 0, 0, 100)',\n        'image_scrollbar_border':      'rgba(51, 51, 51, 100)',\n        'image_scrollbar_handle':      'rgba(80, 80, 80, 150)',\n        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',\n        'image_dropdown_bg':           'rgba(0, 0, 0, 131)',\n        'image_dropdown_selection':    'rgba(51, 51, 51, 200)',\n        'image_dropdown_border':       'rgba(51, 51, 51, 150)',\n    }\n    \n    LIGHT:",
+             "        # Image mode semi-transparent overlay values -- used only in image\n        # mode. DERIVED: a named colour at a declared alpha, so a register\n        # move reaches them (RNV-DERIVE-ALPHA, 2026-09-25).\n        'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),\n        'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),\n        'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),\n        'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),\n        # RNV-COLLAPSE-505050, closed here 2026-09-25: this was\n        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on\n        # 2026-09-02 and left behind because nothing decoded rgba().\n        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),\n        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.\n        # Left as written: #646464 is on no register row, so there is\n        # nothing to derive it from. See tests/test_derived_values.py.\n        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',\n        'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),\n        'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),\n        'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),\n    }\n    \n    LIGHT:", 1)
+    tree.sub('utils/dialog_styles.py',
+             "        # Image mode semi-transparent overlay values (rgba — used only in image mode)\n        # Same values as DARK since image mode always uses dark-based overlays\n        'image_overlay_bg':            'rgba(0, 0, 0, 171)',\n        'image_overlay_bg_dark':       'rgba(26, 26, 26, 191)',\n        'image_overlay_checkbox':      'rgba(0, 0, 0, 100)',\n        'image_scrollbar_border':      'rgba(51, 51, 51, 100)',\n        'image_scrollbar_handle':      'rgba(80, 80, 80, 150)',\n        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',\n        'image_dropdown_bg':           'rgba(0, 0, 0, 131)',\n        'image_dropdown_selection':    'rgba(51, 51, 51, 200)',\n        'image_dropdown_border':       'rgba(51, 51, 51, 150)',\n",
+             "        # Image mode semi-transparent overlay values -- used only in image\n        # mode. Same derivations as DARK since image mode always uses\n        # dark-based overlays; image mode reads DARK, so nothing reads these.\n        'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),\n        'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),\n        'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),\n        'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),\n        # RNV-COLLAPSE-505050, closed here 2026-09-25: this was\n        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on\n        # 2026-09-02 and left behind because nothing decoded rgba().\n        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),\n        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.\n        # Left as written: #646464 is on no register row, so there is\n        # nothing to derive it from. See tests/test_derived_values.py.\n        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',\n        'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),\n        'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),\n        'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),\n", 1)
+    tree.sub('ui/drag_drop_text_edit.py',
+             'from utils.colors import BRAND_GOLD, TRUE_BLACK, with_alpha\n',
+             'from utils.colors import (BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA, TRUE_BLACK,\n                          with_alpha)\n', 1)
+    tree.sub('ui/drag_drop_text_edit.py',
+             '    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, 0xBF)\n',
+             '    _DRAG_HIGHLIGHT: str = with_alpha(BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA)\n', 1)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_dropdown_bg": "rgba(0, 0, 0, 131)",\n',
+             '    "image_dropdown_bg": "#83000000",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_dropdown_border": "rgba(51, 51, 51, 150)",\n',
+             '    "image_dropdown_border": "#96333333",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_dropdown_selection": "rgba(51, 51, 51, 200)",\n',
+             '    "image_dropdown_selection": "#C8333333",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_overlay_bg": "rgba(0, 0, 0, 171)",\n',
+             '    "image_overlay_bg": "#AB000000",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_overlay_bg_dark": "rgba(26, 26, 26, 191)",\n',
+             '    "image_overlay_bg_dark": "#BF1a1a1a",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_overlay_checkbox": "rgba(0, 0, 0, 100)",\n',
+             '    "image_overlay_checkbox": "#64000000",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_scrollbar_border": "rgba(51, 51, 51, 100)",\n',
+             '    "image_scrollbar_border": "#64333333",\n', 2)
+    tree.sub('tests/__snapshots__/test_snapshots.ambr',
+             '    "image_scrollbar_handle": "rgba(80, 80, 80, 150)",\n',
+             '    "image_scrollbar_handle": "#96444444",\n', 2)
+    tree.sub('tests/conftest.py',
+             '# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired\n',
+             '# RNV-DERIVE-ALPHA, 2026-09-25 -- every image-mode colour written at an\n# alpha is DERIVED, with_alpha(BASE, ALPHA), so a change to a base reaches\n# every alpha form of it. The image scrollbar handle left #505050 for\n# GREY_44 at 150, by ruling, closing RNV-COLLAPSE-505050 here.\n# tests/test_derived_values.py holds the derivations.\n# RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired\n', 1)
 
 
 def checks(tree) -> None:
-    guard_txt = tree.files[GUARD]
-    colors_txt = tree.files["utils/colors.py"]
-    styles_txt = (Path.cwd() / "utils" / "dialog_styles.py").read_text(
-        encoding="utf-8")
-    consts = _constants(colors_txt)
+    """Against the IN-MEMORY tree, before anything reaches disk."""
+    colours_src = tree.read('utils/colors.py')
+    styles_src = tree.read('utils/dialog_styles.py')
 
-    # 1. the table landed, with both entries and the values this round means.
-    pinned = {}
-    for node in ast.walk(ast.parse(guard_txt)):
-        if (isinstance(node, ast.Assign) and len(node.targets) == 1
-                and getattr(node.targets[0], "id", "") == "RETIRED_FILLS"
-                and isinstance(node.value, ast.Dict)):
-            for k, v in zip(node.value.keys, node.value.values):
-                pinned[k.value] = tuple(e.value for e in v.elts)
-    if pinned != WANT_FILLS:
-        raise SystemExit(f"RETIRED_FILLS is {pinned}, not {WANT_FILLS}")
+    # THE VALUES, EVALUATED. utils/colors.py imports nothing but typing, so the
+    # edited module runs here; each palette entry is then evaluated in its
+    # namespace, which is every name dialog_styles imports from it.
+    ns = {}
+    exec(compile(colours_src, 'utils/colors.py (edited)', 'exec'), ns)
+    module = ast.parse(styles_src)
+    cls = next(n for n in module.body
+               if isinstance(n, ast.ClassDef) and n.name == 'DialogStyleManager')
+    palettes, calls = {}, 0
+    for node in cls.body:
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            t = node.targets[0] if isinstance(node, ast.Assign) else node.target
+            if getattr(t, 'id', None) in ('DARK', 'LIGHT'):
+                live = {}
+                for k, v in zip(node.value.keys, node.value.values):
+                    live[k.value] = eval(compile(ast.Expression(v), 'entry', 'eval'), ns)
+                    if isinstance(v, ast.Call) and getattr(v.func, 'id', None) == 'with_alpha':
+                        calls += 1
+                    if (isinstance(v, ast.Constant) and isinstance(v.value, str)
+                            and k.value != 'image_scrollbar_handle_hover'):
+                        assert 'rgba(' not in v.value, f'{t.id}[{k.value!r}] = {v.value}'
+                palettes[t.id] = live
+    assert calls == 16, f'expected 16 derived entries, found {calls}'
 
-    # 2. every pinned figure re-derived from the palette, not trusted. This is
-    #    the round: the last one published four numbers nothing re-derived.
-    bad = []
-    for fill, (mode, collapse, w_worst, w_normal, w_text) in pinned.items():
-        pal = _palette(styles_txt, mode, consts)
-        ground, ink = pal["bg"], pal["text"]
-        got = _sim(fill, "achromatopsia")
-        if got != collapse:
-            bad.append(f"{fill} collapses to {got}, pinned {collapse}")
-        d, eye = _worst(fill, ground)
-        if eye != "achromatopsia":
-            bad.append(f"{fill} closest to its pane under {eye}")
-        if abs(d - w_worst) >= 0.005:
-            bad.append(f"{fill} worst {d:.2f}, pinned {w_worst}")
-        if d >= 8.40:
-            bad.append(f"{fill} reads {d:.2f} -- over the floor it was "
-                       f"retired for, so the story does not hold")
-        n = _de2000(fill, ground)
-        if abs(n - w_normal) >= 0.005:
-            bad.append(f"{fill} normal {n:.2f}, pinned {w_normal}")
-        t = _contrast(fill, ink)
-        if abs(t - w_text) >= 0.00005:
-            bad.append(f"{fill} text {t:.4f}, pinned {w_text}")
-    if bad:
-        raise SystemExit("pinned figures do not re-derive:\n  "
-                         + "\n  ".join(bad))
+    want = {
+        'image_overlay_bg': '#AB000000',
+        'image_overlay_bg_dark': '#BF1a1a1a',
+        'image_overlay_checkbox': '#64000000',
+        'image_scrollbar_border': '#64333333',
+        'image_scrollbar_handle': '#96444444',      # the ruled change
+        'image_scrollbar_handle_hover': 'rgba(100, 100, 100, 200)',  # unread, left
+        'image_dropdown_bg': '#83000000',
+        'image_dropdown_selection': '#C8333333',
+        'image_dropdown_border': '#96333333',
+    }
+    for mode, live in palettes.items():
+        for key, value in want.items():
+            assert live[key] == value, f'{mode}[{key!r}] = {live[key]}, want {value}'
+        # the locked suite's own colour check, applied to every value
+        for key, value in live.items():
+            assert re.match(r'^#[0-9a-fA-F]{3,8}$', value) or \
+                re.match(r'^rgba\(\d+,\s*\d+,\s*\d+,\s*\d+\)$', value), (mode, key, value)
 
-    # 3. the six values that SHIP are untouched. This round corrects prose; if
-    #    a rendered value moved, something went wrong in an anchor.
-    for mode, keys in (("DARK", ("diff_added_bg", "diff_removed_bg",
-                                 "diff_changed_bg", "regex_match_bg")),
-                       ("LIGHT", ("diff_added_bg", "diff_removed_bg",
-                                  "diff_changed_bg", "regex_match_bg"))):
-        pal = _palette(styles_txt, mode, consts)
-        for key in keys:
-            if key not in pal:
-                raise SystemExit(f"{mode}[{key}] vanished; this round should "
-                                 f"not touch a palette")
+    # the drag highlight keeps its value, now through a named alpha
+    drag = tree.read('ui/drag_drop_text_edit.py')
+    assert 'with_alpha(BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA)' in drag
+    assert eval("with_alpha(BRAND_GOLD, DRAG_HIGHLIGHT_ALPHA)", ns) == '#BFd2bc93'
 
-    # 4. the instrument, before its figures are trusted.
-    got = _de2000("#d2bc93", "#b49e75")
-    if abs(got - 8.4035) >= 0.0005:
-        raise SystemExit(f"CIEDE2000(#d2bc93, #b49e75) = {got:.4f}, and the "
-                         f"register publishes 8.4035")
-
-    # 5. the sentinel is in the file the already-applied check reads.
-    if SENTINEL not in tree.files[SENTINEL_FILE]:
-        raise SystemExit(f"'{SENTINEL}' is not in {SENTINEL_FILE}, so the "
-                         f"already-applied check can never fire")
-
-    print(f"  guards: {len(pinned)} retired fills pinned and every figure "
-          f"re-derived, 8 shipped values untouched, instrument reads {got:.4f}")
-
-
-
+    # the snapshot records the new values and none of the old
+    snap = tree.read('tests/__snapshots__/test_snapshots.ambr')
+    assert snap.count('rgba(') == 2 and snap.count(
+        '"image_scrollbar_handle_hover": "rgba(100, 100, 100, 200)"') == 2, (
+        'the snapshot records an rgba() value other than the unread hover key')
+    assert snap.count('"image_scrollbar_handle": "#96444444"') == 2
 # ------------------------------------------------------------------ plumbing
-#: EXIT CODES ARE NAMED, and every path out of this script takes one of them.
-#:
-#: The version of this harness before 2026-09-15 exited 1 for "already
-#: applied", 1 for "wrong directory" and 1 for a failing guard, so a finished
-#: round and a broken round were indistinguishable from the shell. Three
-#: conditions, one code, and the two that are not failures were the majority.
-#:
-#:   0  complete and clean   applied and green, already applied, --check passed
-#:   1  something disagrees  a guard failed, a suite failed, an anchor moved
-#:   2  could not run at all  wrong directory, wrong repository, environment
-#:   3  ran but incomplete   the suite started and Python aborted natively
-#:
-#: An unrecognised code is a bug in this file and main() says so rather than
-#: passing it through, because a code that falls through every branch is the
-#: original defect returning.
-EXIT_CLEAN = 0
-EXIT_DISAGREES = 1
-EXIT_CANNOT_RUN = 2
-EXIT_INCOMPLETE = 3
-
-_EXIT_NAMES = {
-    EXIT_CLEAN: "clean",
-    EXIT_DISAGREES: "something disagrees",
-    EXIT_CANNOT_RUN: "could not run",
-    EXIT_INCOMPLETE: "ran but did not finish",
-}
+#
+# EXIT CODES ARE A TAXONOMY, NOT A BOOLEAN. Rev 6 §3.0.1. A harness that
+# returns non-zero for everything tells the operator something is wrong and
+# nothing about what, and the three non-zero cases want three different
+# actions: read the diff, install something, re-run.
+EXIT_CLEAN = 0       # everything agreed
+EXIT_DISAGREES = 1   # something ran and disagreed -- read it
+EXIT_CANNOT_RUN = 2  # the environment is not ready -- nothing was asked
+EXIT_INCOMPLETE = 3  # it ran and did not finish -- re-run before believing it
 
 
-class Stop(Exception):
-    """A deliberate exit carrying one of the named codes above.
+class Stop(SystemExit):
+    """A refusal this script chose, as opposed to a crash.
 
-    Replaces SystemExit for every stop this harness OWNS. A bare SystemExit
-    raised inside a round's own checks() still means "a guard said no" and
-    main() maps it to EXIT_DISAGREES, which is what it exited as before.
+    Carries an exit code from the taxonomy. Bare SystemExit('message') exits 1,
+    which says A TEST DISAGREED -- so every refusal used to arrive wearing the
+    one verdict it was not.
     """
 
-    def __init__(self, code: int, message: str) -> None:
+    def __init__(self, message: str, code: int = EXIT_CANNOT_RUN) -> None:
         super().__init__(message)
         self.code = code
 
 
-#: TWO DISTINCTIVE PATHS PER REPOSITORY, used only to recognise the WRONG one.
-#:
-#: Two rather than one because a single shared filename is not a discriminator
-#: -- every app here has ui/ and core/ and tests/conftest.py.
-#:
-#: This table is consulted for POSITIVE EVIDENCE OF THE WRONG REPOSITORY and
-#: never as a requirement that the right one look a particular way. A renamed
-#: file would otherwise refuse a correct checkout, and a gate that refuses good
-#: work is a gate that gets loosened until it denies nothing. Stale entries
-#: therefore weaken DETECTION, not correctness: a wrong repo the table misses
-#: is still caught by the anchors, one code later and with worse attribution.
+#: Two files per repository that exist there and in none of the others.
+#: Verified against the live fleet by _fingerprint_check.py at build time,
+#: because a fingerprint that has been renamed away identifies nothing and
+#: would refuse every correct checkout.
 FINGERPRINTS = {
     "rnv-color-mixer": ("core/image_handler.py", "ui/canvas_view.py"),
     "rnv-color-palette-manager": ("core/color_extractor.py",
@@ -402,66 +229,52 @@ FINGERPRINTS = {
 }
 
 
+def refuse_wrong_repository(root) -> None:
+    """Refuse a checkout that is not the repository this script was built for.
+
+    CALLED FIRST IN apply(), BEFORE THE SENTINEL AND BEFORE ANY ANCHOR, and the
+    order is the whole point. The five applications share file names -- four of
+    them have a utils/config.py or a ui/colors.py, and several share a
+    tests/conftest.py. Run in the wrong sibling, a sentinel check says "already
+    applied" or "not a checkout" and an anchor check says "the file moved",
+    and BOTH of those are the script guessing at the wrong question.
+
+    A fingerprint is a file only the right repository has. Two, because one
+    that gets renamed takes the check with it.
+    """
+    want = FINGERPRINTS.get(REPO)
+    if not want:
+        return
+    missing = [f for f in want if not (root / f).exists()]
+    if missing:
+        raise Stop(
+            f"this is not a {REPO} checkout.\n"
+            f"  expected to find: {', '.join(want)}\n"
+            f"  missing here:     {', '.join(missing)}\n"
+            f"Run it from the root of {REPO}. Nothing was read or written.",
+            EXIT_CANNOT_RUN)
+
+
+def _left_alone() -> None:
+    """Print what this round deliberately did not touch.
+
+    LEFT_ALONE is optional and is prose, not a guard. It exists because a
+    reader of a diff can see what changed and cannot see what was considered
+    and declined, and the second is where a round's scope actually lives.
+    """
+    items = globals().get("LEFT_ALONE")
+    if not items:
+        return
+    print("\nleft alone, deliberately:")
+    for line in items:
+        print(f"  - {line}")
+
+
 def refuse_to_shadow() -> None:
     name = Path(__file__).name
     if name in SHADOWS:
-        raise Stop(EXIT_CANNOT_RUN,
-                   f"refusing to run as {name} -- it would shadow a module on "
-                   f"sys.path. Rename to up.py and run again.")
-
-
-def _remote_repo(root: Path) -> str | None:
-    """The repository this checkout points at, or None if git cannot say.
-
-    None is not a finding. A tree with no git, no origin, or a git that is not
-    installed is a checkout this script can still be correct about, and
-    refusing it would be a refusal where an answer was available.
-    """
-    try:
-        out = subprocess.run(["git", "-C", str(root), "remote", "get-url",
-                              "origin"], capture_output=True, text=True,
-                             timeout=10)
-    except (OSError, subprocess.SubprocessError):
-        return None
-    if out.returncode != 0:
-        return None
-    url = out.stdout.strip()
-    if not url:
-        return None
-    name = url.rstrip("/").rsplit("/", 1)[-1]
-    return name[:-4] if name.endswith(".git") else name
-
-
-def refuse_wrong_repository(root: Path) -> None:
-    """Stop when this is a checkout of a DIFFERENT repository in the fleet.
-
-    WHY THIS EXISTS AS A CHECK RATHER THAN A CONSTANT. REPO was declared at the
-    top of every delivered script and consumed by nothing -- two occurrences,
-    the assignment and an f-string in an error message, and zero comparisons.
-    It read as a safety check for weeks and was a label. A delivery script for
-    one repository ended up committed at another's root, and nothing in the
-    script could have said so.
-    """
-    seen = _remote_repo(root)
-    if seen is not None and seen != REPO and seen in FINGERPRINTS:
-        raise Stop(EXIT_CANNOT_RUN,
-                   f"this is a {seen} checkout and this script is for {REPO} "
-                   f"(git says origin is {seen}).\n\n"
-                   f"Nothing was read and nothing was written.")
-
-    if seen == REPO:
-        return                       # git answered; no need to guess
-
-    for other, paths in FINGERPRINTS.items():
-        if other == REPO:
-            continue
-        if all((root / p).exists() for p in paths):
-            raise Stop(EXIT_CANNOT_RUN,
-                       f"this looks like a {other} checkout and this script "
-                       f"is for {REPO}.\n\n"
-                       f"Both of {', '.join(paths)} are here, and they exist "
-                       f"in no other repository in the fleet. Nothing was "
-                       f"read and nothing was written.")
+        raise Stop(f"refusing to run as {name} -- it would shadow a module on "
+                   f"sys.path. Rename to up.py and run again.", EXIT_CANNOT_RUN)
 
 
 class Tree:
@@ -472,30 +285,49 @@ class Tree:
         self.root = root
         self.files: dict[str, str] = {}
         self.deleted: set[str] = set()
+        #: rel -> (had a BOM, line endings were CRLF throughout). What a file
+        #: was on disk, so flush() can put back exactly that around the edit.
+        self.form: dict[str, tuple[bool, bool]] = {}
 
     def read(self, rel: str) -> str:
+        """The file as text with LF line endings, whatever it is on disk.
+
+        A FILE IS ITS BYTES, AND AN EDIT MUST NOT CHANGE THE ONES IT DID NOT
+        MEAN TO. This used to read with read_text('utf-8-sig') and flush with
+        encode('utf-8'). The first strips a byte-order mark and folds CRLF to
+        LF; the second puts neither back. So a one-line edit to a CRLF file
+        rewrote every line ending in it, and any edit to a file with a BOM
+        deleted its first three bytes. rnv-color-picker's utils/config.py --
+        the picker's palette -- carries a BOM, so its next round would have.
+
+        Anchors are written with \\n, so a CRLF file is held as LF in memory
+        and its endings are restored on write. A file that MIXES endings is
+        held exactly as it is: anchors then match only its LF lines, and
+        everything else round-trips untouched.
+        """
         if rel not in self.files:
             p = self.root / rel
             if not p.exists():
-                raise Stop(EXIT_DISAGREES, f"missing file: {rel}")
-            self.files[rel] = p.read_text(encoding="utf-8")
+                raise Stop(f"missing file: {rel}", EXIT_CANNOT_RUN)
+            raw = p.read_bytes()
+            bom = raw.startswith(b"\xef\xbb\xbf")
+            text = (raw[3:] if bom else raw).decode("utf-8")
+            crlf = text.count("\r\n")
+            all_crlf = crlf > 0 and crlf == text.count("\n")
+            if all_crlf:
+                text = text.replace("\r\n", "\n")
+            self.files[rel] = text
+            self.form[rel] = (bom, all_crlf)
         return self.files[rel]
 
     def write(self, rel: str, text: str) -> None:
         self.files[rel] = text
 
     def delete(self, rel: str) -> None:
-        """Mark a file for removal. Nothing leaves disk until flush().
-
-        Added for the round that retired the last CI deselect: with no
-        deselects left, tests/test_ci_deselects.py swept an empty set and
-        would have passed over nothing. Its own failure message said to
-        delete it in the commit that removed the last one, so the harness
-        needed to be able to.
-        """
+        """Mark a file for removal. Nothing leaves disk until flush()."""
         if not (self.root / rel).exists() and rel not in self.files:
-            raise Stop(EXIT_DISAGREES,
-                       f"cannot delete {rel}: it is not in this checkout")
+            raise Stop(f"cannot delete {rel}: it is not in this checkout",
+                       EXIT_CANNOT_RUN)
         self.files.pop(rel, None)
         self.deleted.add(rel)
 
@@ -503,10 +335,10 @@ class Tree:
         src = self.read(rel)
         found = src.count(old)
         if found != times:
-            raise Stop(EXIT_DISAGREES,
-                       f"{rel}: expected {times} occurrence(s) of the anchor, "
-                       f"found {found}. The file moved; re-derive this edit "
-                       f"before trusting the script.")
+            raise Stop(
+                f"{rel}: expected {times} occurrence(s) of the anchor, found "
+                f"{found}. The file moved; re-derive this edit before trusting "
+                f"the script.", EXIT_CANNOT_RUN)
         self.write(rel, src.replace(old, new, times))
 
     def flush(self) -> list[str]:
@@ -524,11 +356,23 @@ class Tree:
         for rel, text in self.files.items():
             p = self.root / rel
             p.parent.mkdir(parents=True, exist_ok=True)
-            data = text.encode("utf-8")
+            data = self.encode(rel, text)
             if not p.exists() or p.read_bytes() != data:
                 p.write_bytes(data)
                 touched.append(rel)
         return touched
+
+    def encode(self, rel: str, text: str) -> bytes:
+        """Text back to bytes in the form the file had when it was read.
+
+        A file never read -- one this script creates -- has no form to keep
+        and is written as plain UTF-8 with LF, which is what every file in
+        this fleet is unless it says otherwise.
+        """
+        bom, all_crlf = self.form.get(rel, (False, False))
+        if all_crlf:
+            text = text.replace("\n", "\r\n")
+        return (b"\xef\xbb\xbf" if bom else b"") + text.encode("utf-8")
 
 
 def _tail(out: str, lines: int = 40) -> str:
@@ -555,18 +399,56 @@ def _outcome(code: int, out: str) -> str:
     if code in (134, -6, 139, -11) or "Fatal Python error" in out:
         return "abort"
     if code == 1 and "INTERNALERROR" not in out:
+        # EXIT 1 IS NOT ALWAYS A TEST DISAGREEING, and this used to assume it
+        # was. A missing pytest PLUGIN or a missing pinned package does not
+        # stop collection -- the tests are found, then fail at setup -- so
+        # pytest exits 1, the same code a real regression gives.
+        #
+        # It shipped that way. A fresh Codespace with the app requirements and
+        # none of tests/requirements-dev.txt ran a round that had landed
+        # cleanly and got 85 errors ("fixture 'qtbot' not found": pytest-qt)
+        # and 3 failures ("No module named 'engine'": the rnv-brand pin), and
+        # the verdict was "FAILED -- the suite is not green". Not one of the 88
+        # was the change disagreeing with anything.
+        #
+        # The discriminator is the assertion. A regression raises
+        # AssertionError; a missing dependency raises nothing of the kind. If
+        # the run carries environment signatures and NO assertion failure, it
+        # is the environment. If it carries both, it is a failure -- the
+        # conservative direction, because under-reporting a real regression is
+        # the one way this verdict must never be wrong.
+        if _missing_dependency(out) and not _ASSERTION.search(out):
+            return "env"
         return "fail"
     return "env"
 
 
-#: Each suite outcome maps to exactly one named exit code, in one place, so a
-#: new outcome cannot quietly inherit somebody else's meaning.
-_OUTCOME_EXIT = {
+#: A dependency that is not installed, as pytest reports it. Each of these
+#: arrived in a real run of this fleet's suites.
+_ENV_SIGNS = (
+    re.compile(r"fixture '\w+' not found"),                 # a pytest plugin
+    re.compile(r"ModuleNotFoundError: No module named"),    # a package
+    re.compile(r"\bis not importable\b"),                   # the register pin
+    re.compile(r"ImportError: lib[\w.+-]+\.so"),            # a system library
+)
+#: A real regression. pytest prints the failing line under `E   ` and the
+#: exception class in the summary.
+_ASSERTION = re.compile(r"^E\s+assert\b|\bAssertionError\b", re.M)
+
+
+def _missing_dependency(out: str) -> bool:
+    return any(sign.search(out) for sign in _ENV_SIGNS)
+
+
+#: verdict -> taxonomy. "abort" and "killed" are EXIT_INCOMPLETE rather than
+#: EXIT_CANNOT_RUN: the environment WAS ready and the run started, which is a
+#: different instruction to the operator -- re-run, do not go installing things.
+_VERDICT_CODE = {
     "pass": EXIT_CLEAN,
     "fail": EXIT_DISAGREES,
-    "abort": EXIT_INCOMPLETE,
-    "killed": EXIT_CANNOT_RUN,
     "env": EXIT_CANNOT_RUN,
+    "abort": EXIT_INCOMPLETE,
+    "killed": EXIT_INCOMPLETE,
 }
 
 
@@ -600,7 +482,6 @@ If it aborts every time on the same test, that is worth looking at. If it
 comes and goes, this change is not involved.
 """
 
-
 KILLED_HELP = """\
 THE TEST PROCESS WAS KILLED FROM OUTSIDE. No test failed and nothing crashed --
 something stopped the run, and on a small runner that is almost always the
@@ -633,7 +514,6 @@ def run(label: str, args: list[str]) -> tuple[int, str]:
 
 
 def _step(label: str, args: list[str]) -> int:
-    """Run one suite and return a NAMED exit code, not pytest's raw one."""
     code, out = run(label, args)
     verdict = _outcome(code, out)
     print(_tail(out) if verdict != "pass"
@@ -647,23 +527,7 @@ def _step(label: str, args: list[str]) -> int:
     elif verdict == "fail":
         print("\nFAILED -- the suite is not green. Nothing was reverted; "
               "`git diff` shows exactly what landed.")
-    return _OUTCOME_EXIT[verdict]
-
-
-def _left_alone() -> None:
-    """Say what this round deliberately did not touch.
-
-    Silence about the untouched reads as "there was nothing else", which is a
-    claim no round is entitled to make by saying nothing.
-    """
-    stated = globals().get("LEFT_ALONE")
-    if stated:
-        print("\nleft alone, deliberately:")
-        for line in stated:
-            print(f"  - {line}")
-    else:
-        print("\nleft alone: NOT DECLARED by this round. Read the diff rather "
-              "than reading this silence as 'nothing else was in scope'.")
+    return _VERDICT_CODE[verdict]
 
 
 def verify() -> int:
@@ -705,11 +569,7 @@ def verify() -> int:
 def apply(check_only: bool) -> int:
     root = Path.cwd()
 
-    # ORDER IS LOAD-BEARING and is pinned by a test. The repository check runs
-    # BEFORE the sentinel and before any anchor, because every one of those
-    # would also stop a wrong-repository run -- with the wrong code and the
-    # wrong reason. A protection that works while reporting the wrong cause
-    # files a placement defect as a content defect.
+    # FIRST. Before the sentinel, before any anchor. See the docstring.
     refuse_wrong_repository(root)
 
     if not (root / SENTINEL_FILE).exists():
@@ -717,31 +577,51 @@ def apply(check_only: bool) -> int:
         # tell "wrong directory" from "prerequisite not run", and the default
         # message asserts the first while the second is more likely. Such a
         # script sets MISSING_HELP and says which one to run.
-        raise Stop(EXIT_CANNOT_RUN,
-                   globals().get("MISSING_HELP") or
+        raise Stop(globals().get("MISSING_HELP") or
                    f"run this from the root of a {REPO} checkout "
-                   f"(no {SENTINEL_FILE} here)")
+                   f"(no {SENTINEL_FILE} here)", EXIT_CANNOT_RUN)
 
-    if SENTINEL in (root / SENTINEL_FILE).read_text(encoding="utf-8"):
-        # ALREADY APPLIED IS A NO-OP, NOT A FAILURE. It used to exit 1, which
-        # is the code for "something disagrees" -- so running a finished round
-        # a second time reported the same thing as a broken one.
+    if SENTINEL in (root / SENTINEL_FILE).read_text(encoding="utf-8-sig"):
+        # ALREADY APPLIED IS NOT AN ERROR, AND USED TO EXIT 1.
         #
-        # It re-runs the suites rather than returning 0 immediately, because a
-        # 0 that did not look is worth less than it reads as. Exiting clean
-        # here means the tree is in the intended state AND the suites agree.
+        # The operator runs this from a phone and the honest question behind a
+        # second run is "did this land?". Exiting 1 answered "something
+        # disagreed", which is the one thing that had not happened. Re-running
+        # the suites answers the question that was actually asked, and a
+        # repository that has the change and passes its tests is CLEAN.
         print(f"already applied -- {SENTINEL!r} is present in "
-              f"{SENTINEL_FILE}.")
-        if check_only:
-            print("--check: nothing to rehearse, nothing written.")
-            _left_alone()
-            return EXIT_CLEAN
-        print("Nothing to write. Re-checking the tree instead, so a clean "
-              "exit here means the round still holds.\n")
+              f"{SENTINEL_FILE}.\nNothing to write. Re-running the suites so "
+              f"the answer is measured rather than assumed.\n")
         return verify()
 
     tree = Tree(root)
     edits(tree)
+
+    # THE SCRIPT MUST WRITE ITS OWN SENTINEL WHERE apply() LOOKS FOR IT.
+    #
+    # Checked here, against the in-memory tree, before anything reaches disk.
+    #
+    # WHY THIS IS NOT A BUILD-TIME CHECK. The build's `sentinel-written` guard
+    # asserts the marker appears at least twice in the composed script -- its
+    # own declaration plus somewhere it gets written. That is a PROXY. A round
+    # can carry the marker in a new guard file and never put it in
+    # SENTINEL_FILE, and the build passes while the already-applied branch can
+    # never fire. That shipped once, on 2026-09-24: the operator ran a landed
+    # script a second time and got "expected 1 occurrence of the anchor, found
+    # 0. The file moved" -- about a file that had not moved, from a script
+    # that could not tell it had already run.
+    #
+    # Here the question is exact rather than approximated: after every edit,
+    # is the marker in the file apply() reads? It fires on the FIRST run, in
+    # the author's verification, rather than on the operator's second.
+    if SENTINEL not in tree.read(SENTINEL_FILE):
+        raise Stop(
+            f"this script never writes {SENTINEL!r} into {SENTINEL_FILE}, "
+            f"which is the file it reads to tell whether it has already run.\n"
+            f"Applied once it would work; run again it would re-attempt "
+            f"anchors that are already replaced and report them as missing.\n"
+            f"Add an edit that marks {SENTINEL_FILE}. Nothing was written.",
+            EXIT_CANNOT_RUN)
     # GUARD_SOURCE is OPTIONAL. Every round until 2026-09-12 installed a new
     # guard file, so the harness assumed one; the ramp-condense round adopts
     # three that already exist -- the mixer's SPLITS table and two RETIRED
@@ -760,10 +640,11 @@ def apply(check_only: bool) -> int:
         return EXIT_CLEAN
 
     touched = tree.flush()
-    print("wrote: " + ", ".join(touched))
-    _left_alone()
-    print()
-    return verify()
+    print("wrote: " + ", ".join(touched) + "\n")
+    code = verify()
+    if code == EXIT_CLEAN:
+        _left_alone()
+    return code
 
 
 def finish() -> None:
@@ -773,54 +654,26 @@ def finish() -> None:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description=DESCRIPTION)
+    ap.add_argument("--check", action="store_true",
+                    help="rehearse every edit in memory, write nothing")
+    ap.add_argument("--verify", action="store_true",
+                    help="run the suites only, change nothing")
+    ap.add_argument("--finish", action="store_true", help="delete this script")
+    args = ap.parse_args()
     try:
         refuse_to_shadow()
-        ap = argparse.ArgumentParser(description=DESCRIPTION)
-        ap.add_argument("--check", action="store_true",
-                        help="rehearse every edit in memory, write nothing")
-        ap.add_argument("--verify", action="store_true",
-                        help="run the suites only, change nothing")
-        ap.add_argument("--finish", action="store_true",
-                        help="delete this script")
-        ap.add_argument("--exit-codes", action="store_true",
-                        help="print what each exit code means and stop")
-        args = ap.parse_args()
-        if args.exit_codes:
-            for code, name in sorted(_EXIT_NAMES.items()):
-                print(f"  {code}  {name}")
-            return EXIT_CLEAN
         if args.finish:
             finish()
             return EXIT_CLEAN
         if args.verify:
-            code = verify()
-        else:
-            code = apply(args.check)
+            return verify()
+        return apply(args.check)
     except Stop as stop:
-        print(stop, file=sys.stderr)
-        code = stop.code
-    except SystemExit as exc:
-        # A round's own checks() raises SystemExit to mean "a guard said no",
-        # which is what it exited as before this taxonomy existed. Mapped
-        # explicitly rather than left to Python's default, so the meaning is
-        # written down somewhere instead of inherited from the interpreter.
-        if isinstance(exc.code, int) and exc.code in _EXIT_NAMES:
-            code = exc.code
-        else:
-            if exc.code not in (None, 0):
-                print(exc.code, file=sys.stderr)
-            code = EXIT_DISAGREES if exc.code not in (None, 0) else EXIT_CLEAN
-
-    if code not in _EXIT_NAMES:
-        # An unnamed code that falls through every branch is the original bug
-        # returning. Refuse to pass it on.
-        print(f"\nBUG IN THIS SCRIPT: it tried to exit {code!r}, which is not "
-              f"one of its own named codes. Treating it as "
-              f"'could not run'.", file=sys.stderr)
-        return EXIT_CANNOT_RUN
-    if code != EXIT_CLEAN:
-        print(f"\nexit {code} -- {_EXIT_NAMES[code]}", file=sys.stderr)
-    return code
+        # Print it ourselves and return the taxonomy code. Letting SystemExit
+        # propagate would print the message and exit 1 regardless of .code.
+        print(stop.args[0] if stop.args else "", file=sys.stderr)
+        return stop.code
 
 
 if __name__ == "__main__":
