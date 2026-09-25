@@ -13,13 +13,13 @@ at 150. Everything else keeps its colour and its alpha byte, respelled from
 rgba() to #AARRGGBB -- the same pixels, in the one spelling QColor() can also
 read. test_nothing_moved_that_was_not_ruled holds that to the byte.
 
-AND ONE KEY THAT NOTHING READS, LEFT AS IT IS. image_scrollbar_handle_hover
-holds rgba(100, 100, 100, 200), a grey on no register row, while the image
+AND ONE KEY THAT NOTHING READ, REMOVED. image_scrollbar_handle_hover held
+rgba(100, 100, 100, 200), a grey on no register row, while the image
 scrollbar's hover is painted from DARK's 'accent' -- BRAND_GOLD, ruled
-2026-09-12. It is not derived, because there is no row for it to follow; and
-it cannot simply take the painted gold, because LIGHT carries the same image
-keys and a BRAND_GOLD there is a third gold in a mode the brand allows two.
-A test pins that nothing reads it.
+2026-09-12. It could not be derived, having no row to follow, and it could
+not take the painted gold, because LIGHT carries the same image keys and a
+BRAND_GOLD there is a third gold in a mode the brand allows two. Ruled
+2026-09-25: render it first, then remove it. A test pins that it stays gone.
 """
 from __future__ import annotations
 
@@ -65,7 +65,9 @@ MADE_OF = {
     "image_dropdown_selection": ("APP_BORDER", 200),
     "image_dropdown_border": ("APP_BORDER", 150),
 }
-UNREAD = "image_scrollbar_handle_hover"
+#: Removed 2026-09-25 (RNV-HOVER-KEY-GONE). Named here only so the test
+#: below can say it is gone; tests/ is not application source.
+REMOVED = "image_scrollbar_handle_hover"
 
 _HEX8 = re.compile(r"^#([0-9a-fA-F]{2})([0-9a-fA-F]{6})$")
 _COMPOSED = re.compile(r"#[0-9a-fA-F]{8}\b|\brgba\(\s*\d{1,3}\s*,\s*\d{1,3}"
@@ -290,30 +292,27 @@ def test_nothing_moved_that_was_not_ruled():
     assert decompose(DragDropTextEdit._DRAG_HIGHLIGHT) == (colors.BRAND_GOLD, 0xBF)
 
 
-def test_the_unread_hover_key_stays_unread():
-    """image_scrollbar_handle_hover is read by nothing: the image scrollbar
-    hovers from DARK's 'accent', BRAND_GOLD, ruled 2026-09-12. It still holds
-    rgba(100, 100, 100, 200) -- a grey on no register row, left because there
-    is nothing to derive it from and the gold would be a third gold in LIGHT.
+def test_the_unused_hover_key_stays_removed():
+    """RNV-HOVER-KEY-GONE, 2026-09-25. image_scrollbar_handle_hover painted
+    nothing. A render set it to #ff00ff, and then deleted it, and neither
+    changed one pixel across the main window and twelve dialogs in all three
+    modes, sixty scrollbars under the pointer among them. A control that
+    changed DARK's 'accent' instead changed 65 of the same 159 captures. The
+    image scrollbar hovers from DARK's 'accent', BRAND_GOLD.
 
-    If anything starts reading it, this fails: the value would then be a grey
-    hover on screen, against the gold ruling, and it has to be decided rather
-    than inherited."""
+    Gone from both palettes and named nowhere in the application. A key
+    brought back would be a grey hover on no register row, against the gold
+    ruling, and it has to be decided rather than inherited."""
     assert DialogStyleManager.DARK["accent"] == colors.BRAND_GOLD
-    readers, keys = [], 0
-    for rel, tree in _sources():
-        # the dict KEYS that declare it are not reads; anything else is,
-        # including a lookup inside dialog_styles.py itself
-        declared = {id(k) for node in ast.walk(tree) if isinstance(node, ast.Dict)
-                    for k in node.keys if k is not None}
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Constant) and node.value == UNREAD:
-                if id(node) in declared:
-                    keys += 1
-                else:
-                    readers.append(f"{rel}:{node.lineno}")
-    assert keys == 2, f"expected the key declared in DARK and LIGHT, found {keys}"
-    assert not readers, f"{UNREAD} is read now: {readers}"
+    for mode, palette in PALETTES.items():
+        assert REMOVED not in palette, f"{mode} declares {REMOVED} again"
+    sources = list(_sources())
+    assert any(rel.as_posix() == "utils/dialog_styles.py" for rel, _ in sources), (
+        "the sweep cannot see the palettes, so it proves nothing")
+    named = [f"{rel}:{node.lineno}" for rel, tree in sources
+             for node in ast.walk(tree)
+             if isinstance(node, ast.Constant) and node.value == REMOVED]
+    assert not named, f"{REMOVED} is named again: {named}"
 
 
 def test_the_collapsed_value_is_gone_in_every_spelling():

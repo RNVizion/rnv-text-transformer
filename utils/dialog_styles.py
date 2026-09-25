@@ -248,10 +248,8 @@ class DialogStyleManager:
         # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
         # 2026-09-02 and left behind because nothing decoded rgba().
         'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
-        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.
-        # Left as written: #646464 is on no register row, so there is
-        # nothing to derive it from. See tests/test_derived_values.py.
-        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',
+        # The image scrollbar hovers from DARK's 'accent'. It has no key of
+        # its own: the unused one was removed, RNV-HOVER-KEY-GONE.
         'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
         'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
         'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
@@ -358,10 +356,8 @@ class DialogStyleManager:
         # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
         # 2026-09-02 and left behind because nothing decoded rgba().
         'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
-        # NOT CONSUMED -- the image scrollbar hovers from DARK's 'accent'.
-        # Left as written: #646464 is on no register row, so there is
-        # nothing to derive it from. See tests/test_derived_values.py.
-        'image_scrollbar_handle_hover':'rgba(100, 100, 100, 200)',
+        # The image scrollbar hovers from DARK's 'accent'. It has no key of
+        # its own: the unused one was removed, RNV-HOVER-KEY-GONE.
         'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
         'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
         'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
