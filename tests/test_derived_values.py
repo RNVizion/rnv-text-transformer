@@ -171,7 +171,7 @@ def _derived():
 def test_with_alpha_composes_alpha_first():
     """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and
     the wrong one, which is the failure that does not look like a failure."""
-    assert with_alpha("#1a1a1a", 0xBF) == "#BF1a1a1a"
+    assert with_alpha("#1a1a1a", 0xBF) == "#bf1a1a1a"
     assert decompose(with_alpha("#d2bc93", 0x33)) == ("#d2bc93", 0x33)
     assert decompose(with_alpha("444444", 0x96)) == ("#444444", 0x96)
 
@@ -236,7 +236,7 @@ def test_every_derived_value_decomposes_to_its_base_and_its_alpha():
 def test_no_composed_literal_is_left_in_the_application():
     """The completeness half. Every EVALUATED string in the application's own
     source that spells a named colour at an alpha. Docstrings are mentions --
-    utils/colors.py shows '#BFd2bc93' as an example, and that is prose.
+    utils/colors.py shows '#bfd2bc93' as an example, and that is prose.
     Alpha 0 is not a colour; a base no constant names has no row to follow."""
     named = {v.lower() for n, v in vars(colors).items()
              if n.isupper() and isinstance(v, str)
@@ -343,3 +343,84 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
     assert colours_in("rgba(80, 80, 80, 150)") == {"#505050"}, "the decoder is blind"
 
 # RNV-DERIVE-ALPHA
+
+
+# ------------------------------------------------ eight-digit hex, lower case
+
+LOWER8_MODULES = ('utils.colors', 'utils.dialog_styles', 'ui.drag_drop_text_edit')
+#: Found when this was written; below the floor, the sweep has gone blind.
+LOWER8_FLOOR = 12
+LOWER8_FILES = 40
+
+
+def _lower8_values():
+    """(where, value) for every eight-digit hex string the colour modules
+    build -- their constants, the dicts they hold, and their classes' dicts
+    -- as they EVALUATE, which is what a derived value is."""
+    import importlib
+
+    def walk(where, value):
+        if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{8}", value):
+            yield where, value
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                yield from walk(f"{where}[{key!r}]", item)
+
+    for name in LOWER8_MODULES:
+        module = importlib.import_module(name)
+        for attr, value in vars(module).items():
+            if attr.startswith("__"):
+                continue
+            if isinstance(value, type) and value.__module__ == name:
+                for cattr, cvalue in vars(value).items():
+                    if not cattr.startswith("__"):
+                        yield from walk(f"{name}.{attr}.{cattr}", cvalue)
+            else:
+                yield from walk(f"{name}.{attr}", value)
+
+
+def _lower8_trees():
+    """Application source: not tests, not a root test suite, not a delivery
+    script. BOM-aware."""
+    for path in sorted(ROOT.rglob("*.py")):
+        rel = path.relative_to(ROOT)
+        if any(p in {".git", "tests", "snapshots", "build", "dist", ".venv",
+                     "venv", "__pycache__"} for p in rel.parts):
+            continue
+        if len(rel.parts) == 1 and rel.name.startswith(("test_", "up")):
+            continue
+        text = path.read_bytes().decode("utf-8-sig", errors="replace")
+        if "RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP" in text:
+            continue
+        yield rel, ast.parse(text)
+
+
+def test_eight_digit_hex_is_lower_case():
+    """RNV-LOWER-EIGHT, 2026-09-25. The register writes hex in lower case --
+    Notation, ruled 2026-08-15, Brand Book decision #19 -- and on 2026-09-25
+    Chris ruled that eight digits are hex too: #ed1a1a1a, never #ED1A1A1A.
+    Qt reads either case, so no pixel moved when this application's helper
+    changed.
+
+    Both halves: every eight-digit value the application BUILDS, as its
+    colour modules evaluate, and every eight-digit literal it WRITES in code.
+    Docstrings are prose, and a sentence that names an upper-case value as
+    history keeps its case."""
+    built = list(_lower8_values())
+    assert len(built) >= LOWER8_FLOOR, (
+        f"only {len(built)} eight-digit values found; the sweep has gone blind")
+    upper = [f"{where} = {value}" for where, value in built
+             if value != value.lower()]
+    written, files = [], 0
+    for rel, tree in _lower8_trees():
+        files += 1
+        bare = _bare_strings(tree)
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                    and id(node) not in bare):
+                for hex8 in re.findall(r"#[0-9a-fA-F]{8}\b", node.value):
+                    if hex8 != hex8.lower():
+                        written.append(f"{rel}:{node.lineno}  {hex8}")
+    assert files >= LOWER8_FILES, f"only {files} files swept"
+    assert not upper, "built in upper case:\n  " + "\n  ".join(upper)
+    assert not written, "written in upper case:\n  " + "\n  ".join(written)

@@ -54,7 +54,7 @@ Usage
     LIGHT = {'accent': BRAND_DARK_GOLD}
 
     # Qt #AARRGGBB -- primary gold at 75% alpha
-    highlight = with_alpha(BRAND_GOLD, 0xBF)   # '#BFd2bc93'
+    highlight = with_alpha(BRAND_GOLD, 0xBF)   # '#bfd2bc93'
 """
 
 from __future__ import annotations
@@ -517,14 +517,16 @@ def with_alpha(color: str, alpha: int) -> str:
         alpha: Alpha channel, 0-255 (0xBF is 75%)
 
     Returns:
-        Eight-digit ``#AARRGGBB`` string, RGB digits preserved as given
+        Eight-digit ``#AARRGGBB`` string in lower case, whatever case the
+        colour is given in. The register's notation rule covers eight
+        digits since 2026-09-25 (RNV-LOWER-EIGHT).
 
     Raises:
         ValueError: If color is not six hex digits or alpha is out of range
 
     Example:
         >>> with_alpha(BRAND_GOLD, 0xBF)
-        '#BFd2bc93'
+        '#bfd2bc93'
     """
     rgb = color.lstrip('#')
 
@@ -543,7 +545,7 @@ def with_alpha(color: str, alpha: int) -> str:
     if not 0 <= alpha <= 255:
         raise ValueError(f"alpha must be 0-255, got {alpha}")
 
-    return f"#{alpha:02X}{rgb}"
+    return f"#{alpha:02x}{rgb.lower()}"
 
 
 # ==================== COMPOSITE ALPHAS ====================
