@@ -14,6 +14,7 @@ Python 3.13 Optimized:
 
 from __future__ import annotations
 
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -34,6 +35,7 @@ from core.text_statistics import TextStatistics
 from core.preset_manager import PresetManager, PresetExecutor, TransformPreset
 from ui.drag_drop_text_edit import DragDropTextEdit
 from ui.image_button import ImageButton
+from ui.base_dialog import BaseDialog
 from ui.settings_dialog import SettingsDialog
 from ui.find_replace_dialog import FindReplaceDialog
 from ui.batch_dialog import BatchDialog
@@ -1902,6 +1904,7 @@ class MainWindow(QMainWindow):
             replace_mode=False,
             parent=self
         )
+        self._track_open_dialog(dialog)
         dialog.show()
     
     def _open_replace_dialog(self) -> None:
@@ -1913,6 +1916,7 @@ class MainWindow(QMainWindow):
             replace_mode=True,
             parent=self
         )
+        self._track_open_dialog(dialog)
         dialog.show()
     
     def _open_batch_dialog(self) -> None:
@@ -1956,15 +1960,38 @@ class MainWindow(QMainWindow):
         """Clear the compare dialog reference when it closes."""
         self._compare_dialog = None
     
+    def _track_open_dialog(self, dialog: BaseDialog) -> None:
+        """
+        Keep a non-modal dialog where _refresh_open_dialogs_theme() reaches
+        it, for as long as it is open.
+        
+        RNV-DIALOG-SWITCH 2026-09-27. Find, Find & Replace, the Regex Builder
+        and Watch Folders are non-modal, so the theme can be cycled while one
+        is open -- and nothing referred to them after show(), so they kept
+        the mode they were opened in. More than one can be open at once, and
+        Find opens from the Regex Builder's Apply Find as well as from here.
+        """
+        if not hasattr(self, '_open_dialogs'):
+            self._open_dialogs: list[BaseDialog] = []
+        self._open_dialogs.append(dialog)
+        dialog.finished.connect(partial(self._forget_open_dialog, dialog))
+    
+    def _forget_open_dialog(self, dialog: BaseDialog, _result: int = 0) -> None:
+        """Stop refreshing a dialog once it has closed."""
+        if dialog in getattr(self, '_open_dialogs', ()):
+            self._open_dialogs.remove(dialog)
+    
     def _refresh_open_dialogs_theme(self) -> None:
         """
         Propagate the current theme to any open non-modal dialog.
         
         Called whenever the application theme changes (via Ctrl+Shift+T or
-        from the settings dialog). The compare dialog is the only non-modal
-        one — modal dialogs cannot be open during a theme cycle so they
-        don't need this. Wrapped defensively in case the Qt object was
-        destroyed without the finished signal firing.
+        from the settings dialog). The non-modal dialogs are Compare and the
+        ones _track_open_dialog() keeps: Find, Find & Replace, the Regex
+        Builder and Watch Folders. A modal dialog blocks the theme button and
+        the shortcut while it is open; the settings dialog, which switches
+        the theme itself, restyles itself. Wrapped defensively in case the
+        Qt object was destroyed without the finished signal firing.
         """
         compare_dialog = getattr(self, '_compare_dialog', None)
         if compare_dialog is not None:
@@ -1972,6 +1999,11 @@ class MainWindow(QMainWindow):
                 compare_dialog.refresh_theme()
             except RuntimeError:
                 self._compare_dialog = None
+        for dialog in list(getattr(self, '_open_dialogs', ())):
+            try:
+                dialog.refresh_theme()
+            except RuntimeError:
+                self._forget_open_dialog(dialog)
     
     def _on_merge_applied(self, merged_text: str) -> None:
         """Handle merged text from Compare & Merge dialog."""
@@ -2047,6 +2079,7 @@ class MainWindow(QMainWindow):
         # Connect pattern applied signal
         dialog.pattern_applied.connect(self._on_regex_pattern_applied)
         
+        self._track_open_dialog(dialog)
         dialog.show()
     
     def _on_regex_pattern_applied(self, pattern: str, replacement: str, flags: int) -> None:
@@ -2075,6 +2108,7 @@ class MainWindow(QMainWindow):
             )
             dialog.find_input.setText(pattern)
             dialog.regex_check.setChecked(True)
+            self._track_open_dialog(dialog)
             dialog.show()
     
     # ==================== PRESET SYSTEM ====================
@@ -2167,6 +2201,7 @@ class MainWindow(QMainWindow):
             font_family=self.font_family,
             parent=self
         )
+        self._track_open_dialog(dialog)
         dialog.show()
     
     # ==================== ABOUT DIALOG ====================

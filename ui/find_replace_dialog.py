@@ -183,8 +183,8 @@ class FindReplaceDialog(BaseDialog):
         
         # Status label
         self.status_label = QLabel("")
-        c = self.get_colors()
-        self.status_label.setStyleSheet(f"color: {c['text_muted']};")
+        self._style_for_mode(self.status_label, lambda: (
+            f"color: {self.get_colors()['text_muted']};"))
         layout.addWidget(self.status_label)
         
         # Buttons

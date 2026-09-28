@@ -367,7 +367,8 @@ class SettingsDialog(BaseDialog):
             "• Undo Output: Ctrl+Z\n"
             "• Redo Output: Ctrl+Y"
         )
-        shortcut_info.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))
+        self._style_for_mode(shortcut_info, lambda: (
+            DialogStyleManager.get_description_style(self._is_dark)))
         shortcuts_layout.addWidget(shortcut_info)
         
         layout.addWidget(shortcuts_group)
@@ -442,7 +443,8 @@ class SettingsDialog(BaseDialog):
             format_row.addWidget(format_label)
             
             desc_label = QLabel(description)
-            desc_label.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))
+            self._style_for_mode(desc_label, lambda: (
+                DialogStyleManager.get_description_style(self._is_dark)))
             format_row.addWidget(desc_label)
             
             format_row.addStretch()
@@ -462,7 +464,8 @@ class SettingsDialog(BaseDialog):
             "• Font Settings - Choose font family and size\n"
             "• Format-specific options (PDF pages, HTML theme)"
         )
-        options_info.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))
+        self._style_for_mode(options_info, lambda: (
+            DialogStyleManager.get_description_style(self._is_dark)))
         options_layout.addWidget(options_info)
         
         layout.addWidget(options_group)
@@ -689,10 +692,13 @@ class SettingsDialog(BaseDialog):
         self.theme_change_requested.emit(theme)
         self._changes_made = True
         
-        # Update dialog styling for new theme
+        # Update dialog styling for new theme. RNV-DIALOG-SWITCH 2026-09-27:
+        # refresh_theme() builds the dialog's sheet again and every label
+        # sheet that reads the mode. This restyled the dialog's own sheet
+        # alone, so the tab headings, the muted descriptions and the gold
+        # tips kept the mode the dialog was opened in.
         self.theme_manager.set_theme(theme)
-        self._is_dark = self._detect_dark_theme()
-        self.apply_extended_styling('tab', 'spinbox', 'slider', 'list', 'table')
+        self.refresh_theme()
     
     def _on_setting_changed(self) -> None:
         """Handle any setting change - auto-apply all settings immediately."""

@@ -39,6 +39,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from core.theme_manager import ThemeManager
 
 
@@ -84,7 +86,8 @@ class BaseDialog(QDialog):
     _CONTENT_MARGINS: ClassVar[tuple[int, int, int, int]] = (15, 15, 15, 15)
     _SPACING: ClassVar[int] = 12
     
-    __slots__ = ('theme_manager', 'font_family', '_is_dark')
+    __slots__ = ('theme_manager', 'font_family', '_is_dark',
+                 '_style_components', '_mode_styled')
     
     # ==================== INITIALIZATION ====================
     
@@ -107,6 +110,13 @@ class BaseDialog(QDialog):
         self.theme_manager = theme_manager
         self.font_family = font_family
         self._is_dark = self._detect_dark_theme()
+        
+        # RNV-DIALOG-SWITCH 2026-09-27: what refresh_theme() builds again.
+        # The components of the dialog's own sheet, as the last call to
+        # apply_base_styling() or apply_extended_styling() set them, and
+        # every sheet set with _style_for_mode(), by widget.
+        self._style_components: tuple[str, ...] = ()
+        self._mode_styled: dict[QWidget, Callable[[], str]] = {}
         
         self._configure_window()
     
@@ -166,6 +176,7 @@ class BaseDialog(QDialog):
         For dialogs with additional components, override and call super().
         """
         from utils.dialog_styles import DialogStyleManager
+        self._style_components = ()
         stylesheet = DialogStyleManager.get_dialog_stylesheet(
             self._is_dark, 
             self.font_family
@@ -187,6 +198,7 @@ class BaseDialog(QDialog):
                 - 'list': QListWidget styles
         """
         from utils.dialog_styles import DialogStyleManager
+        self._style_components = components
         stylesheet = DialogStyleManager.get_extended_stylesheet(
             self._is_dark,
             self.font_family,
@@ -199,9 +211,41 @@ class BaseDialog(QDialog):
         Refresh dialog styling after theme change.
         
         Call this when the application theme changes to update the dialog.
+        
+        RNV-DIALOG-SWITCH 2026-09-27: the dialog's sheet is built again
+        with the components it was built with. This applied the base sheet
+        alone, which dropped the tab, table and list styles of a dialog
+        built with them. Then every sheet set with _style_for_mode() is set
+        again, in the new mode.
         """
         self._is_dark = self._detect_dark_theme()
-        self.apply_base_styling()
+        if self._style_components:
+            self.apply_extended_styling(*self._style_components)
+        else:
+            self.apply_base_styling()
+        for widget, sheet in list(self._mode_styled.items()):
+            try:
+                widget.setStyleSheet(sheet())
+            except RuntimeError:  # the widget has been deleted
+                del self._mode_styled[widget]
+    
+    def _style_for_mode(self, widget: QWidget, sheet: Callable[[], str]) -> None:
+        """
+        Style widget with sheet(), now and again on every refresh_theme().
+        
+        RNV-DIALOG-SWITCH 2026-09-27 -- the helper of the same name in the
+        picker's Settings panel and About dialog, for the same fault. For a
+        stylesheet that reads the mode when it is set: set once, it kept
+        the mode the dialog was opened in. A widget styled this way again
+        keeps the later sheet, so a status line whose colour follows its
+        state is set again in the colour it shows now.
+        
+        Args:
+            widget: The widget to style
+            sheet: Builds the widget's stylesheet from the current mode
+        """
+        widget.setStyleSheet(sheet())
+        self._mode_styled[widget] = sheet
     
     def get_status_style(self, status: str) -> str:
         """
@@ -414,7 +458,8 @@ class BaseDialog(QDialog):
         from utils.dialog_styles import DialogStyleManager
         
         label = QLabel(text)
-        label.setStyleSheet(DialogStyleManager.get_header_style(self._is_dark))
+        self._style_for_mode(label, lambda: (
+            DialogStyleManager.get_header_style(self._is_dark)))
         return label
     
     def _create_subtitle_label(self, text: str) -> QLabel:
@@ -430,7 +475,8 @@ class BaseDialog(QDialog):
         from utils.dialog_styles import DialogStyleManager
         
         label = QLabel(text)
-        label.setStyleSheet(DialogStyleManager.get_subtitle_style(self._is_dark))
+        self._style_for_mode(label, lambda: (
+            DialogStyleManager.get_subtitle_style(self._is_dark)))
         label.setWordWrap(True)
         return label
     
@@ -447,7 +493,8 @@ class BaseDialog(QDialog):
         from utils.dialog_styles import DialogStyleManager
         
         label = QLabel(text)
-        label.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))
+        self._style_for_mode(label, lambda: (
+            DialogStyleManager.get_description_style(self._is_dark)))
         label.setWordWrap(True)
         return label
     
@@ -465,7 +512,8 @@ class BaseDialog(QDialog):
         from utils.dialog_styles import DialogStyleManager
         
         label = QLabel(text)
-        label.setStyleSheet(DialogStyleManager.get_tip_style(self._is_dark))
+        self._style_for_mode(label, lambda: (
+            DialogStyleManager.get_tip_style(self._is_dark)))
         if center:
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         return label

@@ -103,6 +103,18 @@ class RegexBuilderDialog(BaseDialog):
         self._populate_patterns()
         self._load_text()
     
+    def refresh_theme(self) -> None:
+        """
+        Refresh the dialog after a theme switch, and paint the matches again.
+        
+        RNV-DIALOG-SWITCH 2026-09-27: the matches in the test pane are painted
+        in the mode's regex_match_bg when they are found; a switch left them
+        in the old mode's until the next edit.
+        """
+        super().refresh_theme()
+        if self._current_matches:
+            self._highlight_matches()
+    
 
     def _setup_ui(self) -> None:
         """Setup the dialog UI."""
@@ -168,8 +180,7 @@ class RegexBuilderDialog(BaseDialog):
         # Status row
         status_row = QHBoxLayout()
         self.status_label = QLabel("Ready")
-        c = self.get_colors()
-        self.status_label.setStyleSheet(f"color: {c['text_muted']};")
+        self._set_status_colour('text_muted')
         status_row.addWidget(self.status_label)
         status_row.addStretch()
         self.match_count_label = QLabel("Matches: 0")
@@ -306,13 +317,24 @@ class RegexBuilderDialog(BaseDialog):
             is_valid, error = RegexHelper.validate_pattern(text, self._get_flags())
             if is_valid:
                 self.status_label.setText("Pattern is valid")
-                self.status_label.setStyleSheet(f"color: {self.get_colors()['success']};")
+                self._set_status_colour('success')
             else:
                 self.status_label.setText(f"Error: {error}")
-                self.status_label.setStyleSheet(f"color: {self.get_colors()['error']};")
+                self._set_status_colour('error')
         else:
             self.status_label.setText("Enter a pattern")
-            self.status_label.setStyleSheet(f"color: {self.get_colors()['text_muted']};")
+            self._set_status_colour('text_muted')
+    
+    def _set_status_colour(self, key: str) -> None:
+        """
+        Colour the status line with the palette's `key`, in the dialog's mode.
+        
+        RNV-DIALOG-SWITCH 2026-09-27: through _style_for_mode(), so a theme
+        switch sets it again in the new mode, in the colour of the state it
+        shows (text_muted, success or error).
+        """
+        self._style_for_mode(self.status_label, lambda: (
+            f"color: {self.get_colors()[key]};"))
     
     def _on_replacement_changed(self, text: str) -> None:
         """Handle replacement text change."""
@@ -350,7 +372,7 @@ class RegexBuilderDialog(BaseDialog):
         if not is_valid:
             self._clear_results()
             self.status_label.setText(f"Error: {error}")
-            self.status_label.setStyleSheet(f"color: {self.get_colors()['error']};")
+            self._set_status_colour('error')
             return
         
         # Find matches
@@ -366,8 +388,7 @@ class RegexBuilderDialog(BaseDialog):
         count = len(self._current_matches)
         self.match_count_label.setText(f"Matches: {count}")
         self.status_label.setText(f"Found {count} match{'es' if count != 1 else ''}")
-        c = self.get_colors()
-        self.status_label.setStyleSheet(f"color: {c['success']};" if count > 0 else f"color: {c['text_muted']};")
+        self._set_status_colour('success' if count > 0 else 'text_muted')
     
     def _clear_results(self) -> None:
         """Clear all results."""

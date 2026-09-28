@@ -329,7 +329,8 @@ class WatchFolderDialog(BaseDialog):
                 "⚠️ Watch Folder feature requires the 'watchdog' library.\n"
                 "Install with: pip install watchdog"
             )
-            warning.setStyleSheet(f"color: {self.get_colors()['error']}; font-weight: bold; padding: 10px;")
+            self._style_for_mode(warning, lambda: (
+                f"color: {self.get_colors()['error']}; font-weight: bold; padding: 10px;"))
             warning.setWordWrap(True)
             layout.addWidget(warning)
         
