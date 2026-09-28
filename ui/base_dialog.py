@@ -30,6 +30,7 @@ Usage:
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
 from PyQt6.QtWidgets import (
@@ -37,9 +38,12 @@ from PyQt6.QtWidgets import (
     QLabel, QFrame
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QTextCursor
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
+
+    from PyQt6.QtWidgets import QTextEdit
 
     from core.theme_manager import ThemeManager
 
@@ -246,6 +250,66 @@ class BaseDialog(QDialog):
         """
         widget.setStyleSheet(sheet())
         self._mode_styled[widget] = sheet
+    
+    @contextmanager
+    def _not_an_edit(self, edit: QTextEdit) -> Iterator[None]:
+        """
+        Change the format of edit's text without editing it: what is done
+        inside the block is one step of the text's undo history, and the
+        text's signals are held until it ends.
+        
+        RNV-NOT-AN-EDIT 2026-09-28. Qt reports a change of format as a change
+        of the text -- textChanged fires -- and records each one as a step of
+        the undo history. Find's highlights and the Regex Builder's matches
+        are formats, and what listens to the text took each one for an edit:
+        the main window's statistics and auto-transform (a Find replaced an
+        output edited by hand), and the Regex Builder's own update, which
+        highlighted again, three times a second, for as long as it was open.
+        
+        A caret moved inside the block is not announced either. The one caret
+        that moves inside one, in Find's _highlight_all_matches(), is moved
+        again straight after, outside it.
+        
+        Args:
+            edit: The text edit whose text is formatted
+        """
+        cursor = QTextCursor(edit.document())
+        was_blocked = edit.blockSignals(True)
+        cursor.beginEditBlock()
+        try:
+            yield
+        finally:
+            cursor.endEditBlock()
+            edit.blockSignals(was_blocked)
+    
+    @staticmethod
+    def _carries_format(edit: QTextEdit) -> bool:
+        """
+        Whether any of edit's text carries a character format.
+        
+        RNV-NOT-AN-EDIT 2026-09-28: resetting the format of text that carries
+        none changes nothing, and Qt records it as a step of the undo history
+        all the same -- Find did it on every key typed into its field. A
+        block's own character format is the line break before it, which a
+        match that runs over a line break colours too.
+        
+        Args:
+            edit: The text edit to look at
+        
+        Returns:
+            True if any character, line breaks included, has a format
+        """
+        block = edit.document().begin()
+        while block.isValid():
+            if block.charFormat().properties():
+                return True
+            it = block.begin()
+            while not it.atEnd():
+                if it.fragment().charFormat().properties():
+                    return True
+                it += 1
+            block = block.next()
+        return False
     
     def get_status_style(self, status: str) -> str:
         """

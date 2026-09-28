@@ -401,7 +401,13 @@ class RegexBuilderDialog(BaseDialog):
         # Clear highlighting
         cursor = self.test_text.textCursor()
         cursor.select(QTextCursor.SelectionType.Document)
-        cursor.setCharFormat(QTextCharFormat())
+        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the pane, and not made
+        # when the pane carries no format. The pane's textChanged re-arms the
+        # update that called this, so with no pattern, or a broken one, it
+        # ran again every 300 ms for as long as the dialog was open.
+        if self._carries_format(self.test_text):
+            with self._not_an_edit(self.test_text):
+                cursor.setCharFormat(QTextCharFormat())
         cursor.clearSelection()
         self.test_text.setTextCursor(cursor)
     
@@ -469,25 +475,31 @@ class RegexBuilderDialog(BaseDialog):
     
     def _highlight_matches(self) -> None:
         """Highlight matches in test text area."""
-        # First, clear existing formatting
-        cursor = self.test_text.textCursor()
-        cursor.select(QTextCursor.SelectionType.Document)
-        cursor.setCharFormat(QTextCharFormat())
-        
-        if not self._current_matches:
-            return
-        
-        is_dark = self.theme_manager.current_theme in ('dark', 'image')
-        highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)
-        
-        # Highlight each match
-        for match in self._current_matches:
-            cursor.setPosition(match.start)
-            cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)
+        # RNV-NOT-AN-EDIT 2026-09-28: one step of the pane's undo history --
+        # a step per match, before -- and not an edit of it. The pane's
+        # textChanged re-arms the update that called this, which highlighted
+        # again, three times a second, for as long as the dialog was open.
+        with self._not_an_edit(self.test_text):
+            # First, clear existing formatting
+            cursor = self.test_text.textCursor()
+            cursor.select(QTextCursor.SelectionType.Document)
+            if self._carries_format(self.test_text):
+                cursor.setCharFormat(QTextCharFormat())
             
-            fmt = QTextCharFormat()
-            fmt.setBackground(QBrush(highlight_color))
-            cursor.mergeCharFormat(fmt)
+            if not self._current_matches:
+                return
+            
+            is_dark = self.theme_manager.current_theme in ('dark', 'image')
+            highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)
+            
+            # Highlight each match
+            for match in self._current_matches:
+                cursor.setPosition(match.start)
+                cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)
+                
+                fmt = QTextCharFormat()
+                fmt.setBackground(QBrush(highlight_color))
+                cursor.mergeCharFormat(fmt)
     
     def _update_replace_preview(self) -> None:
         """Update replace preview with replacement applied."""

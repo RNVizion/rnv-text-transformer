@@ -67,7 +67,7 @@ class FindReplaceDialog(BaseDialog):
         'search_input_radio', 'search_output_radio', 'search_group',
         'find_btn', 'find_next_btn', 'replace_btn', 'replace_all_btn',
         'status_label', '_current_matches', '_current_match_index',
-        '_is_replace_mode'
+        '_is_replace_mode', '_painted_highlight'
     )
     
     def __init__(
@@ -94,9 +94,23 @@ class FindReplaceDialog(BaseDialog):
         self.target_text_edit = target_text_edit
         self._current_matches: list[tuple[int, int]] = []  # (start, end) positions
         self._current_match_index: int = -1
+        # RNV-FIND-REPAINT 2026-09-28: the colour the highlights in the text
+        # were painted in, while any are there; what a switch finds them by.
+        self._painted_highlight: QColor | None = None
         
         self._setup_ui()
         self.apply_base_styling()
+    
+    def refresh_theme(self) -> None:
+        """
+        Refresh the dialog after a theme switch, and the highlights it drew.
+        
+        RNV-FIND-REPAINT 2026-09-28: Find paints its matches into the text
+        in the mode's accent when it runs, and a switch left them in the old
+        mode's until the next Find.
+        """
+        super().refresh_theme()
+        self._recolour_highlights()
     
     def _configure_window(self) -> None:
         """Override to set fixed width only (height adjusts to content)."""
@@ -420,26 +434,41 @@ class FindReplaceDialog(BaseDialog):
         except re.error as e:
             self.status_label.setText(f"Regex error: {e}")
     
+    def _highlight_colour(self) -> QColor:
+        """
+        The colour matches are highlighted in: the mode's accent, at alpha 80.
+        
+        RNV-FIND-REPAINT 2026-09-28: one place for it, read by the Find that
+        paints the highlights and by the switch that paints them again.
+        """
+        is_dark = self.theme_manager.current_theme in ('dark', 'image')
+        highlight_color = QColor(DialogStyleManager.get_colors(is_dark)['accent'])
+        highlight_color.setAlpha(80)  # Semi-transparent
+        return highlight_color
+    
     def _highlight_all_matches(self) -> None:
         """Highlight all matches in the text edit."""
         if self.target_text_edit is None:
             return
         
-        self._clear_highlights()
-        
-        is_dark = self.theme_manager.current_theme in ('dark', 'image')
-        highlight_color = QColor(DialogStyleManager.get_colors(is_dark)['accent'])
-        highlight_color.setAlpha(80)  # Semi-transparent
-        
-        cursor = self.target_text_edit.textCursor()
-        format_highlight = QTextCharFormat()
-        format_highlight.setBackground(QBrush(highlight_color))
-        
-        # Apply highlighting to all matches
-        for start, end in self._current_matches:
-            cursor.setPosition(start)
-            cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
-            cursor.mergeCharFormat(format_highlight)
+        # RNV-NOT-AN-EDIT 2026-09-28: the clear and the paint are one step of
+        # the text's undo history -- a step per match, before -- and not an
+        # edit of it: with auto-transform on, a Find re-ran the transform.
+        with self._not_an_edit(self.target_text_edit):
+            self._clear_highlights()
+            
+            highlight_color = self._highlight_colour()
+            
+            cursor = self.target_text_edit.textCursor()
+            format_highlight = QTextCharFormat()
+            format_highlight.setBackground(QBrush(highlight_color))
+            
+            # Apply highlighting to all matches
+            for start, end in self._current_matches:
+                cursor.setPosition(start)
+                cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
+                cursor.mergeCharFormat(format_highlight)
+        self._painted_highlight = QColor(highlight_color)
     
     def _highlight_current_match(self) -> None:
         """Highlight and scroll to current match."""
@@ -475,9 +504,60 @@ class FindReplaceDialog(BaseDialog):
         cursor = self.target_text_edit.textCursor()
         cursor.select(QTextCursor.SelectionType.Document)
         format_clear = QTextCharFormat()
-        cursor.setCharFormat(format_clear)
+        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the text, and not made
+        # at all when the text carries no format -- it changed nothing, and
+        # was a step of the undo history for every key typed into Find.
+        if self._carries_format(self.target_text_edit):
+            with self._not_an_edit(self.target_text_edit):
+                cursor.setCharFormat(format_clear)
         cursor.clearSelection()
         self.target_text_edit.setTextCursor(cursor)
+        self._painted_highlight = None
+    
+    def _recolour_highlights(self) -> None:
+        """
+        Paint the highlights this dialog drew again, in this mode's accent.
+        
+        RNV-FIND-REPAINT 2026-09-28. What is recoloured is whatever carries
+        the colour they were painted in, where it now sits: an edit since
+        the Find moves the highlights with the text, so the positions the
+        Find recorded may no longer be theirs. Through a cursor of the
+        document's own, so the caret, the current match's selection and
+        the view stay where they are -- _highlight_all_matches() clears
+        through the text's own cursor, which leaves the caret at the end.
+        In one edit block, so it is one step of the text's undo history;
+        and with the text's signals held, because a colour is not an edit:
+        the statistics and the auto-transform the main window runs on
+        textChanged have nothing to do.
+        """
+        painted, edit = self._painted_highlight, self.target_text_edit
+        if painted is None or edit is None:
+            return
+        colour = self._highlight_colour()
+        if colour == painted:
+            return
+        spans = []
+        block = edit.document().begin()
+        while block.isValid():
+            it = block.begin()
+            while not it.atEnd():
+                fragment = it.fragment()
+                brush = fragment.charFormat().background()
+                if brush.style() != Qt.BrushStyle.NoBrush and brush.color() == painted:
+                    spans.append((fragment.position(), fragment.length()))
+                it += 1
+            block = block.next()
+        self._painted_highlight = QColor(colour)
+        if not spans:
+            return
+        format_highlight = QTextCharFormat()
+        format_highlight.setBackground(QBrush(colour))
+        cursor = QTextCursor(edit.document())
+        with self._not_an_edit(edit):
+            for start, length in spans:
+                cursor.setPosition(start)
+                cursor.setPosition(start + length, QTextCursor.MoveMode.KeepAnchor)
+                cursor.mergeCharFormat(format_highlight)
     
     def closeEvent(self, event) -> None:
         """Handle dialog close - clear highlights."""
