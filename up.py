@@ -1,38 +1,38 @@
-"""Find, Find & Replace, the Regex Builder and Watch Folders follow a mode switch; Settings follows its own theme box
+"""Find's painting and the Regex Builder's highlighting are not edits of the text
 
     python up.py             # apply, then run the guards and CI's own commands
     python up.py --check     # rehearse every edit in memory, write nothing
     python up.py --verify    # run the guards and CI's commands, change nothing
 
-For rnv-text-transformer, derived against a fresh clone at the live head (165523d).
+For rnv-text-transformer, derived against a fresh clone at the live head (29a485e with up_tt_find_repaint.py applied).
 
 RNV-DELIVERY-SCRIPT-DO-NOT-SWEEP. This script is a delivery tool, not
 application source, and it names what it retires. That marker is what tells
 this fleet's scanners to skip it.
 
-RULED 2026-09-27: "Yes we can build the reachables" -- the switch-open
-sweep's two reachable findings in this app.
+RULED 2026-09-28: "We can work on those 2 fixes" -- the two faults the
+find-and-watch round found and left alone. Built on up_tt_find_repaint.py:
+run that script first. This one refuses, saying so, where it has not run.
 
-1. Find, Find & Replace, the Regex Builder and Watch Folders are non-modal,
-   so the theme can be cycled while one is open. None followed: each was
-   built, shown and never referred to again, so _refresh_open_dialogs_theme()
-   -- which refreshes the Compare dialog -- could not reach it. After a
-   switch from dark to light the whole dialog kept dark. The main window
-   keeps each one while it is open now, lets it go when it closes, and
-   refreshes it on every switch -- the Find dialog the Regex Builder's
-   Apply Find opens included.
-2. The Settings dialog switches the mode itself, from its Default Theme box,
-   and restyled its own sheet alone: its tab headings, muted descriptions
-   and gold tips kept the mode it was opened in.
+1. Find's own painting counted as an edit of the text. Qt reports a change of
+   format as a change of the text -- textChanged fires -- and records each
+   one as a step of the undo history. A Find fired the main text's
+   textChanged once per match; with auto-transform on, that re-ran the
+   transform and replaced an output edited by hand; and each match was a
+   Ctrl+Z press between you and your last edit. Typing into Find's field did
+   the same once per key, with nothing painted, and so did closing Find.
+2. The Regex Builder re-ran itself about three times a second, forever. Its
+   highlighting fired the test pane's textChanged, which re-armed the 300 ms
+   update, which highlighted again -- with a pattern, with none and with a
+   broken one -- and the pane's undo history grew without end.
 
-One mechanism in BaseDialog serves both. refresh_theme() builds the dialog's
-sheet again with the components it was built with -- it applied the base
-sheet alone, which would have dropped the Regex Builder's tab, table and
-list styles -- and sets again every sheet registered with _style_for_mode(),
-the helper of the same name the picker's windows use. The sheets are the
-same text as before. The Regex Builder also paints its matches again in the
-new mode's colour, and its status line keeps its state's colour (muted,
-success or error) across a switch.
+The approach the find-repaint round took for a theme switch, now in one
+helper both dialogs use: BaseDialog._not_an_edit() holds the text's signals
+and makes what is done inside it one step of the undo history; and
+BaseDialog._carries_format() lets a reset that would change nothing not be
+made at all. A Find is one Ctrl+Z; typing into Find's field and closing it
+are none, and none of the three sets the auto-transform going. The Regex
+Builder updates when its pattern or its text changes, and then rests.
 """
 from __future__ import annotations
 
@@ -47,13 +47,13 @@ import tempfile
 from pathlib import Path
 
 REPO = 'rnv-text-transformer'
-SENTINEL = 'RNV-DIALOG-SWITCH'
+SENTINEL = 'RNV-NOT-AN-EDIT'
 SENTINEL_FILE = 'ui/base_dialog.py'
-GUARD = 'tests/test_dialogs_follow_a_switch.py'
+GUARD = 'tests/test_highlighting_is_not_an_edit.py'
 #: Every guard this round touches, run before CI's own commands.
 GUARD_CMD = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
-             'tests/test_dialogs_follow_a_switch.py']
-DESCRIPTION = 'Find, Find & Replace, the Regex Builder and Watch Folders follow a mode switch; Settings follows its own theme box'
+             'tests/test_highlighting_is_not_an_edit.py', 'tests/test_find_highlights_follow_a_switch.py']
+DESCRIPTION = "Find's painting and the Regex Builder's highlighting are not edits of the text"
 
 _COV = [sys.executable, "-m", "coverage", "run", "--source=core,utils,ui,cli",
         "--branch"]
@@ -78,114 +78,52 @@ def post_write() -> None:
 #: The workflows SUITES was written from, by content hash.
 CI_MIRRORS = {'.github/workflows/tests.yml': '22c4f261f69cda029e0801f148e9b061e3bd65b5c9472b1bf321fc998b5a0434'}
 
-SHADOWS = {"colors.py", "conftest.py", "dialog_styles.py", "base_dialog.py", "test_rnv_text_transformer.py"}
+SHADOWS = {"base_dialog.py", "colors.py", "conftest.py", "find_replace_dialog.py", "regex_builder_dialog.py", "test_rnv_text_transformer.py"}
 
-LEFT_ALONE = ['the modal dialogs -- About, Batch, Export, Encoding, Preset Manager and Preset Editor. Each blocks the theme button and the shortcut while it is open, so no switch reaches it; the sweep lists them.', "the match highlights Find draws in the main window's text. Find paints them when it runs, in the accent of the mode it runs in; a switch leaves them in that colour until the next Find.", "every stylesheet's text: the same sheets are set, now again on a switch."]
+LEFT_ALONE = ["the caret. Clearing Find's highlights still moves the main text's caret to the end and scrolls there -- on every key typed into Find's field, and on closing Find -- and the Regex Builder's clear, with no pattern or a broken one, still moves the test pane's caret to the end 300 ms after a key typed in the middle. Measured before and after this round; raised in the round's doc for a ruling.", "highlights in the undo history. A Find, a switch's repaint and a Regex Builder update are each still one step of the text's undo history: Qt records every change of format. Highlighting with extra selections instead would record nothing, and would change how the highlights are drawn and kept; raised in the round's doc.", 'the Compare dialog: its panes are read only and nothing listens to them.']
 
 
 def edits(tree) -> None:
     """Every substitution, against the in-memory tree. Each anchor is
     checked for its exact number of occurrences before anything is
     written."""
+    # This round builds on up_tt_find_repaint.py: its anchors are that round's
+    # text. Without it they would all be "missing", which says the wrong thing.
+    if "RNV-FIND-REPAINT" not in tree.read("ui/find_replace_dialog.py"):
+        raise Stop("this round builds on up_tt_find_repaint.py, which has not been "
+                   "applied here: ui/find_replace_dialog.py has no 'RNV-FIND-REPAINT'.\n"
+                   "Run that script first, then this one. Nothing was written.",
+                   EXIT_CANNOT_RUN)
     tree.sub('ui/base_dialog.py',
-             'if TYPE_CHECKING:\n    from core.theme_manager import ThemeManager\n',
-             'if TYPE_CHECKING:\n    from collections.abc import Callable\n\n    from core.theme_manager import ThemeManager\n')
+             'from typing import TYPE_CHECKING, ClassVar\n\nfrom PyQt6.QtWidgets import (\n',
+             'from contextlib import contextmanager\nfrom typing import TYPE_CHECKING, ClassVar\n\nfrom PyQt6.QtWidgets import (\n')
     tree.sub('ui/base_dialog.py',
-             "    __slots__ = ('theme_manager', 'font_family', '_is_dark')\n",
-             "    __slots__ = ('theme_manager', 'font_family', '_is_dark',\n                 '_style_components', '_mode_styled')\n")
+             'from PyQt6.QtCore import Qt\n',
+             'from PyQt6.QtCore import Qt\nfrom PyQt6.QtGui import QTextCursor\n')
     tree.sub('ui/base_dialog.py',
-             '        self.theme_manager = theme_manager\n        self.font_family = font_family\n        self._is_dark = self._detect_dark_theme()\n        \n        self._configure_window()\n',
-             "        self.theme_manager = theme_manager\n        self.font_family = font_family\n        self._is_dark = self._detect_dark_theme()\n        \n        # RNV-DIALOG-SWITCH 2026-09-27: what refresh_theme() builds again.\n        # The components of the dialog's own sheet, as the last call to\n        # apply_base_styling() or apply_extended_styling() set them, and\n        # every sheet set with _style_for_mode(), by widget.\n        self._style_components: tuple[str, ...] = ()\n        self._mode_styled: dict[QWidget, Callable[[], str]] = {}\n        \n        self._configure_window()\n")
+             'if TYPE_CHECKING:\n    from collections.abc import Callable\n\n    from core.theme_manager import ThemeManager\n',
+             'if TYPE_CHECKING:\n    from collections.abc import Callable, Iterator\n\n    from PyQt6.QtWidgets import QTextEdit\n\n    from core.theme_manager import ThemeManager\n')
     tree.sub('ui/base_dialog.py',
-             '        from utils.dialog_styles import DialogStyleManager\n        stylesheet = DialogStyleManager.get_dialog_stylesheet(\n            self._is_dark, \n            self.font_family\n        )\n        self.setStyleSheet(stylesheet)\n',
-             '        from utils.dialog_styles import DialogStyleManager\n        self._style_components = ()\n        stylesheet = DialogStyleManager.get_dialog_stylesheet(\n            self._is_dark, \n            self.font_family\n        )\n        self.setStyleSheet(stylesheet)\n')
-    tree.sub('ui/base_dialog.py',
-             '        from utils.dialog_styles import DialogStyleManager\n        stylesheet = DialogStyleManager.get_extended_stylesheet(\n',
-             '        from utils.dialog_styles import DialogStyleManager\n        self._style_components = components\n        stylesheet = DialogStyleManager.get_extended_stylesheet(\n')
-    tree.sub('ui/base_dialog.py',
-             '        Call this when the application theme changes to update the dialog.\n        """\n        self._is_dark = self._detect_dark_theme()\n        self.apply_base_styling()\n',
-             '        Call this when the application theme changes to update the dialog.\n        \n        RNV-DIALOG-SWITCH 2026-09-27: the dialog\'s sheet is built again\n        with the components it was built with. This applied the base sheet\n        alone, which dropped the tab, table and list styles of a dialog\n        built with them. Then every sheet set with _style_for_mode() is set\n        again, in the new mode.\n        """\n        self._is_dark = self._detect_dark_theme()\n        if self._style_components:\n            self.apply_extended_styling(*self._style_components)\n        else:\n            self.apply_base_styling()\n        for widget, sheet in list(self._mode_styled.items()):\n            try:\n                widget.setStyleSheet(sheet())\n            except RuntimeError:  # the widget has been deleted\n                del self._mode_styled[widget]\n    \n    def _style_for_mode(self, widget: QWidget, sheet: Callable[[], str]) -> None:\n        """\n        Style widget with sheet(), now and again on every refresh_theme().\n        \n        RNV-DIALOG-SWITCH 2026-09-27 -- the helper of the same name in the\n        picker\'s Settings panel and About dialog, for the same fault. For a\n        stylesheet that reads the mode when it is set: set once, it kept\n        the mode the dialog was opened in. A widget styled this way again\n        keeps the later sheet, so a status line whose colour follows its\n        state is set again in the colour it shows now.\n        \n        Args:\n            widget: The widget to style\n            sheet: Builds the widget\'s stylesheet from the current mode\n        """\n        widget.setStyleSheet(sheet())\n        self._mode_styled[widget] = sheet\n')
-    tree.sub('ui/base_dialog.py',
-             '        label = QLabel(text)\n        label.setStyleSheet(DialogStyleManager.get_header_style(self._is_dark))\n',
-             '        label = QLabel(text)\n        self._style_for_mode(label, lambda: (\n            DialogStyleManager.get_header_style(self._is_dark)))\n')
-    tree.sub('ui/base_dialog.py',
-             '        label = QLabel(text)\n        label.setStyleSheet(DialogStyleManager.get_subtitle_style(self._is_dark))\n',
-             '        label = QLabel(text)\n        self._style_for_mode(label, lambda: (\n            DialogStyleManager.get_subtitle_style(self._is_dark)))\n')
-    tree.sub('ui/base_dialog.py',
-             '        label = QLabel(text)\n        label.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))\n',
-             '        label = QLabel(text)\n        self._style_for_mode(label, lambda: (\n            DialogStyleManager.get_description_style(self._is_dark)))\n')
-    tree.sub('ui/base_dialog.py',
-             '        label = QLabel(text)\n        label.setStyleSheet(DialogStyleManager.get_tip_style(self._is_dark))\n',
-             '        label = QLabel(text)\n        self._style_for_mode(label, lambda: (\n            DialogStyleManager.get_tip_style(self._is_dark)))\n')
-    tree.sub('ui/settings_dialog.py',
-             "        # Update dialog styling for new theme\n        self.theme_manager.set_theme(theme)\n        self._is_dark = self._detect_dark_theme()\n        self.apply_extended_styling('tab', 'spinbox', 'slider', 'list', 'table')\n",
-             "        # Update dialog styling for new theme. RNV-DIALOG-SWITCH 2026-09-27:\n        # refresh_theme() builds the dialog's sheet again and every label\n        # sheet that reads the mode. This restyled the dialog's own sheet\n        # alone, so the tab headings, the muted descriptions and the gold\n        # tips kept the mode the dialog was opened in.\n        self.theme_manager.set_theme(theme)\n        self.refresh_theme()\n")
-    tree.sub('ui/settings_dialog.py',
-             '        shortcut_info.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))\n',
-             '        self._style_for_mode(shortcut_info, lambda: (\n            DialogStyleManager.get_description_style(self._is_dark)))\n')
-    tree.sub('ui/settings_dialog.py',
-             '            desc_label.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))\n',
-             '            self._style_for_mode(desc_label, lambda: (\n                DialogStyleManager.get_description_style(self._is_dark)))\n')
-    tree.sub('ui/settings_dialog.py',
-             '        options_info.setStyleSheet(DialogStyleManager.get_description_style(self._is_dark))\n',
-             '        self._style_for_mode(options_info, lambda: (\n            DialogStyleManager.get_description_style(self._is_dark)))\n')
+             '        widget.setStyleSheet(sheet())\n        self._mode_styled[widget] = sheet\n    \n    def get_status_style(self, status: str) -> str:\n',
+             '        widget.setStyleSheet(sheet())\n        self._mode_styled[widget] = sheet\n    \n    @contextmanager\n    def _not_an_edit(self, edit: QTextEdit) -> Iterator[None]:\n        """\n        Change the format of edit\'s text without editing it: what is done\n        inside the block is one step of the text\'s undo history, and the\n        text\'s signals are held until it ends.\n        \n        RNV-NOT-AN-EDIT 2026-09-28. Qt reports a change of format as a change\n        of the text -- textChanged fires -- and records each one as a step of\n        the undo history. Find\'s highlights and the Regex Builder\'s matches\n        are formats, and what listens to the text took each one for an edit:\n        the main window\'s statistics and auto-transform (a Find replaced an\n        output edited by hand), and the Regex Builder\'s own update, which\n        highlighted again, three times a second, for as long as it was open.\n        \n        A caret moved inside the block is not announced either. The one caret\n        that moves inside one, in Find\'s _highlight_all_matches(), is moved\n        again straight after, outside it.\n        \n        Args:\n            edit: The text edit whose text is formatted\n        """\n        cursor = QTextCursor(edit.document())\n        was_blocked = edit.blockSignals(True)\n        cursor.beginEditBlock()\n        try:\n            yield\n        finally:\n            cursor.endEditBlock()\n            edit.blockSignals(was_blocked)\n    \n    @staticmethod\n    def _carries_format(edit: QTextEdit) -> bool:\n        """\n        Whether any of edit\'s text carries a character format.\n        \n        RNV-NOT-AN-EDIT 2026-09-28: resetting the format of text that carries\n        none changes nothing, and Qt records it as a step of the undo history\n        all the same -- Find did it on every key typed into its field. A\n        block\'s own character format is the line break before it, which a\n        match that runs over a line break colours too.\n        \n        Args:\n            edit: The text edit to look at\n        \n        Returns:\n            True if any character, line breaks included, has a format\n        """\n        block = edit.document().begin()\n        while block.isValid():\n            if block.charFormat().properties():\n                return True\n            it = block.begin()\n            while not it.atEnd():\n                if it.fragment().charFormat().properties():\n                    return True\n                it += 1\n            block = block.next()\n        return False\n    \n    def get_status_style(self, status: str) -> str:\n')
     tree.sub('ui/find_replace_dialog.py',
-             '        self.status_label = QLabel("")\n        c = self.get_colors()\n        self.status_label.setStyleSheet(f"color: {c[\'text_muted\']};")\n',
-             '        self.status_label = QLabel("")\n        self._style_for_mode(self.status_label, lambda: (\n            f"color: {self.get_colors()[\'text_muted\']};"))\n')
+             '        self._clear_highlights()\n        \n        highlight_color = self._highlight_colour()\n        \n        cursor = self.target_text_edit.textCursor()\n        format_highlight = QTextCharFormat()\n        format_highlight.setBackground(QBrush(highlight_color))\n        \n        # Apply highlighting to all matches\n        for start, end in self._current_matches:\n            cursor.setPosition(start)\n            cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)\n            cursor.mergeCharFormat(format_highlight)\n        self._painted_highlight = QColor(highlight_color)\n',
+             "        # RNV-NOT-AN-EDIT 2026-09-28: the clear and the paint are one step of\n        # the text's undo history -- a step per match, before -- and not an\n        # edit of it: with auto-transform on, a Find re-ran the transform.\n        with self._not_an_edit(self.target_text_edit):\n            self._clear_highlights()\n            \n            highlight_color = self._highlight_colour()\n            \n            cursor = self.target_text_edit.textCursor()\n            format_highlight = QTextCharFormat()\n            format_highlight.setBackground(QBrush(highlight_color))\n            \n            # Apply highlighting to all matches\n            for start, end in self._current_matches:\n                cursor.setPosition(start)\n                cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)\n                cursor.mergeCharFormat(format_highlight)\n        self._painted_highlight = QColor(highlight_color)\n")
+    tree.sub('ui/find_replace_dialog.py',
+             '        format_clear = QTextCharFormat()\n        cursor.setCharFormat(format_clear)\n        cursor.clearSelection()\n',
+             '        format_clear = QTextCharFormat()\n        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the text, and not made\n        # at all when the text carries no format -- it changed nothing, and\n        # was a step of the undo history for every key typed into Find.\n        if self._carries_format(self.target_text_edit):\n            with self._not_an_edit(self.target_text_edit):\n                cursor.setCharFormat(format_clear)\n        cursor.clearSelection()\n')
+    tree.sub('ui/find_replace_dialog.py',
+             '        cursor = QTextCursor(edit.document())\n        was_blocked = edit.blockSignals(True)\n        try:\n            cursor.beginEditBlock()\n            for start, length in spans:\n                cursor.setPosition(start)\n                cursor.setPosition(start + length, QTextCursor.MoveMode.KeepAnchor)\n                cursor.mergeCharFormat(format_highlight)\n            cursor.endEditBlock()\n        finally:\n            edit.blockSignals(was_blocked)\n',
+             '        cursor = QTextCursor(edit.document())\n        with self._not_an_edit(edit):\n            for start, length in spans:\n                cursor.setPosition(start)\n                cursor.setPosition(start + length, QTextCursor.MoveMode.KeepAnchor)\n                cursor.mergeCharFormat(format_highlight)\n')
     tree.sub('ui/regex_builder_dialog.py',
-             '        self._populate_patterns()\n        self._load_text()\n    \n\n    def _setup_ui(self) -> None:\n',
-             '        self._populate_patterns()\n        self._load_text()\n    \n    def refresh_theme(self) -> None:\n        """\n        Refresh the dialog after a theme switch, and paint the matches again.\n        \n        RNV-DIALOG-SWITCH 2026-09-27: the matches in the test pane are painted\n        in the mode\'s regex_match_bg when they are found; a switch left them\n        in the old mode\'s until the next edit.\n        """\n        super().refresh_theme()\n        if self._current_matches:\n            self._highlight_matches()\n    \n\n    def _setup_ui(self) -> None:\n')
+             '        # Clear highlighting\n        cursor = self.test_text.textCursor()\n        cursor.select(QTextCursor.SelectionType.Document)\n        cursor.setCharFormat(QTextCharFormat())\n        cursor.clearSelection()\n',
+             "        # Clear highlighting\n        cursor = self.test_text.textCursor()\n        cursor.select(QTextCursor.SelectionType.Document)\n        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the pane, and not made\n        # when the pane carries no format. The pane's textChanged re-arms the\n        # update that called this, so with no pattern, or a broken one, it\n        # ran again every 300 ms for as long as the dialog was open.\n        if self._carries_format(self.test_text):\n            with self._not_an_edit(self.test_text):\n                cursor.setCharFormat(QTextCharFormat())\n        cursor.clearSelection()\n")
     tree.sub('ui/regex_builder_dialog.py',
-             '        self.status_label = QLabel("Ready")\n        c = self.get_colors()\n        self.status_label.setStyleSheet(f"color: {c[\'text_muted\']};")\n',
-             '        self.status_label = QLabel("Ready")\n        self._set_status_colour(\'text_muted\')\n')
-    tree.sub('ui/regex_builder_dialog.py',
-             '                self.status_label.setStyleSheet(f"color: {self.get_colors()[\'success\']};")\n',
-             "                self._set_status_colour('success')\n")
-    tree.sub('ui/regex_builder_dialog.py',
-             '                self.status_label.setStyleSheet(f"color: {self.get_colors()[\'error\']};")\n',
-             "                self._set_status_colour('error')\n")
-    tree.sub('ui/regex_builder_dialog.py',
-             '            self.status_label.setStyleSheet(f"color: {self.get_colors()[\'text_muted\']};")\n',
-             "            self._set_status_colour('text_muted')\n")
-    tree.sub('ui/regex_builder_dialog.py',
-             '\n            self.status_label.setStyleSheet(f"color: {self.get_colors()[\'error\']};")\n',
-             "\n            self._set_status_colour('error')\n")
-    tree.sub('ui/regex_builder_dialog.py',
-             '        c = self.get_colors()\n        self.status_label.setStyleSheet(f"color: {c[\'success\']};" if count > 0 else f"color: {c[\'text_muted\']};")\n',
-             "        self._set_status_colour('success' if count > 0 else 'text_muted')\n")
-    tree.sub('ui/regex_builder_dialog.py',
-             '    def _on_replacement_changed(self, text: str) -> None:\n',
-             '    def _set_status_colour(self, key: str) -> None:\n        """\n        Colour the status line with the palette\'s `key`, in the dialog\'s mode.\n        \n        RNV-DIALOG-SWITCH 2026-09-27: through _style_for_mode(), so a theme\n        switch sets it again in the new mode, in the colour of the state it\n        shows (text_muted, success or error).\n        """\n        self._style_for_mode(self.status_label, lambda: (\n            f"color: {self.get_colors()[key]};"))\n    \n    def _on_replacement_changed(self, text: str) -> None:\n')
-    tree.sub('ui/watch_folder_dialog.py',
-             '            warning.setStyleSheet(f"color: {self.get_colors()[\'error\']}; font-weight: bold; padding: 10px;")\n',
-             '            self._style_for_mode(warning, lambda: (\n                f"color: {self.get_colors()[\'error\']}; font-weight: bold; padding: 10px;"))\n')
-    tree.sub('ui/main_window.py',
-             'from pathlib import Path\nfrom typing import TYPE_CHECKING\n',
-             'from functools import partial\nfrom pathlib import Path\nfrom typing import TYPE_CHECKING\n')
-    tree.sub('ui/main_window.py',
-             'from ui.settings_dialog import SettingsDialog\n',
-             'from ui.base_dialog import BaseDialog\nfrom ui.settings_dialog import SettingsDialog\n')
-    tree.sub('ui/main_window.py',
-             '            target_text_edit=self.text_input,\n            replace_mode=False,\n            parent=self\n        )\n        dialog.show()\n',
-             '            target_text_edit=self.text_input,\n            replace_mode=False,\n            parent=self\n        )\n        self._track_open_dialog(dialog)\n        dialog.show()\n')
-    tree.sub('ui/main_window.py',
-             '            target_text_edit=self.text_input,\n            replace_mode=True,\n            parent=self\n        )\n        dialog.show()\n',
-             '            target_text_edit=self.text_input,\n            replace_mode=True,\n            parent=self\n        )\n        self._track_open_dialog(dialog)\n        dialog.show()\n')
-    tree.sub('ui/main_window.py',
-             '        # Connect pattern applied signal\n        dialog.pattern_applied.connect(self._on_regex_pattern_applied)\n        \n        dialog.show()\n',
-             '        # Connect pattern applied signal\n        dialog.pattern_applied.connect(self._on_regex_pattern_applied)\n        \n        self._track_open_dialog(dialog)\n        dialog.show()\n')
-    tree.sub('ui/main_window.py',
-             '        """Open Watch Folder dialog for automatic file transformation."""\n        dialog = WatchFolderDialog(\n            theme_manager=self.theme_manager,\n            font_family=self.font_family,\n            parent=self\n        )\n        dialog.show()\n',
-             '        """Open Watch Folder dialog for automatic file transformation."""\n        dialog = WatchFolderDialog(\n            theme_manager=self.theme_manager,\n            font_family=self.font_family,\n            parent=self\n        )\n        self._track_open_dialog(dialog)\n        dialog.show()\n')
-    tree.sub('ui/main_window.py',
-             '            dialog.find_input.setText(pattern)\n            dialog.regex_check.setChecked(True)\n            dialog.show()\n',
-             '            dialog.find_input.setText(pattern)\n            dialog.regex_check.setChecked(True)\n            self._track_open_dialog(dialog)\n            dialog.show()\n')
-    tree.sub('ui/main_window.py',
-             '    def _refresh_open_dialogs_theme(self) -> None:\n        """\n        Propagate the current theme to any open non-modal dialog.\n        \n        Called whenever the application theme changes (via Ctrl+Shift+T or\n        from the settings dialog). The compare dialog is the only non-modal\n        one — modal dialogs cannot be open during a theme cycle so they\n        don\'t need this. Wrapped defensively in case the Qt object was\n        destroyed without the finished signal firing.\n        """\n        compare_dialog = getattr(self, \'_compare_dialog\', None)\n        if compare_dialog is not None:\n            try:\n                compare_dialog.refresh_theme()\n            except RuntimeError:\n                self._compare_dialog = None\n',
-             '    def _track_open_dialog(self, dialog: BaseDialog) -> None:\n        """\n        Keep a non-modal dialog where _refresh_open_dialogs_theme() reaches\n        it, for as long as it is open.\n        \n        RNV-DIALOG-SWITCH 2026-09-27. Find, Find & Replace, the Regex Builder\n        and Watch Folders are non-modal, so the theme can be cycled while one\n        is open -- and nothing referred to them after show(), so they kept\n        the mode they were opened in. More than one can be open at once, and\n        Find opens from the Regex Builder\'s Apply Find as well as from here.\n        """\n        if not hasattr(self, \'_open_dialogs\'):\n            self._open_dialogs: list[BaseDialog] = []\n        self._open_dialogs.append(dialog)\n        dialog.finished.connect(partial(self._forget_open_dialog, dialog))\n    \n    def _forget_open_dialog(self, dialog: BaseDialog, _result: int = 0) -> None:\n        """Stop refreshing a dialog once it has closed."""\n        if dialog in getattr(self, \'_open_dialogs\', ()):\n            self._open_dialogs.remove(dialog)\n    \n    def _refresh_open_dialogs_theme(self) -> None:\n        """\n        Propagate the current theme to any open non-modal dialog.\n        \n        Called whenever the application theme changes (via Ctrl+Shift+T or\n        from the settings dialog). The non-modal dialogs are Compare and the\n        ones _track_open_dialog() keeps: Find, Find & Replace, the Regex\n        Builder and Watch Folders. A modal dialog blocks the theme button and\n        the shortcut while it is open; the settings dialog, which switches\n        the theme itself, restyles itself. Wrapped defensively in case the\n        Qt object was destroyed without the finished signal firing.\n        """\n        compare_dialog = getattr(self, \'_compare_dialog\', None)\n        if compare_dialog is not None:\n            try:\n                compare_dialog.refresh_theme()\n            except RuntimeError:\n                self._compare_dialog = None\n        for dialog in list(getattr(self, \'_open_dialogs\', ())):\n            try:\n                dialog.refresh_theme()\n            except RuntimeError:\n                self._forget_open_dialog(dialog)\n')
-    if (tree.root / 'tests/test_dialogs_follow_a_switch.py').exists():
-        raise Stop('tests/test_dialogs_follow_a_switch.py' + ' exists already: this round creates it', EXIT_CANNOT_RUN)
-    tree.write('tests/test_dialogs_follow_a_switch.py', '"""\ntests/test_dialogs_follow_a_switch.py\n=====================================\nRNV-DIALOG-SWITCH, 2026-09-27. A window open through a theme switch is\nstyled, after the switch, as the same window opened in the new mode.\n\nTwo faults, found by the fleet\'s switch-open sweep:\n\n1. Find, Find & Replace, the Regex Builder and Watch Folders are non-modal,\n   so the theme can be cycled while one is open. None followed: each was\n   built, shown and never referred to again, so the main window\'s\n   _refresh_open_dialogs_theme() could not reach it. After dark -> light the\n   whole dialog kept dark -- grounds, fields, buttons, the pattern tables.\n2. The Settings dialog switches the mode itself, from its Default Theme box,\n   and restyled its own sheet alone: the tab headings, the muted\n   descriptions and the gold tips kept the mode it was opened in.\n\nIn the two classes that switch whole windows, the first test is the general\none: after a switch, every widget carries the stylesheet a window opened in\nthat mode gives it. The rest pin what a stylesheet does not show -- a status\nline that follows its state, the matches painted into the Regex Builder\'s\ntest pane -- and the mechanism: the main window keeps each open dialog,\nforgets it when it closes, and BaseDialog.refresh_theme() keeps a dialog\'s\nextended styles.\n"""\nfrom __future__ import annotations\n\nimport pytest\nfrom PyQt6.QtWidgets import QApplication, QLabel, QWidget\n\nfrom core.theme_manager import ThemeManager\nfrom ui.base_dialog import BaseDialog\nfrom ui.regex_builder_dialog import RegexBuilderDialog\nfrom ui.settings_dialog import SettingsDialog\nfrom utils.dialog_styles import DialogStyleManager\n\nOPENERS = ("_open_find_dialog", "_open_replace_dialog",\n           "_open_regex_builder_dialog", "_open_watch_folder_dialog")\n\n\ndef _styles(dlg) -> list:\n    return [dlg.styleSheet()] + [(type(w).__name__, w.objectName(), w.styleSheet())\n                                 for w in dlg.findChildren(QWidget)]\n\n\ndef _opened(win, opener: str) -> BaseDialog:\n    """The dialog the main window\'s own opener shows."""\n    before = {id(d) for d in win.findChildren(BaseDialog)}\n    getattr(win, opener)()\n    QApplication.processEvents()\n    new = [d for d in win.findChildren(BaseDialog)\n           if id(d) not in before and d.isVisible()]\n    assert len(new) == 1, (opener, len(new))\n    return new[0]\n\n\ndef _palette(win) -> dict:\n    return DialogStyleManager.get_colors(win.theme_manager.is_dark_mode)\n\n\ndef _ink(label) -> str:\n    from PyQt6.QtGui import QPalette\n    label.ensurePolished()\n    return label.palette().color(QPalette.ColorRole.WindowText).name()\n\n\n# ─────────────────────────────────────────────────────────────────────────────\n# 1. The four non-modal dialogs, opened and switched with the main window\'s\n#    own opener and theme cycle\n# ─────────────────────────────────────────────────────────────────────────────\n\nclass TestTheNonModalDialogsFollowASwitch:\n\n    @pytest.mark.parametrize("opener", OPENERS)\n    def test_a_switched_dialog_is_styled_as_one_opened_in_that_mode(self, main_window, opener):\n        win = main_window\n        dlg = _opened(win, opener)\n        modes = []\n        for _ in range(3):                                   # every mode, and back\n            win._cycle_theme()\n            QApplication.processEvents()\n            modes.append(win.theme_manager.current_theme)\n            fresh = _opened(win, opener)\n            a, b = _styles(dlg), _styles(fresh)\n            assert len(a) == len(b), (opener, modes[-1], len(a), len(b))\n            differ = [(i, x, y) for i, (x, y) in enumerate(zip(a, b)) if x != y]\n            assert not differ, (opener, modes[-1], differ[:2])\n            fresh.close()\n        assert {"dark", "light"} <= set(modes), modes\n        dlg.close()\n\n    def test_watch_folders_without_watchdog_warns_in_the_new_mode(self, main_window, monkeypatch):\n        """The warning shown when watchdog is missing is coloured error."""\n        import ui.watch_folder_dialog as watch\n        monkeypatch.setattr(watch, "WATCHDOG_AVAILABLE", False)\n        win = main_window\n        dlg = _opened(win, "_open_watch_folder_dialog")\n        warning = [w for w in dlg.findChildren(QLabel) if "watchdog" in w.text()]\n        assert len(warning) == 1\n        for _ in range(3):\n            win._cycle_theme()\n            assert _ink(warning[0]) == _palette(win)["error"].lower()\n        dlg.close()\n\n    def test_two_find_dialogs_open_at_once_both_follow(self, main_window):\n        win = main_window\n        first, second = _opened(win, "_open_find_dialog"), _opened(win, "_open_find_dialog")\n        for _ in range(3):\n            win._cycle_theme()\n            muted = _palette(win)["text_muted"].lower()\n            assert _ink(first.status_label) == muted\n            assert _ink(second.status_label) == muted\n        first.close()\n        second.close()\n\n    def test_the_find_dialog_apply_find_opens_follows_too(self, main_window):\n        """The Regex Builder\'s Apply Find, with no replacement, opens Find\n        with the pattern -- a second road to a non-modal Find."""\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText("qu")\n        before = {id(d) for d in win.findChildren(BaseDialog)}\n        builder._apply_find()\n        QApplication.processEvents()\n        found = [d for d in win.findChildren(BaseDialog) if id(d) not in before and d.isVisible()]\n        assert len(found) == 1 and found[0].find_input.text() == "qu"\n        for _ in range(3):\n            win._cycle_theme()\n            fresh = _opened(win, "_open_find_dialog")\n            assert _styles(found[0]) == _styles(fresh), win.theme_manager.current_theme\n            fresh.close()\n        found[0].close()\n\n    def test_a_closed_dialog_is_let_go(self, main_window):\n        win = main_window\n        for opener in OPENERS:\n            dlg = _opened(win, opener)\n            assert dlg in win._open_dialogs, opener\n            dlg.close()\n            QApplication.processEvents()\n            assert dlg not in win._open_dialogs, opener\n\n\nclass TestTheRegexBuilderFollowsItsState:\n\n    def test_the_status_line_keeps_its_state_across_a_switch(self, main_window):\n        win = main_window\n        dlg = _opened(win, "_open_regex_builder_dialog")\n        for pattern, key in (("qu", "success"), ("(", "error"), ("", "text_muted")):\n            dlg.pattern_input.setText(pattern)\n            for _ in range(3):\n                win._cycle_theme()\n                assert _ink(dlg.status_label) == _palette(win)[key].lower(), (pattern, key)\n        dlg.close()\n\n    def test_the_matches_are_painted_again_in_the_new_mode(self, main_window):\n        win = main_window\n        win.text_input.setPlainText("The quick brown fox jumps over the lazy dog.")\n        dlg = _opened(win, "_open_regex_builder_dialog")\n        dlg.pattern_input.setText("o")\n        dlg._update_matches()\n        assert dlg._current_matches\n        start = dlg._current_matches[0].start\n        for _ in range(3):\n            win._cycle_theme()\n            cursor = dlg.test_text.textCursor()\n            cursor.setPosition(start + 1)\n            painted = cursor.charFormat().background().color().name()\n            want = (RegexBuilderDialog._MATCH_COLOR_DARK if win.theme_manager.is_dark_mode\n                    else RegexBuilderDialog._MATCH_COLOR_LIGHT)\n            assert painted == want.lower(), (win.theme_manager.current_theme, painted, want)\n        dlg.close()\n\n\n# ─────────────────────────────────────────────────────────────────────────────\n# 2. The Settings dialog, switched by its own Default Theme box\n# ─────────────────────────────────────────────────────────────────────────────\n\nclass TestSettingsFollowsItsOwnThemeBox:\n\n    NAMES = {"Dark Mode": "dark", "Light Mode": "light", "Image Mode": "image"}\n\n    @staticmethod\n    def _theme_manager(mode: str) -> ThemeManager:\n        tm = ThemeManager()\n        tm.detect_image_resources()\n        tm.set_theme(mode)\n        return tm\n\n    def _walk(self, dlg) -> list[str]:\n        """Every ordered pair of different modes the box offers."""\n        items = [dlg.theme_combo.itemText(i) for i in range(dlg.theme_combo.count())]\n        assert {"Dark Mode", "Light Mode"} <= set(items), items\n        walk = []\n        for a in items:\n            for b in items:\n                if a != b:\n                    walk += [a, b]\n        return walk\n\n    def test_switched_by_its_box_it_is_styled_as_one_opened_in_that_mode(self, qtbot, tmp_settings):\n        dlg = SettingsDialog(tmp_settings, self._theme_manager("dark"))\n        qtbot.addWidget(dlg)\n        for text in self._walk(dlg):\n            dlg.theme_combo.setCurrentText(text)\n            fresh = SettingsDialog(tmp_settings, self._theme_manager(self.NAMES[text]))\n            qtbot.addWidget(fresh)\n            a, b = _styles(dlg), _styles(fresh)\n            assert len(a) == len(b), (text, len(a), len(b))\n            differ = [(i, x, y) for i, (x, y) in enumerate(zip(a, b)) if x != y]\n            assert not differ, (text, differ[:2])\n\n    def test_the_headings_descriptions_and_tips_change_colour(self, qtbot, tmp_settings):\n        """The labels that read the mode, by the ink Qt draws them in: every\n        one of them differs between dark and light, and follows the box."""\n        dlg = SettingsDialog(tmp_settings, self._theme_manager("dark"))\n        qtbot.addWidget(dlg)\n        labels = [w for w in dlg.findChildren(QLabel) if w.styleSheet() and "color" in w.styleSheet()]\n        dark = [_ink(w) for w in labels]\n        dlg.theme_combo.setCurrentText("Light Mode")\n        light = [_ink(w) for w in labels]\n        moved = [w.text()[:30] for w, a, b in zip(labels, dark, light) if a != b]\n        assert len(moved) == len(labels) >= 17, (len(moved), len(labels))\n        dlg.theme_combo.setCurrentText("Dark Mode")\n        assert [_ink(w) for w in labels] == dark\n\n\n# ─────────────────────────────────────────────────────────────────────────────\n# 3. The mechanism, in BaseDialog\n# ─────────────────────────────────────────────────────────────────────────────\n\nclass TestBaseDialogRefresh:\n\n    def test_refresh_keeps_the_components_the_dialog_was_built_with(self, qtbot):\n        tm = ThemeManager()\n        tm.set_theme("dark")\n        dlg = BaseDialog(tm)\n        qtbot.addWidget(dlg)\n        dlg.apply_extended_styling("tab", "table")\n        tm.set_theme("light")\n        dlg.refresh_theme()\n        assert dlg.styleSheet() == DialogStyleManager.get_extended_stylesheet(\n            False, dlg.font_family, "tab", "table")\n        dlg.apply_base_styling()\n        tm.set_theme("dark")\n        dlg.refresh_theme()\n        assert dlg.styleSheet() == DialogStyleManager.get_dialog_stylesheet(True, dlg.font_family)\n\n    def test_a_widget_styled_again_keeps_the_later_sheet(self, qtbot):\n        tm = ThemeManager()\n        tm.set_theme("dark")\n        dlg = BaseDialog(tm)\n        qtbot.addWidget(dlg)\n        label = QLabel("status", dlg)\n        dlg._style_for_mode(label, lambda: f"color: {dlg.get_colors()[\'success\']};")\n        dlg._style_for_mode(label, lambda: f"color: {dlg.get_colors()[\'error\']};")\n        tm.set_theme("light")\n        dlg.refresh_theme()\n        assert label.styleSheet() == f"color: {DialogStyleManager.LIGHT[\'error\']};"\n        assert len(dlg._mode_styled) == 1\n')
+             '        """Highlight matches in test text area."""\n        # First, clear existing formatting\n        cursor = self.test_text.textCursor()\n        cursor.select(QTextCursor.SelectionType.Document)\n        cursor.setCharFormat(QTextCharFormat())\n        \n        if not self._current_matches:\n            return\n        \n        is_dark = self.theme_manager.current_theme in (\'dark\', \'image\')\n        highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)\n        \n        # Highlight each match\n        for match in self._current_matches:\n            cursor.setPosition(match.start)\n            cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)\n            \n            fmt = QTextCharFormat()\n            fmt.setBackground(QBrush(highlight_color))\n            cursor.mergeCharFormat(fmt)\n',
+             '        """Highlight matches in test text area."""\n        # RNV-NOT-AN-EDIT 2026-09-28: one step of the pane\'s undo history --\n        # a step per match, before -- and not an edit of it. The pane\'s\n        # textChanged re-arms the update that called this, which highlighted\n        # again, three times a second, for as long as the dialog was open.\n        with self._not_an_edit(self.test_text):\n            # First, clear existing formatting\n            cursor = self.test_text.textCursor()\n            cursor.select(QTextCursor.SelectionType.Document)\n            if self._carries_format(self.test_text):\n                cursor.setCharFormat(QTextCharFormat())\n            \n            if not self._current_matches:\n                return\n            \n            is_dark = self.theme_manager.current_theme in (\'dark\', \'image\')\n            highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)\n            \n            # Highlight each match\n            for match in self._current_matches:\n                cursor.setPosition(match.start)\n                cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)\n                \n                fmt = QTextCharFormat()\n                fmt.setBackground(QBrush(highlight_color))\n                cursor.mergeCharFormat(fmt)\n')
+    if (tree.root / 'tests/test_highlighting_is_not_an_edit.py').exists():
+        raise Stop('tests/test_highlighting_is_not_an_edit.py' + ' exists already: this round creates it', EXIT_CANNOT_RUN)
+    tree.write('tests/test_highlighting_is_not_an_edit.py', '"""\ntests/test_highlighting_is_not_an_edit.py\n=========================================\nRNV-NOT-AN-EDIT, 2026-09-28. Painting highlights is not an edit of the text.\n\nQt reports a change of format as a change of the text -- textChanged fires --\nand records each one as a step of the undo history. Two of this app\'s\ndialogs highlight by format, and what listens to the text took each\nhighlight for an edit:\n\n1. Find. A Find fired the main text\'s textChanged once per match; with\n   auto-transform on, that re-ran the transform and replaced an output\n   edited by hand; and each match was a Ctrl+Z press between you and your\n   last edit. Typing into Find\'s field did the same once per key, with\n   nothing painted; so did closing Find.\n2. The Regex Builder. Its highlighting fired the test pane\'s textChanged,\n   which re-armed the 300 ms update, which highlighted again: about three\n   times a second, for as long as the dialog was open, with a pattern, with\n   none and with a broken one. The pane\'s undo history grew without end.\n\nBaseDialog._not_an_edit() holds the text\'s signals and makes a paint one step\nof the undo history; BaseDialog._carries_format() lets a reset that would\nchange nothing not be made. Every test drives the main window\'s own openers.\n"""\nfrom __future__ import annotations\n\nimport pytest\nfrom PyQt6.QtGui import QTextCursor\nfrom PyQt6.QtWidgets import QApplication\n\nfrom ui.base_dialog import BaseDialog\n\nTEXT = ("The quick brown fox jumps over the lazy dog.\\n"\n        "Pack my box with five dozen liquor jugs.\\n"\n        "How vexingly quick daft zebras jump over the log.\\n")\nHAND = "an output edited by hand"\nPANE = "foo boo zoo\\nmoo\\n"\n\n\ndef _opened(win, opener: str) -> BaseDialog:\n    before = {id(d) for d in win.findChildren(BaseDialog)}\n    getattr(win, opener)()\n    QApplication.processEvents()\n    new = [d for d in win.findChildren(BaseDialog) if id(d) not in before and d.isVisible()]\n    assert len(new) == 1, (opener, len(new))\n    return new[0]\n\n\ndef _formatted(edit) -> list:\n    """Every run of the text that carries a character format, line breaks\n    included (a block\'s own format is the line break before it)."""\n    out = []\n    block = edit.document().begin()\n    while block.isValid():\n        if block.charFormat().properties():\n            out.append(("line break before", block.position()))\n        it = block.begin()\n        while not it.atEnd():\n            if it.fragment().charFormat().properties():\n                out.append((it.fragment().position(), it.fragment().length()))\n            it += 1\n        block = block.next()\n    return out\n\n\ndef _typed_at_the_end(edit, text: str = "X") -> None:\n    """A real edit: text typed at the end, through the text\'s own caret."""\n    cursor = edit.textCursor()\n    cursor.movePosition(QTextCursor.MoveOperation.End)\n    edit.setTextCursor(cursor)\n    edit.insertPlainText(text)\n\n\nclass _Edits:\n    """Counts the text\'s textChanged."""\n\n    def __init__(self, edit):\n        self.count = 0\n        edit.textChanged.connect(self._bump)\n\n    def _bump(self):\n        self.count += 1\n\n\n@pytest.fixture\ndef watched(main_window):\n    """The main window with auto-transform on, its text filled, and an\n    output edited by hand after the transform that filling started."""\n    win = main_window\n    win.settings_manager.save_auto_transform(True)\n    win.text_input.setPlainText(TEXT)\n    win.auto_transform_timer.stop()\n    win.output_text.setPlainText(HAND)\n    yield win, _Edits(win.text_input)\n    win.auto_transform_timer.stop()\n\n\nclass TestFindIsNotAnEdit:\n\n    def test_a_find_does_not_edit_the_text(self, watched):\n        win, edits = watched\n        dlg = _opened(win, "_open_find_dialog")\n        dlg.find_input.setText("o")\n        dlg._on_find()\n        assert _formatted(win.text_input), "the Find painted nothing: nothing was tested"\n        assert edits.count == 0, f"the Find fired the text\'s textChanged {edits.count} times"\n        assert not win.auto_transform_timer.isActive(), "the Find set the auto-transform going"\n        assert win.output_text.toPlainText() == HAND\n        _typed_at_the_end(win.text_input)                    # and a real edit still is one\n        assert edits.count == 1, "the text\'s signals were left held after the Find"\n        dlg.close()\n\n    def test_a_find_is_one_step_of_undo(self, main_window):\n        win = main_window\n        win.text_input.setPlainText(TEXT)\n        _typed_at_the_end(win.text_input)\n        dlg = _opened(win, "_open_find_dialog")\n        dlg.find_input.setText("o")\n        dlg._on_find()\n        assert len(_formatted(win.text_input)) > 1, "fewer than two matches: nothing was tested"\n        win.text_input.undo()\n        assert _formatted(win.text_input) == [], "one Ctrl+Z did not take the Find\'s highlights away"\n        assert win.text_input.toPlainText() == TEXT + "X", "one Ctrl+Z undid more than the Find"\n        win.text_input.undo()\n        assert win.text_input.toPlainText() == TEXT, "the second Ctrl+Z did not reach the last edit"\n        dlg.close()\n\n    def test_typing_into_find_leaves_the_text_and_its_history_alone(self, watched):\n        win, edits = watched\n        _typed_at_the_end(win.text_input)\n        edits.count = 0\n        dlg = _opened(win, "_open_find_dialog")\n        steps = win.text_input.document().availableUndoSteps()\n        for i in range(1, 6):\n            dlg.find_input.setText("hello"[:i])              # five keys, nothing found yet\n        assert edits.count == 0, f"typing into Find fired the text\'s textChanged {edits.count} times"\n        assert win.text_input.document().availableUndoSteps() == steps, \\\n            "typing into Find added to the text\'s undo history"\n        win.text_input.undo()\n        assert win.text_input.toPlainText() == TEXT, "one Ctrl+Z did not reach the last edit"\n        dlg.close()\n\n    def test_closing_find_does_not_edit_the_text(self, watched):\n        win, edits = watched\n        dlg = _opened(win, "_open_find_dialog")\n        dlg.find_input.setText("o")\n        dlg._on_find()\n        assert _formatted(win.text_input)\n        dlg.close()\n        QApplication.processEvents()\n        assert _formatted(win.text_input) == [], "closing Find left its highlights"\n        assert edits.count == 0, f"closing Find fired the text\'s textChanged {edits.count} times"\n        assert win.output_text.toPlainText() == HAND and not win.auto_transform_timer.isActive()\n\n    def test_a_highlight_on_a_line_break_is_cleared_too(self, main_window):\n        """A regular expression can match line breaks alone, and a line\n        break\'s format is its block\'s, not a run of text. Left behind, it\n        colours what is typed at the start of the next line."""\n        win = main_window\n        win.text_input.setPlainText(TEXT)\n        dlg = _opened(win, "_open_find_dialog")\n        dlg.regex_check.setChecked(True)\n        dlg.find_input.setText("\\\\n")\n        dlg._on_find()\n        breaks = _formatted(win.text_input)\n        assert breaks and all(b[0] == "line break before" for b in breaks), \\\n            f"the Find did not colour line breaks alone: {breaks}"\n        dlg.find_input.setText("")                           # a new search clears them\n        assert _formatted(win.text_input) == [], "a line break kept the Find\'s colour"\n        dlg.close()\n\n\nclass TestTheRegexBuilderRests:\n\n    @pytest.mark.parametrize("pattern", ["o", "", "(o"], ids=["pattern", "no-pattern", "broken-pattern"])\n    def test_it_does_nothing_while_nothing_changes(self, main_window, qtbot, pattern):\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText(pattern)\n        builder.test_text.setPlainText(PANE)\n        qtbot.wait(700)                                      # the update the edits asked for\n        runs = []\n        builder._update_timer.timeout.connect(lambda: runs.append(1))\n        steps = builder.test_text.document().availableUndoSteps()\n        qtbot.wait(1500)                                     # nothing happens for 1.5 s\n        assert runs == [], f"the Regex Builder updated {len(runs)} times with nothing changed"\n        assert builder.test_text.document().availableUndoSteps() == steps, \\\n            "the test pane\'s undo history grew with nothing changed"\n        builder.close()\n\n    def test_an_edit_still_updates_the_matches(self, main_window, qtbot):\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText("o")\n        builder.test_text.setPlainText(PANE)\n        qtbot.wait(700)\n        before = len(builder._current_matches)\n        assert before == 8, before\n        builder.test_text.insertPlainText("oo")              # a real edit of the pane\n        qtbot.wait(700)\n        assert len(builder._current_matches) == before + 2, "an edit of the test text no longer updates"\n        builder.close()\n\n    def test_clearing_the_pattern_is_not_an_edit_of_the_pane(self, main_window, qtbot):\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText("o")\n        builder.test_text.setPlainText(PANE)\n        qtbot.wait(700)\n        assert _formatted(builder.test_text), "nothing was painted: nothing was tested"\n        edits = _Edits(builder.test_text)\n        builder.pattern_input.setText("")                    # the results are cleared\n        qtbot.wait(700)\n        assert _formatted(builder.test_text) == [], "clearing the pattern left the matches painted"\n        assert edits.count == 0, f"clearing the matches fired the pane\'s textChanged {edits.count} times"\n        builder.close()\n\n    @pytest.mark.parametrize("pattern", ["", "(o", "zzz"], ids=["no-pattern", "broken-pattern", "no-match"])\n    def test_with_nothing_to_paint_the_pane_s_history_is_its_own(self, main_window, qtbot, pattern):\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText(pattern)\n        builder.test_text.setPlainText(PANE)                 # a new text: its history starts empty\n        qtbot.wait(700)                                      # the update runs and paints nothing\n        assert _formatted(builder.test_text) == []\n        assert builder.test_text.document().availableUndoSteps() == 0, \\\n            "an update that painted nothing added to the pane\'s undo history"\n        builder.close()\n\n    def test_an_update_is_one_step_of_the_pane_s_undo(self, main_window, qtbot):\n        win = main_window\n        builder = _opened(win, "_open_regex_builder_dialog")\n        builder.pattern_input.setText("o")\n        builder.test_text.setPlainText(PANE)\n        qtbot.wait(700)\n        pane = builder.test_text\n        assert len(_formatted(pane)) > 1, "fewer than two matches painted: nothing was tested"\n        pane.undo()\n        assert _formatted(pane) == [] and pane.toPlainText() == PANE, \\\n            "one Ctrl+Z did not take the update\'s highlights away, and only those"\n        builder._update_timer.stop()\n        builder.close()\n')
 
 
 def _original(tree, rel: str) -> str:
@@ -240,199 +178,153 @@ def _calls(fn, attr: str) -> list:
 
 def checks(tree) -> None:
     """Against the IN-MEMORY tree, before anything reaches disk."""
-    import copy
+    BASE, FIND = "ui/base_dialog.py", "ui/find_replace_dialog.py"
+    REGEX, MAIN = "ui/regex_builder_dialog.py", "ui/main_window.py"
 
-    BASE, SETTINGS = "ui/base_dialog.py", "ui/settings_dialog.py"
-    FIND, REGEX = "ui/find_replace_dialog.py", "ui/regex_builder_dialog.py"
-    WATCH, MAIN = "ui/watch_folder_dialog.py", "ui/main_window.py"
-    MODE = {"get_colors", "get_header_style", "get_subtitle_style",
-            "get_description_style", "get_tip_style"}
+    def dialog(src, name):
+        c = next(n for n in ast.parse(src).body if isinstance(n, ast.ClassDef) and n.name == name)
+        return {n.name: n for n in c.body if isinstance(n, ast.FunctionDef)}, c
 
-    def methods(src, cls):
-        c = next(n for n in ast.parse(src).body if isinstance(n, ast.ClassDef) and n.name == cls)
-        return {n.name: n for n in c.body if isinstance(n, ast.FunctionDef)}
-
-    def compare(rel, cls):
-        o, n = methods(_original(tree, rel), cls), methods(tree.read(rel), cls)
+    def compare(rel, name):
+        (o, oc), (n, nc) = dialog(_original(tree, rel), name), dialog(tree.read(rel), name)
         moved = sorted(k for k in o if k in n and ast.dump(o[k]) != ast.dump(n[k]))
-        return o, n, moved, sorted(set(n) - set(o)), sorted(set(o) - set(n))
+        return o, n, oc, nc, moved, sorted(set(n) - set(o)), sorted(set(o) - set(n))
 
-    def outside(src, cls):
+    def dumps(stmts):
+        return [ast.dump(s) for s in stmts]
+
+    def held(node, item):
+        return isinstance(node, ast.With) and len(node.items) == 1 \
+            and ast.unparse(node.items[0]) == item
+
+    def rest(cls):
+        return dumps(s for s in cls.body if not isinstance(s, ast.FunctionDef))
+
+    def outside(src, name):
         return [ast.dump(x) for x in ast.parse(src).body
-                if not (isinstance(x, ast.ClassDef) and x.name == cls)]
+                if not (isinstance(x, ast.ClassDef) and x.name == name)]
 
-    def reads_mode(node):
-        return any(isinstance(c, ast.Call) and getattr(c.func, "attr", None) in MODE
-                   for c in ast.walk(node))
+    def reset_wrapped(old_fn, new_fn, reset, edit):
+        """The one reset statement, now made only when the text carries a
+        format and then held; every other statement as it was."""
+        ob = old_fn.body
+        at = [ast.unparse(s) for s in ob].index(reset)
+        nb = new_fn.body
+        gate = nb[at]
+        ok = (isinstance(gate, ast.If) and ast.unparse(gate.test) == f"self._carries_format({edit})"
+              and not gate.orelse and len(gate.body) == 1
+              and held(gate.body[0], f"self._not_an_edit({edit})")
+              and dumps(gate.body[0].body) == [ast.dump(ob[at])])
+        return ok and dumps(nb[:at] + nb[at + 1:]) == dumps(ob[:at] + ob[at + 1:])
 
-    def with_locals(fn, expr):
-        local = {a.targets[0].id: a.value for a in ast.walk(fn)
-                 if isinstance(a, ast.Assign) and len(a.targets) == 1
-                 and isinstance(a.targets[0], ast.Name) and reads_mode(a.value)}
-
-        class Sub(ast.NodeTransformer):
-            def visit_Name(self, node):
-                return copy.deepcopy(local[node.id]) if node.id in local else node
-        return Sub().visit(copy.deepcopy(expr))
-
-    def direct(fn):
-        """(target, sheet) for every sheet set straight away that reads the mode."""
-        out = []
-        for c in ast.walk(fn):
-            if isinstance(c, ast.Call) and getattr(c.func, "attr", None) == "setStyleSheet" and c.args:
-                arg = with_locals(fn, c.args[0])
-                if reads_mode(arg):
-                    out.append((ast.unparse(c.func.value), ast.dump(arg)))
-        return sorted(out)
-
-    def registered(fn):
-        out = []
-        for c in ast.walk(fn):
-            if isinstance(c, ast.Call) and getattr(c.func, "attr", None) == "_style_for_mode":
-                target, sheet = c.args
-                assert isinstance(sheet, ast.Lambda), ast.unparse(c)
-                out.append((ast.unparse(target), ast.dump(sheet.body)))
-        return sorted(out)
-
-    def same_sheets(o, n, names, where):
-        for name in names:
-            assert direct(o[name]) == sorted(direct(n[name]) + registered(n[name])), \
-                f"{where}.{name}: a stylesheet changed on the way"
-            assert not direct(n[name]), \
-                f"{where}.{name}: a stylesheet reads the mode at build and nothing redraws it"
-
-    # --- BaseDialog: the register, the helper, the refresh
-    o, n, moved, added, gone = compare(BASE, "BaseDialog")
-    assert added == ["_style_for_mode"] and not gone, f"BaseDialog: added {added}, removed {gone}"
-    labels = ["_create_header_label", "_create_subtitle_label",
-              "_create_description_label", "_create_tip_label"]
-    assert moved == sorted(["__init__", "apply_base_styling", "apply_extended_styling",
-                            "refresh_theme"] + labels), f"BaseDialog: moved {moved}"
-    assert [ast.unparse(s) for s in n["_style_for_mode"].body[1:]] == [
-        "widget.setStyleSheet(sheet())", "self._mode_styled[widget] = sheet"], \
-        "_style_for_mode() does not set the sheet and keep it"
-    init = [ast.unparse(s) for s in n["__init__"].body]
-    conf = init.index("self._configure_window()")
-    made = [i for i, s in enumerate(init) if s.startswith(("self._mode_styled", "self._style_components"))]
-    assert len(made) == 2 and max(made) < conf, "the register is made after the window is configured"
-    assert "self._style_components = ()" in [ast.unparse(s) for s in n["apply_base_styling"].body], \
-        "apply_base_styling() does not forget the components"
-    assert "self._style_components = components" in [ast.unparse(s) for s in n["apply_extended_styling"].body], \
-        "apply_extended_styling() does not keep its components"
-    refresh = ast.unparse(n["refresh_theme"])
-    assert "self.apply_extended_styling(*self._style_components)" in refresh \
-        and "self.apply_base_styling()" in refresh, "refresh_theme() drops a dialog's extended styles"
-    loops = [s for s in n["refresh_theme"].body if isinstance(s, ast.For)]
-    assert len(loops) == 1 and "self._mode_styled.items()" in ast.unparse(loops[0].iter) \
-        and "widget.setStyleSheet(sheet())" in ast.unparse(loops[0]), \
-        "refresh_theme() does not restyle what was styled for a mode"
-    same_sheets(o, n, labels, "BaseDialog")
+    # --- BaseDialog: the two helpers, and nothing else in the class
+    o, n, oc, nc, moved, added, gone = compare(BASE, "BaseDialog")
+    assert added == ["_carries_format", "_not_an_edit"] and not gone and not moved, \
+        f"BaseDialog: added {added}, removed {gone}, moved {moved}"
+    assert rest(oc) == rest(nc), "BaseDialog's class body moved beyond its two helpers"
+    ne = n["_not_an_edit"]
+    assert [ast.unparse(d) for d in ne.decorator_list] == ["contextmanager"], \
+        "_not_an_edit() is not a context manager"
+    assert [ast.unparse(s) for s in ne.body[1:]] == [
+        "cursor = QTextCursor(edit.document())",
+        "was_blocked = edit.blockSignals(True)",
+        "cursor.beginEditBlock()",
+        "try:\n    yield\nfinally:\n    cursor.endEditBlock()\n    edit.blockSignals(was_blocked)"], \
+        "_not_an_edit() does not hold the text's signals and make one step, and give both back"
+    cf = n["_carries_format"]
+    cft = ast.unparse(cf)
+    assert [ast.unparse(d) for d in cf.decorator_list] == ["staticmethod"] \
+        and "block.charFormat().properties()" in cft and "it.fragment().charFormat().properties()" in cft, \
+        "_carries_format() misses the line breaks or the runs of text"
     ob, nb = outside(_original(tree, BASE), "BaseDialog"), outside(tree.read(BASE), "BaseDialog")
-    new_top = [x for x in nb if x not in ob]
-    assert len(nb) == len(ob) and len(new_top) == 1 and "collections.abc" in new_top[0], \
-        "the module moved beyond the dialog"
+    gone_top, new_top = [x for x in ob if x not in nb], [x for x in nb if x not in ob]
+    module = ast.parse(tree.read(BASE)).body
+    added_imports = sorted(ast.unparse(x) for x in module if ast.dump(x) in new_top
+                           and isinstance(x, ast.ImportFrom))
+    assert added_imports == ["from PyQt6.QtGui import QTextCursor", "from contextlib import contextmanager"] \
+        and len(gone_top) == 1 and len(new_top) == 3, "the module moved beyond the helpers' imports"
+    checking = next(x for x in module if isinstance(x, ast.If) and ast.unparse(x.test) == "TYPE_CHECKING")
+    assert [ast.unparse(s) for s in checking.body] == [
+        "from collections.abc import Callable, Iterator", "from PyQt6.QtWidgets import QTextEdit",
+        "from core.theme_manager import ThemeManager"], "the type-checking imports moved beyond the helpers'"
 
-    # --- SettingsDialog: every mode-read sheet registered, and its box refreshes
-    o, n, moved, added, gone = compare(SETTINGS, "SettingsDialog")
-    assert not added and not gone, f"SettingsDialog: added {added}, removed {gone}"
-    assert moved == ["_create_adjustments_tab", "_create_export_tab", "_on_theme_changed"], \
-        f"SettingsDialog: moved {moved}"
-    same_sheets(o, n, ["_create_adjustments_tab", "_create_export_tab"], "SettingsDialog")
-    assert [ast.unparse(s) for s in n["_on_theme_changed"].body[-2:]] == [
-        "self.theme_manager.set_theme(theme)", "self.refresh_theme()"], \
-        "the theme box does not refresh the dialog"
-    for name, fn in n.items():
-        assert not direct(fn), f"SettingsDialog.{name}: a stylesheet reads the mode at build and nothing redraws it"
-    assert outside(_original(tree, SETTINGS), "SettingsDialog") == outside(tree.read(SETTINGS), "SettingsDialog"), \
-        f"{SETTINGS} moved beyond the dialog"
+    # --- Find: its paint one held step; its reset held, and not made when it changes nothing
+    o, n, oc, nc, moved, added, gone = compare(FIND, "FindReplaceDialog")
+    assert not added and not gone and moved == ["_clear_highlights", "_highlight_all_matches",
+                                                "_recolour_highlights"], \
+        f"FindReplaceDialog: moved {moved}, added {added}, removed {gone}"
+    assert rest(oc) == rest(nc), "the Find dialog's class body moved beyond its methods"
+    ob, nb = o["_highlight_all_matches"].body, n["_highlight_all_matches"].body
+    assert len(nb) == 4 and held(nb[2], "self._not_an_edit(self.target_text_edit)"), \
+        "the Find's clear and paint are not one held step"
+    assert dumps(nb[2].body) == dumps(ob[2:-1]) and dumps(nb[:2] + nb[3:]) == dumps(ob[:2] + ob[-1:]), \
+        "_highlight_all_matches() changed beyond holding its clear and paint"
+    assert reset_wrapped(o["_clear_highlights"], n["_clear_highlights"],
+                         "cursor.setCharFormat(format_clear)", "self.target_text_edit"), \
+        "_clear_highlights() changed beyond holding its reset and not making one that changes nothing"
+    ob, nb = o["_recolour_highlights"].body, n["_recolour_highlights"].body
+    tried = ob[-1]
+    assert isinstance(tried, ast.Try) and len(tried.body) == 3 \
+        and [ast.unparse(s) for s in (tried.body[0], tried.body[2])] == [
+            "cursor.beginEditBlock()", "cursor.endEditBlock()"] \
+        and [ast.unparse(s) for s in tried.finalbody] == ["edit.blockSignals(was_blocked)"], \
+        "the switch's repaint is not the one this round was derived against"
+    assert dumps(nb[:-1]) == dumps(ob[:-2]) and held(nb[-1], "self._not_an_edit(edit)") \
+        and dumps(nb[-1].body) == [ast.dump(tried.body[1])], \
+        "_recolour_highlights() changed beyond taking the one helper"
+    assert outside(_original(tree, FIND), "FindReplaceDialog") == outside(tree.read(FIND), "FindReplaceDialog"), \
+        f"{FIND} moved beyond the dialog"
 
-    # --- Find & Replace and Watch Folders: their one mode-read sheet, registered
-    for rel, cls in ((FIND, "FindReplaceDialog"), (WATCH, "WatchFolderDialog")):
-        o, n, moved, added, gone = compare(rel, cls)
-        assert moved == ["_setup_ui"] and not added and not gone, \
-            f"{cls}: moved {moved}, added {added}, removed {gone}"
-        same_sheets(o, n, ["_setup_ui"], cls)
-        for name, fn in n.items():
-            assert not direct(fn), f"{cls}.{name}: a stylesheet reads the mode at build and nothing redraws it"
-        assert outside(_original(tree, rel), cls) == outside(tree.read(rel), cls), f"{rel} moved beyond {cls}"
-
-    # --- the Regex Builder: its status line keeps its state's key; its matches repaint
-    o, n, moved, added, gone = compare(REGEX, "RegexBuilderDialog")
-    assert added == ["_set_status_colour", "refresh_theme"] and not gone, \
-        f"RegexBuilderDialog: added {added}, removed {gone}"
-    assert moved == ["_on_pattern_changed", "_setup_ui", "_update_matches"], f"RegexBuilderDialog: moved {moved}"
-    assert [ast.unparse(s) for s in n["_set_status_colour"].body[1:]] == [
-        "self._style_for_mode(self.status_label, lambda: f'color: {self.get_colors()[key]};')"], \
-        "_set_status_colour() does not register the status sheet"
-
-    def keys_before(fn):
-        out = []
-        for c in ast.walk(fn):
-            if isinstance(c, ast.Call) and getattr(c.func, "attr", None) == "setStyleSheet" \
-                    and ast.unparse(c.func.value) == "self.status_label":
-                arg = with_locals(fn, c.args[0])
-                out.append(sorted(s.slice.value for s in ast.walk(arg)
-                                  if isinstance(s, ast.Subscript) and isinstance(s.slice, ast.Constant)))
-        return sorted(out)
-
-    def keys_after(fn):
-        return sorted(sorted(k.value for k in ast.walk(c.args[0])
-                             if isinstance(k, ast.Constant) and isinstance(k.value, str))
-                      for c in ast.walk(fn) if isinstance(c, ast.Call)
-                      and getattr(c.func, "attr", None) == "_set_status_colour")
-
-    for name in moved:
-        assert keys_before(o[name]) == keys_after(n[name]), f"RegexBuilderDialog.{name}: the status line changed colour on the way"
-        assert not keys_before(n[name]), f"RegexBuilderDialog.{name}: the status line is still styled once"
-    for name, fn in n.items():
-        assert not direct(fn), f"RegexBuilderDialog.{name}: a stylesheet reads the mode at build and nothing redraws it"
-    assert [ast.unparse(s) for s in n["refresh_theme"].body[1:]] == [
-        "super().refresh_theme()", "if self._current_matches:\n    self._highlight_matches()"], \
-        "the Regex Builder does not repaint its matches on a switch"
+    # --- the Regex Builder: its paint one held step; its reset held, and not made when it changes nothing
+    o, n, oc, nc, moved, added, gone = compare(REGEX, "RegexBuilderDialog")
+    assert not added and not gone and moved == ["_clear_results", "_highlight_matches"], \
+        f"RegexBuilderDialog: moved {moved}, added {added}, removed {gone}"
+    assert rest(oc) == rest(nc), "the Regex Builder's class body moved beyond its methods"
+    assert reset_wrapped(o["_clear_results"], n["_clear_results"],
+                         "cursor.setCharFormat(QTextCharFormat())", "self.test_text"), \
+        "_clear_results() changed beyond holding its reset and not making one that changes nothing"
+    ob, nb = o["_highlight_matches"].body, n["_highlight_matches"].body
+    assert len(nb) == 2 and ast.dump(nb[0]) == ast.dump(ob[0]) \
+        and held(nb[1], "self._not_an_edit(self.test_text)"), \
+        "the Regex Builder's clear and paint are not one held step"
+    inner = nb[1].body
+    at = [ast.unparse(s) for s in ob].index("cursor.setCharFormat(QTextCharFormat())") - 1
+    gate = inner[at]
+    assert isinstance(gate, ast.If) and ast.unparse(gate.test) == "self._carries_format(self.test_text)" \
+        and dumps(gate.body) == [ast.dump(ob[at + 1])] and not gate.orelse \
+        and dumps(inner[:at] + inner[at + 1:]) == dumps(ob[1:at + 1] + ob[at + 2:]), \
+        "_highlight_matches() changed beyond holding its paint and not making a reset that changes nothing"
     assert outside(_original(tree, REGEX), "RegexBuilderDialog") == outside(tree.read(REGEX), "RegexBuilderDialog"), \
         f"{REGEX} moved beyond the dialog"
 
-    # --- the main window keeps every non-modal dialog it shows, and refreshes it
-    o, n, moved, added, gone = compare(MAIN, "MainWindow")
-    assert added == ["_forget_open_dialog", "_track_open_dialog"] and not gone, \
-        f"MainWindow: added {added}, removed {gone}"
-    # every method that SHOWS a dialog -- non-modal -- keeps it. Derived, not
-    # listed: this is how the Regex Builder's Apply Find road was found.
-    for name, fn in n.items():
-        shows = any(isinstance(c, ast.Call) and ast.unparse(c) == "dialog.show()" for c in ast.walk(fn))
-        if shows and name != "_open_compare_dialog":
-            assert "self._track_open_dialog(dialog)" in ast.unparse(fn), f"{name} shows a dialog nothing refreshes"
-    openers = ["_open_find_dialog", "_open_replace_dialog", "_open_regex_builder_dialog",
-               "_open_watch_folder_dialog"]
-    for name in openers:
-        body = [ast.unparse(s) for s in n[name].body]
-        assert body[-2:] == ["self._track_open_dialog(dialog)", "dialog.show()"], f"{name} shows a dialog it does not keep"
-    assert moved == sorted(openers + ["_on_regex_pattern_applied", "_refresh_open_dialogs_theme"]), \
-        f"MainWindow: moved {moved}"
-    for name in openers + ["_on_regex_pattern_applied"]:
-        kept = "\n".join(line for line in ast.unparse(n[name]).split("\n")
-                         if line.strip() != "self._track_open_dialog(dialog)")
-        assert kept == ast.unparse(o[name]), f"{name} changed beyond keeping its dialog"
-    track = ast.unparse(n["_track_open_dialog"])
-    assert "dialog.finished.connect(partial(self._forget_open_dialog, dialog))" in track, "a closed dialog is never let go"
-    refresh = n["_refresh_open_dialogs_theme"]
-    loops = [s for s in refresh.body if isinstance(s, ast.For)]
-    assert len(loops) == 1 and "_open_dialogs" in ast.unparse(loops[0].iter) \
-        and "dialog.refresh_theme()" in ast.unparse(loops[0]), \
-        "_refresh_open_dialogs_theme() does not reach the dialogs it keeps"
-    assert [ast.dump(s) for s in o["_refresh_open_dialogs_theme"].body[1:]] == \
-        [ast.dump(s) for s in refresh.body[1:-1]], "the Compare dialog's refresh moved"
-    om, nm = outside(_original(tree, MAIN), "MainWindow"), outside(tree.read(MAIN), "MainWindow")
-    new_top = [x for x in nm if x not in om]
-    assert not [x for x in om if x not in nm] and len(new_top) == 2 \
-        and any("'functools'" in x for x in new_top) and any("'ui.base_dialog'" in x for x in new_top), \
-        "the module moved beyond the main window"
+    # --- derived, not listed: every change of format either dialog makes is held
+    for rel, name in ((FIND, "FindReplaceDialog"), (REGEX, "RegexBuilderDialog")):
+        fns, _cls = dialog(tree.read(rel), name)
+        for fname, fn in fns.items():
+            inside = set()
+            for w in ast.walk(fn):
+                if isinstance(w, ast.With) and ast.unparse(w.items[0]).startswith("self._not_an_edit("):
+                    inside |= {id(c) for c in ast.walk(w)}
+            for c in ast.walk(fn):
+                if isinstance(c, ast.Call) and getattr(c.func, "attr", None) in ("setCharFormat", "mergeCharFormat"):
+                    assert id(c) in inside, f"{name}.{fname} changes a format that is not held"
+
+    # --- the premise: the two texts are listened to -- the main window's
+    # statistics and auto-transform, and the Regex Builder's own update
+    win = next(c for c in ast.parse(tree.read(MAIN)).body
+               if isinstance(c, ast.ClassDef) and c.name == "MainWindow")
+    assert "self.text_input.textChanged.connect(self._on_input_text_changed)" in ast.unparse(win), \
+        "the main window no longer listens to its text: re-derive what Find's painting set off"
+    rb = ast.unparse(dialog(tree.read(REGEX), "RegexBuilderDialog")[1])
+    assert "self.test_text.textChanged.connect(self._on_test_text_changed)" in rb \
+        and "self._update_timer.timeout.connect(self._update_matches)" in rb, \
+        "the Regex Builder no longer updates on its pane's textChanged: re-derive the loop"
 
     # --- the guard: new, and marked
     guard = tree.read(GUARD)
     ast.parse(guard)
-    assert SENTINEL in guard and "class TestTheNonModalDialogsFollowASwitch" in guard \
-        and "class TestSettingsFollowsItsOwnThemeBox" in guard, "the guard is not the one this round writes"
+    assert SENTINEL in guard and "class TestFindIsNotAnEdit" in guard and "class TestTheRegexBuilderRests" in guard, \
+        "the guard is not the one this round writes"
 # ------------------------------------------------------------------ plumbing
 #
 # EXIT CODES ARE A TAXONOMY, NOT A BOOLEAN. Rev 6 §3.0.1. A harness that
