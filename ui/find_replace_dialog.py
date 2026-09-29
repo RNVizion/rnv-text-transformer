@@ -421,6 +421,12 @@ class FindReplaceDialog(BaseDialog):
                 self._current_match_index = 0
                 self._highlight_all_matches()
                 self._highlight_current_match()
+                # RNV-CARET-STAYS 2026-09-28: the first match at the top of the
+                # view, where a Find has always shown it. That came from the
+                # clear, which took the caret to the end on the way; it no
+                # longer does, so the placement is made here.
+                bar = self.target_text_edit.verticalScrollBar()
+                bar.setValue(bar.value() + self.target_text_edit.cursorRect().top())
                 self.find_next_btn.setEnabled(True)
                 if self.replace_btn:
                     self.replace_btn.setEnabled(True)
@@ -501,7 +507,12 @@ class FindReplaceDialog(BaseDialog):
         
         # Reset formatting by getting plain text and setting it back
         # This preserves the text but removes formatting
-        cursor = self.target_text_edit.textCursor()
+        # RNV-CARET-STAYS 2026-09-28: through a cursor of the document's own,
+        # and the text's own is left alone. This selected the whole text with
+        # the text's cursor and set it back, which put the caret at the end
+        # and scrolled there -- on every key typed into Find's field, and on
+        # closing Find, where the match you had found was lost.
+        cursor = QTextCursor(self.target_text_edit.document())
         cursor.select(QTextCursor.SelectionType.Document)
         format_clear = QTextCharFormat()
         # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the text, and not made
@@ -510,8 +521,6 @@ class FindReplaceDialog(BaseDialog):
         if self._carries_format(self.target_text_edit):
             with self._not_an_edit(self.target_text_edit):
                 cursor.setCharFormat(format_clear)
-        cursor.clearSelection()
-        self.target_text_edit.setTextCursor(cursor)
         self._painted_highlight = None
     
     def _recolour_highlights(self) -> None:

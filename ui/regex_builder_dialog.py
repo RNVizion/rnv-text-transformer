@@ -399,7 +399,12 @@ class RegexBuilderDialog(BaseDialog):
         self.match_count_label.setText("Matches: 0")
         
         # Clear highlighting
-        cursor = self.test_text.textCursor()
+        # RNV-CARET-STAYS 2026-09-28: through a cursor of the document's own,
+        # and the pane's own is left alone. This set the pane's cursor back
+        # after selecting all of it, which put the caret at the end: with no
+        # pattern or a broken one, a key typed in the middle of the test text
+        # sent it there 300 ms later.
+        cursor = QTextCursor(self.test_text.document())
         cursor.select(QTextCursor.SelectionType.Document)
         # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the pane, and not made
         # when the pane carries no format. The pane's textChanged re-arms the
@@ -408,8 +413,6 @@ class RegexBuilderDialog(BaseDialog):
         if self._carries_format(self.test_text):
             with self._not_an_edit(self.test_text):
                 cursor.setCharFormat(QTextCharFormat())
-        cursor.clearSelection()
-        self.test_text.setTextCursor(cursor)
     
     def _update_matches_table(self) -> None:
         """Update matches table with current matches."""

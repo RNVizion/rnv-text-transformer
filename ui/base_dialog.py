@@ -266,9 +266,9 @@ class BaseDialog(QDialog):
         output edited by hand), and the Regex Builder's own update, which
         highlighted again, three times a second, for as long as it was open.
         
-        A caret moved inside the block is not announced either. The one caret
-        that moves inside one, in Find's _highlight_all_matches(), is moved
-        again straight after, outside it.
+        A caret moved inside the block would not be announced either, so none
+        is: RNV-CARET-STAYS took out the last one, the caret Find's clear
+        moved to the end.
         
         Args:
             edit: The text edit whose text is formatted
