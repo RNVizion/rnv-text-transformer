@@ -80,17 +80,12 @@ jobs:
         run: |
           coverage report
 
-      - name: Generate coverage XML (for Codecov)
-        run: |
-          coverage xml -o coverage.xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.xml
-          flags: linux
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
+      # RNV-COVERAGE-STAYS-IN-CI, 2026-10-05. The job ends with the report above.
+      # It used to hand a copy to an outside coverage service as well. On
+      # 2026-10-05 that service refused connections, and the step that
+      # called it failed a job whose tests had all passed. It was ruled out
+      # the same day as not needed. tests/test_coverage_stays_in_ci.py keeps
+      # it out.
 
   # ───────────────────────────────────────────────────────────────────────────
   # Windows job — native Qt, no display server needed
@@ -136,14 +131,5 @@ jobs:
         run: |
           coverage report
 
-      - name: Generate coverage XML (for Codecov)
-        run: |
-          coverage xml -o coverage.xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage.xml
-          flags: windows
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
+      # RNV-COVERAGE-STAYS-IN-CI: as in the Linux job. The job ends with the
+      # report above.

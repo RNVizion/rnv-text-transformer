@@ -66,9 +66,6 @@ ENV/
 coverage_html/
 coverage_report.txt
 
-# CI-generated coverage XML uploaded to Codecov
-coverage.xml
-
 # syrupy snapshot test ambient artifacts (the __snapshots__ folders ARE
 # committed — they're the snapshot baselines. Only the .ambr lock files
 # and per-run reports should be ignored.)
