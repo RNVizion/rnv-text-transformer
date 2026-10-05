@@ -24,6 +24,7 @@ from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor, QBrush
 
 from ui.base_dialog import BaseDialog
 from utils.dialog_styles import DialogStyleManager
+from utils.colors import FIND_HIGHLIGHT_ALPHA
 
 if TYPE_CHECKING:
     from core.theme_manager import ThemeManager
@@ -57,6 +58,9 @@ class FindReplaceDialog(BaseDialog):
     _DIALOG_HEIGHT: ClassVar[int] = 320
     _DIALOG_TITLE: ClassVar[str] = "Text Transformer - Find"
     _MODAL: ClassVar[bool] = False
+    # RNV-FIND-TARGET 2026-10-04: said when Replace is asked of a pane that
+    # cannot be edited. The output is read only: it is searched, not replaced.
+    _READ_ONLY_STATUS: ClassVar[str] = "The output is read-only: Replace is unavailable"
     
     # Highlight colors — sourced from DialogStyleManager (no hardcoded hex)
     
@@ -67,7 +71,8 @@ class FindReplaceDialog(BaseDialog):
         'search_input_radio', 'search_output_radio', 'search_group',
         'find_btn', 'find_next_btn', 'replace_btn', 'replace_all_btn',
         'status_label', '_current_matches', '_current_match_index',
-        '_is_replace_mode', '_painted_highlight'
+        '_is_replace_mode', '_painted_highlight',
+        '_input_text_edit', '_output_text_edit'
     )
     
     def __init__(
@@ -76,7 +81,8 @@ class FindReplaceDialog(BaseDialog):
         font_family: str = "Arial",
         target_text_edit: QTextEdit | None = None,
         replace_mode: bool = False,
-        parent: QWidget | None = None
+        parent: QWidget | None = None,
+        output_text_edit: QTextEdit | None = None
     ) -> None:
         """
         Initialize Find/Replace dialog.
@@ -84,14 +90,21 @@ class FindReplaceDialog(BaseDialog):
         Args:
             theme_manager: Theme manager instance
             font_family: Font family to use
-            target_text_edit: Text edit widget to search in
+            target_text_edit: Text edit widget to search in: the input
             replace_mode: If True, show replace options
             parent: Parent widget
+            output_text_edit: The output's text edit, searched when
+                "Search in: Output" is chosen
         """
         self._is_replace_mode = replace_mode
         super().__init__(theme_manager, font_family, parent)
         
         self.target_text_edit = target_text_edit
+        # RNV-FIND-TARGET 2026-10-04: the two panes "Search in:" chooses
+        # between. Nothing was connected to its buttons, so Find searched
+        # the input whichever was chosen.
+        self._input_text_edit = target_text_edit
+        self._output_text_edit = output_text_edit
         self._current_matches: list[tuple[int, int]] = []  # (start, end) positions
         self._current_match_index: int = -1
         # RNV-FIND-REPAINT 2026-09-28: the colour the highlights in the text
@@ -186,6 +199,9 @@ class FindReplaceDialog(BaseDialog):
         
         self.search_group.addButton(self.search_input_radio, 0)
         self.search_group.addButton(self.search_output_radio, 1)
+        # RNV-FIND-TARGET 2026-10-04: the pair chooses the pane searched.
+        # One signal says both: the output's button going on, or off.
+        self.search_output_radio.toggled.connect(self._on_search_area_changed)
         
         search_area_layout.addWidget(self.search_input_radio)
         search_area_layout.addWidget(self.search_output_radio)
@@ -235,20 +251,72 @@ class FindReplaceDialog(BaseDialog):
         buttons_layout.addWidget(close_btn)
         
         layout.addLayout(buttons_layout)
+        self._sync_replace_buttons()
     
     def set_target_text_edit(self, text_edit: QTextEdit, is_output: bool = False) -> None:
         """
         Set the target text edit widget to search in.
         
+        RNV-FIND-TARGET 2026-10-04: the widget becomes the pane its button
+        stands for, so choosing that button again comes back to it.
+        
         Args:
             text_edit: QTextEdit widget
             is_output: If True, select output radio button
         """
-        self.target_text_edit = text_edit
         if is_output:
+            self._output_text_edit = text_edit
             self.search_output_radio.setChecked(True)
         else:
+            self._input_text_edit = text_edit
             self.search_input_radio.setChecked(True)
+        self._search_in(text_edit)
+    
+    def _on_search_area_changed(self, search_output: bool) -> None:
+        """
+        Search the pane "Search in:" now names.
+        
+        RNV-FIND-TARGET 2026-10-04: nothing was connected to the two
+        buttons, so Find, Find Next, Replace and Replace All acted on the
+        input whichever was chosen.
+        """
+        self._search_in(self._output_text_edit if search_output else self._input_text_edit)
+    
+    def _search_in(self, text_edit: QTextEdit | None) -> None:
+        """
+        Make `text_edit` the text this dialog works on.
+        
+        RNV-FIND-TARGET 2026-10-04. The search that was showing belongs to
+        the pane it was run in: its highlights come down and its matches
+        are forgotten, as when the find text changes. The next Find runs
+        in the new pane.
+        """
+        if text_edit is self.target_text_edit:
+            return
+        self._on_find_text_changed(self.find_input.text())
+        self.target_text_edit = text_edit
+        self._sync_replace_buttons()
+    
+    def _target_is_read_only(self) -> bool:
+        """
+        Whether the pane searched cannot be edited, as the output cannot.
+        
+        RNV-FIND-TARGET 2026-10-04: Replace edits the text, so it is
+        offered only where the text can be edited. A cursor of the
+        document's own writes to a read-only pane all the same, so the
+        pane's own flag is asked.
+        """
+        return self.target_text_edit is not None and self.target_text_edit.isReadOnly()
+    
+    def _sync_replace_buttons(self) -> None:
+        """Offer Replace and Replace All only where the text can be edited."""
+        if not self._is_replace_mode:
+            return
+        read_only = self._target_is_read_only()
+        self.replace_all_btn.setEnabled(not read_only)
+        if read_only:
+            self.replace_btn.setEnabled(False)
+            self.status_label.setText(self._READ_ONLY_STATUS)
     
     def get_search_options(self) -> dict:
         """
@@ -312,6 +380,11 @@ class FindReplaceDialog(BaseDialog):
         if self.target_text_edit is None or self.replace_input is None:
             return
         
+        # RNV-FIND-TARGET 2026-10-04: a read-only pane is searched, not edited.
+        if self._target_is_read_only():
+            self.status_label.setText(self._READ_ONLY_STATUS)
+            return
+        
         replace_text = self.replace_input.text()
         start, end = self._current_matches[self._current_match_index]
         
@@ -333,6 +406,11 @@ class FindReplaceDialog(BaseDialog):
             return
         
         if self.target_text_edit is None or self.replace_input is None:
+            return
+        
+        # RNV-FIND-TARGET 2026-10-04: a read-only pane is searched, not edited.
+        if self._target_is_read_only():
+            self.status_label.setText(self._READ_ONLY_STATUS)
             return
         
         replace_text = self.replace_input.text()
@@ -361,6 +439,9 @@ class FindReplaceDialog(BaseDialog):
             
             if count > 0:
                 self.target_text_edit.setPlainText(new_text)
+                # RNV-EXTRA-SELECTIONS 2026-09-30: the new text has no
+                # matches painted; the old highlights are taken down too.
+                self._clear_highlights()
                 self.status_label.setText(f"Replaced {count} occurrence(s)")
             else:
                 self.status_label.setText("No matches found")
@@ -429,7 +510,8 @@ class FindReplaceDialog(BaseDialog):
                 bar.setValue(bar.value() + self.target_text_edit.cursorRect().top())
                 self.find_next_btn.setEnabled(True)
                 if self.replace_btn:
-                    self.replace_btn.setEnabled(True)
+                    # RNV-FIND-TARGET 2026-10-04: not on a read-only pane.
+                    self.replace_btn.setEnabled(not self._target_is_read_only())
                 self.status_label.setText(
                     f"Found {len(self._current_matches)} match(es)"
                 )
@@ -442,14 +524,15 @@ class FindReplaceDialog(BaseDialog):
     
     def _highlight_colour(self) -> QColor:
         """
-        The colour matches are highlighted in: the mode's accent, at alpha 80.
+        The colour matches are highlighted in: the mode's accent, at
+        FIND_HIGHLIGHT_ALPHA (80).
         
         RNV-FIND-REPAINT 2026-09-28: one place for it, read by the Find that
         paints the highlights and by the switch that paints them again.
         """
         is_dark = self.theme_manager.current_theme in ('dark', 'image')
         highlight_color = QColor(DialogStyleManager.get_colors(is_dark)['accent'])
-        highlight_color.setAlpha(80)  # Semi-transparent
+        highlight_color.setAlpha(FIND_HIGHLIGHT_ALPHA)  # Semi-transparent
         return highlight_color
     
     def _highlight_all_matches(self) -> None:
@@ -457,23 +540,12 @@ class FindReplaceDialog(BaseDialog):
         if self.target_text_edit is None:
             return
         
-        # RNV-NOT-AN-EDIT 2026-09-28: the clear and the paint are one step of
-        # the text's undo history -- a step per match, before -- and not an
-        # edit of it: with auto-transform on, a Find re-ran the transform.
-        with self._not_an_edit(self.target_text_edit):
-            self._clear_highlights()
-            
-            highlight_color = self._highlight_colour()
-            
-            cursor = self.target_text_edit.textCursor()
-            format_highlight = QTextCharFormat()
-            format_highlight.setBackground(QBrush(highlight_color))
-            
-            # Apply highlighting to all matches
-            for start, end in self._current_matches:
-                cursor.setPosition(start)
-                cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
-                cursor.mergeCharFormat(format_highlight)
+        # RNV-EXTRA-SELECTIONS 2026-09-30: shown over the text, not written
+        # into it. This painted character formats -- one step of the undo
+        # history (RNV-NOT-AN-EDIT), and a colour a copy carried to the
+        # clipboard. Setting the selections replaces the old ones.
+        highlight_color = self._highlight_colour()
+        self._show_highlights(self.target_text_edit, self._current_matches, highlight_color)
         self._painted_highlight = QColor(highlight_color)
     
     def _highlight_current_match(self) -> None:
@@ -505,22 +577,10 @@ class FindReplaceDialog(BaseDialog):
         if self.target_text_edit is None:
             return
         
-        # Reset formatting by getting plain text and setting it back
-        # This preserves the text but removes formatting
-        # RNV-CARET-STAYS 2026-09-28: through a cursor of the document's own,
-        # and the text's own is left alone. This selected the whole text with
-        # the text's cursor and set it back, which put the caret at the end
-        # and scrolled there -- on every key typed into Find's field, and on
-        # closing Find, where the match you had found was lost.
-        cursor = QTextCursor(self.target_text_edit.document())
-        cursor.select(QTextCursor.SelectionType.Document)
-        format_clear = QTextCharFormat()
-        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the text, and not made
-        # at all when the text carries no format -- it changed nothing, and
-        # was a step of the undo history for every key typed into Find.
-        if self._carries_format(self.target_text_edit):
-            with self._not_an_edit(self.target_text_edit):
-                cursor.setCharFormat(format_clear)
+        # RNV-EXTRA-SELECTIONS 2026-09-30: the highlights are not in the
+        # text, so clearing them touches neither the text nor its cursor
+        # (RNV-CARET-STAYS) nor its undo history (RNV-NOT-AN-EDIT).
+        self.target_text_edit.setExtraSelections([])
         self._painted_highlight = None
     
     def _recolour_highlights(self) -> None:
@@ -530,14 +590,10 @@ class FindReplaceDialog(BaseDialog):
         RNV-FIND-REPAINT 2026-09-28. What is recoloured is whatever carries
         the colour they were painted in, where it now sits: an edit since
         the Find moves the highlights with the text, so the positions the
-        Find recorded may no longer be theirs. Through a cursor of the
-        document's own, so the caret, the current match's selection and
-        the view stay where they are -- _highlight_all_matches() clears
-        through the text's own cursor, which leaves the caret at the end.
-        In one edit block, so it is one step of the text's undo history;
-        and with the text's signals held, because a colour is not an edit:
-        the statistics and the auto-transform the main window runs on
-        textChanged have nothing to do.
+        Find recorded may no longer be theirs. The caret, the current
+        match's selection and the view stay where they are, and the text
+        is not edited: since RNV-EXTRA-SELECTIONS (2026-09-30) the
+        highlights are not in the text at all.
         """
         painted, edit = self._painted_highlight, self.target_text_edit
         if painted is None or edit is None:
@@ -545,28 +601,18 @@ class FindReplaceDialog(BaseDialog):
         colour = self._highlight_colour()
         if colour == painted:
             return
-        spans = []
-        block = edit.document().begin()
-        while block.isValid():
-            it = block.begin()
-            while not it.atEnd():
-                fragment = it.fragment()
-                brush = fragment.charFormat().background()
-                if brush.style() != Qt.BrushStyle.NoBrush and brush.color() == painted:
-                    spans.append((fragment.position(), fragment.length()))
-                it += 1
-            block = block.next()
+        # RNV-EXTRA-SELECTIONS 2026-09-30: the highlights are extra
+        # selections now, whose cursors have followed any edit since the
+        # Find. Those that carry the painted colour take the new one; the
+        # text, its cursor and its undo history are not touched.
+        selections = edit.extraSelections()
+        recoloured = QTextCharFormat()
+        recoloured.setBackground(QBrush(colour))
+        for selection in selections:
+            if selection.format.background().color() == painted:
+                selection.format = recoloured
         self._painted_highlight = QColor(colour)
-        if not spans:
-            return
-        format_highlight = QTextCharFormat()
-        format_highlight.setBackground(QBrush(colour))
-        cursor = QTextCursor(edit.document())
-        with self._not_an_edit(edit):
-            for start, length in spans:
-                cursor.setPosition(start)
-                cursor.setPosition(start + length, QTextCursor.MoveMode.KeepAnchor)
-                cursor.mergeCharFormat(format_highlight)
+        edit.setExtraSelections(selections)
     
     def closeEvent(self, event) -> None:
         """Handle dialog close - clear highlights."""

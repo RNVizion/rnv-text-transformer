@@ -12,11 +12,12 @@ again when it is refreshed:
 
 - in the colour a Find run in the new mode paints, on the same characters;
 - where they now are, if the text was edited since the Find;
-- through a cursor of the document's own: the caret, the current match's
-  selection and the view stay where they are;
-- as one step of the text's undo history, and without counting as an edit.
-  The main window runs its statistics and its auto-transform on the text's
-  textChanged, and a colour is not a change to the text.
+- with the caret, the current match's selection and the view where they are;
+- without touching the text: since RNV-EXTRA-SELECTIONS (2026-09-30) the
+  highlights are extra selections, shown over the text and not in it, so a
+  switch adds nothing to the undo history and fires nothing. The main window
+  runs its statistics and its auto-transform on the text's textChanged, and
+  a colour is not a change to the text.
 
 Every test drives the main window's own opener and its own two roads to a
 switch: the theme cycle, and the theme Settings applies.
@@ -39,21 +40,16 @@ HEADER = "Header line\n"        # no "o" in it: a Find for "o" finds nothing new
 
 
 def _spans(edit) -> list:
-    """(position, length, colour, alpha) of every run of the text painted
-    with a background, block by block -- what a highlight is to the text."""
+    """(position, length, colour, alpha) of every highlight shown over the
+    text: its extra selections. RNV-EXTRA-SELECTIONS 2026-09-30: this read
+    the runs of the text painted with a background; none is, now."""
     out = []
-    block = edit.document().begin()
-    while block.isValid():
-        it = block.begin()
-        while not it.atEnd():
-            fragment = it.fragment()
-            brush = fragment.charFormat().background()
-            if brush.style() != Qt.BrushStyle.NoBrush:
-                out.append((fragment.position(), fragment.length(),
-                            brush.color().name(), brush.color().alpha()))
-            it += 1
-        block = block.next()
-    return out
+    for selection in edit.extraSelections():
+        cursor, brush = selection.cursor, selection.format.background()
+        if cursor.hasSelection() and brush.style() != Qt.BrushStyle.NoBrush:
+            out.append((cursor.selectionStart(), cursor.selectionEnd() - cursor.selectionStart(),
+                        brush.color().name(), brush.color().alpha()))
+    return sorted(out)
 
 
 def _in_dark(win) -> None:
@@ -168,16 +164,21 @@ class TestFindHighlightsFollowASwitch:
         assert edits, "the text's signals were left held after the repaint"
         dlg.close()
 
-    def test_one_switch_is_one_step_of_undo(self, main_window):
+    def test_a_switch_adds_no_step_of_undo(self, main_window):
+        """RNV-EXTRA-SELECTIONS 2026-09-30. A switch's repaint was one step of
+        the undo history; it is none, and Ctrl+Z cannot take it back."""
         win = main_window
         _in_dark(win)
         win.text_input.setPlainText(TEXT)
         dlg = _found(win)
         dark = _spans(win.text_input)
+        steps = win.text_input.document().availableUndoSteps()
         assert _switch(win, "cycle") == "light"
-        assert _spans(win.text_input) != dark, "the switch repainted nothing"
+        light = _spans(win.text_input)
+        assert light != dark, "the switch repainted nothing"
+        assert win.text_input.document().availableUndoSteps() == steps, "the switch added to the undo history"
         win.text_input.undo()
-        assert _spans(win.text_input) == dark, "undoing a switch's repaint took more than one step"
+        assert _spans(win.text_input) == light, "Ctrl+Z took the repaint, which is not an edit"
         assert win.text_input.toPlainText() == TEXT
         dlg.close()
 

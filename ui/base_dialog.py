@@ -30,20 +30,17 @@ Usage:
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
 from PyQt6.QtWidgets import (
     QDialog, QWidget, QPushButton, QHBoxLayout, QVBoxLayout,
-    QLabel, QFrame
+    QLabel, QFrame, QTextEdit
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QTextCursor
+from PyQt6.QtGui import QBrush, QColor, QTextCharFormat, QTextCursor
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
-
-    from PyQt6.QtWidgets import QTextEdit
+    from collections.abc import Callable, Iterable
 
     from core.theme_manager import ThemeManager
 
@@ -251,65 +248,41 @@ class BaseDialog(QDialog):
         widget.setStyleSheet(sheet())
         self._mode_styled[widget] = sheet
     
-    @contextmanager
-    def _not_an_edit(self, edit: QTextEdit) -> Iterator[None]:
-        """
-        Change the format of edit's text without editing it: what is done
-        inside the block is one step of the text's undo history, and the
-        text's signals are held until it ends.
-        
-        RNV-NOT-AN-EDIT 2026-09-28. Qt reports a change of format as a change
-        of the text -- textChanged fires -- and records each one as a step of
-        the undo history. Find's highlights and the Regex Builder's matches
-        are formats, and what listens to the text took each one for an edit:
-        the main window's statistics and auto-transform (a Find replaced an
-        output edited by hand), and the Regex Builder's own update, which
-        highlighted again, three times a second, for as long as it was open.
-        
-        A caret moved inside the block would not be announced either, so none
-        is: RNV-CARET-STAYS took out the last one, the caret Find's clear
-        moved to the end.
-        
-        Args:
-            edit: The text edit whose text is formatted
-        """
-        cursor = QTextCursor(edit.document())
-        was_blocked = edit.blockSignals(True)
-        cursor.beginEditBlock()
-        try:
-            yield
-        finally:
-            cursor.endEditBlock()
-            edit.blockSignals(was_blocked)
-    
     @staticmethod
-    def _carries_format(edit: QTextEdit) -> bool:
+    def _show_highlights(edit: QTextEdit, spans: Iterable[tuple[int, int]],
+                         colour: QColor) -> None:
         """
-        Whether any of edit's text carries a character format.
+        Show highlights over edit's text without touching the text.
         
-        RNV-NOT-AN-EDIT 2026-09-28: resetting the format of text that carries
-        none changes nothing, and Qt records it as a step of the undo history
-        all the same -- Find did it on every key typed into its field. A
-        block's own character format is the line break before it, which a
-        match that runs over a line break colours too.
+        RNV-EXTRA-SELECTIONS 2026-09-30. Find's highlights and the Regex
+        Builder's matches were character formats in the text: Qt reports a
+        change of format as a change of the text and records it as a step
+        of the undo history, and a copy of highlighted text carried the
+        colour to the clipboard as HTML. RNV-NOT-AN-EDIT (2026-09-28) held
+        the text's signals and made each paint one step; a step it still
+        was. Extra selections are Qt's overlay for search results: drawn
+        over the document and kept out of it, so they are no step of the
+        undo history, fire no signal, and are not copied with the text.
+        Their cursors follow an edit, so a highlight stays on the
+        characters it was painted on. An empty spans clears them.
         
         Args:
-            edit: The text edit to look at
-        
-        Returns:
-            True if any character, line breaks included, has a format
+            edit: The text edit the highlights are shown over
+            spans: (start, end) positions in the text, in order
+            colour: The colour every span is filled with
         """
-        block = edit.document().begin()
-        while block.isValid():
-            if block.charFormat().properties():
-                return True
-            it = block.begin()
-            while not it.atEnd():
-                if it.fragment().charFormat().properties():
-                    return True
-                it += 1
-            block = block.next()
-        return False
+        fmt = QTextCharFormat()
+        fmt.setBackground(QBrush(colour))
+        selections = []
+        for start, end in spans:
+            cursor = QTextCursor(edit.document())
+            cursor.setPosition(start)
+            cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
+            selection = QTextEdit.ExtraSelection()
+            selection.cursor = cursor
+            selection.format = fmt
+            selections.append(selection)
+        edit.setExtraSelections(selections)
     
     def get_status_style(self, status: str) -> str:
         """

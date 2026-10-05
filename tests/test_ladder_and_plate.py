@@ -64,8 +64,10 @@ NEW = {
 #: gone from every file, not merely unused in one.
 GONE = ('GREY_3A', 'GREY_E8')
 
-#: What the split leaves behind: the ramp step, and the three static surfaces
-#: that keep it. If this list ever empties, the split has collapsed.
+#: What the split leaves behind: the ramp step, and the static surfaces that
+#: keep it -- two since RNV-NAMED-AND-USED, 2026-10-04, when the dark
+#: palette's copy of diff_html_header_bg, which nothing read, went. If this
+#: list ever empties, the split has collapsed.
 STATIC_EE_KEYS = ('diff_html_header_bg', 'line_number_bg')
 
 #: Palette entries and what they must resolve to. Written as VALUES, because
@@ -235,7 +237,7 @@ def test_the_static_surfaces_still_use_the_ramp_step():
     assert len(using) == len(STATIC_EE_KEYS), (
         f'only {using} still name GREY_EE. The split puts the interaction '
         f'plate on APP_HOVER_LIGHT and leaves the static grounds on the ramp '
-        f'step; if the grounds moved too, three surfaces are now claiming to '
+        f'step; if the grounds moved too, static surfaces are now claiming to '
         f'be a hover state.')
 
 

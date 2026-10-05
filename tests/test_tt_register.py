@@ -26,6 +26,11 @@ The two need OPPOSITE answers, and that is the whole point of this guard:
 
 These tests do NOT need rnv-brand to be importable. That is deliberate: the
 whole failure mode was a check that only runs somewhere else.
+
+RNV-REGISTER-WIRING-GUARD (2026-09-30): the fleet's wiring guard, which
+sweeps both palettes for any register value written as a literal, is
+test_register_wiring.py. This file keeps the two light values it was
+written for.
 """
 from __future__ import annotations
 

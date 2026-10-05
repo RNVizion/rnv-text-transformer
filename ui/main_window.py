@@ -1902,7 +1902,8 @@ class MainWindow(QMainWindow):
             font_family=self.font_family,
             target_text_edit=self.text_input,
             replace_mode=False,
-            parent=self
+            parent=self,
+            output_text_edit=self.output_text
         )
         self._track_open_dialog(dialog)
         dialog.show()
@@ -1914,7 +1915,8 @@ class MainWindow(QMainWindow):
             font_family=self.font_family,
             target_text_edit=self.text_input,
             replace_mode=True,
-            parent=self
+            parent=self,
+            output_text_edit=self.output_text
         )
         self._track_open_dialog(dialog)
         dialog.show()
@@ -2104,7 +2106,8 @@ class MainWindow(QMainWindow):
                 font_family=self.font_family,
                 target_text_edit=self.text_input,
                 replace_mode=False,
-                parent=self
+                parent=self,
+                output_text_edit=self.output_text
             )
             dialog.find_input.setText(pattern)
             dialog.regex_check.setChecked(True)

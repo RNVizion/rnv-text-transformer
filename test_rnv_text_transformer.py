@@ -1189,7 +1189,21 @@ class TestDialogStyleManager(unittest.TestCase):
         self.assertEqual(DialogStyleManager.LIGHT["accent"].lower(), "#8c7337")
 
     def test_dark_and_light_have_same_keys(self):
-        self.assertEqual(set(DialogStyleManager.DARK.keys()), set(DialogStyleManager.LIGHT.keys()))
+        # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED): "for the locked
+        # key test if we don't use these values we can fix the test and remove
+        # unused values". A key only one mode reads is in that mode's palette
+        # alone; its other half was a value nothing showed. Image mode reads
+        # its eight overlay values from DARK by name, and the diff export, a
+        # page that is always light, reads its seven from LIGHT by name.
+        dark, light = set(DialogStyleManager.DARK), set(DialogStyleManager.LIGHT)
+        self.assertEqual(dark - light, {
+            "image_overlay_bg", "image_overlay_bg_dark", "image_overlay_checkbox",
+            "image_scrollbar_border", "image_scrollbar_handle", "image_dropdown_bg",
+            "image_dropdown_selection", "image_dropdown_border"})
+        self.assertEqual(light - dark, {
+            "diff_html_equal_bg", "diff_html_insert_bg", "diff_html_delete_bg",
+            "diff_html_header_bg", "diff_html_line_num", "diff_html_border",
+            "diff_html_stats_text"})
 
     def test_required_keys_present_dark(self):
         required = [
@@ -1199,7 +1213,9 @@ class TestDialogStyleManager(unittest.TestCase):
             "accent", "accent_hover", "accent_pressed", "accent_text",
             "success", "error", "warning",
             "selection_bg", "selection_text",
-            "scrollbar_bg", "scrollbar_handle", "scrollbar_handle_hover",
+            # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED):
+            # scrollbar_handle_hover stood here. No stylesheet read it.
+            "scrollbar_bg", "scrollbar_handle",
             "checkbox_indicator_bg", "checkbox_border",
             "list_hover_bg", "list_hover_text",
             "window_bg", "main_btn_bg", "main_btn_text", "main_btn_hover_bg",
@@ -1610,7 +1626,10 @@ class TestEdgeCases(unittest.TestCase):
             "selection_bg", "selection_text", "output_text_color", "main_btn_bg",
             "main_btn_text", "main_btn_hover_bg", "main_btn_pressed_text", "border_color",
             "text_color", "accent", "checkbox_border", "checkbox_indicator_bg",
-            "scrollbar_bg", "scrollbar_handle_main", "scrollbar_handle_hover",
+            # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED):
+            # scrollbar_handle_hover stood here, and the main window never
+            # referenced it.
+            "scrollbar_bg", "scrollbar_handle_main",
             "list_hover_bg", "list_hover_text", "tooltip_border",
         ]
         for key in mw_keys:

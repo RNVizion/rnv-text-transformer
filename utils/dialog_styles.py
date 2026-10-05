@@ -186,7 +186,6 @@ class DialogStyleManager:
         'selection_text': TRUE_BLACK,
         'scrollbar_bg': APP_CARD,
         'scrollbar_handle': GREY_44,
-        'scrollbar_handle_hover': BRAND_GOLD,
         'scrollbar_handle_main': GREY_44,
         'tooltip_border': BRAND_GOLD,
         
@@ -225,14 +224,10 @@ class DialogStyleManager:
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
         'diff_changed_bg': SEMANTIC_DIFF_CHANGED,
 
-        # Diff HTML export colors (standalone document — always light-styled)
-        'diff_html_equal_bg':  WHITE,
-        'diff_html_insert_bg': SEMANTIC_DIFF_ADDED_LIGHT,
-        'diff_html_delete_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
-        'diff_html_header_bg': GREY_EE,
-        'diff_html_line_num':  GREY_88,
-        'diff_html_border':    GREY_DD,
-        'diff_html_stats_text':GREY_66,
+        # RNV-NAMED-AND-USED (2026-10-04): the diff export's seven colours
+        # stood here too. The export is a standalone page, always light,
+        # and reads them from LIGHT by name; this copy was looked up by
+        # nothing. They are in LIGHT alone.
 
         # Regex builder match highlight
         'regex_match_bg': SEMANTIC_REGEX_MATCH,
@@ -294,7 +289,6 @@ class DialogStyleManager:
         'selection_text': WHITE,
         'scrollbar_bg': GREY_E0,
         'scrollbar_handle': APP_TEXT_DIM,
-        'scrollbar_handle_hover': GREY_88,
         'scrollbar_handle_main': APP_TEXT_DIM,
         'tooltip_border': BRAND_DARK_GOLD,
         
@@ -345,22 +339,10 @@ class DialogStyleManager:
         # Regex builder match highlight
         'regex_match_bg': SEMANTIC_REGEX_MATCH_LIGHT,
 
-        # Image mode semi-transparent overlay values -- used only in image
-        # mode. Same derivations as DARK since image mode always uses
-        # dark-based overlays; image mode reads DARK, so nothing reads these.
-        'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),
-        'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),
-        'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),
-        'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
-        # RNV-COLLAPSE-505050, closed here 2026-09-25: this was
-        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
-        # 2026-09-02 and left behind because nothing decoded rgba().
-        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
-        # The image scrollbar hovers from DARK's 'accent'. It has no key of
-        # its own: the unused one was removed, RNV-HOVER-KEY-GONE.
-        'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
-        'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
-        'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
+        # RNV-NAMED-AND-USED (2026-10-04): the image overlays' eight values
+        # stood here too, the same derivations as DARK. Image mode reads
+        # them from DARK by name, as the note that stood with them said:
+        # "nothing reads these". They are in DARK alone.
     }
     
     # ==================== PUBLIC METHODS ====================

@@ -163,9 +163,12 @@ class TestTheRegexBuilderFollowsItsState:
         start = dlg._current_matches[0].start
         for _ in range(3):
             win._cycle_theme()
-            cursor = dlg.test_text.textCursor()
-            cursor.setPosition(start + 1)
-            painted = cursor.charFormat().background().color().name()
+            # RNV-EXTRA-SELECTIONS 2026-09-30: the matches are extra selections
+            # over the pane, not formats in it; the one on the first match
+            over = [s for s in dlg.test_text.extraSelections()
+                    if s.cursor.selectionStart() <= start < s.cursor.selectionEnd()]
+            assert len(over) == 1, f"the first match is under {len(over)} highlights"
+            painted = over[0].format.background().color().name()
             want = (RegexBuilderDialog._MATCH_COLOR_DARK if win.theme_manager.is_dark_mode
                     else RegexBuilderDialog._MATCH_COLOR_LIGHT)
             assert painted == want.lower(), (win.theme_manager.current_theme, painted, want)

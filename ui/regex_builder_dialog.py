@@ -24,7 +24,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import (
-    QTextCharFormat, QColor, QBrush, QTextCursor, QFont
+    QColor, QTextCursor, QFont
 )
 
 from ui.base_dialog import BaseDialog
@@ -399,20 +399,11 @@ class RegexBuilderDialog(BaseDialog):
         self.match_count_label.setText("Matches: 0")
         
         # Clear highlighting
-        # RNV-CARET-STAYS 2026-09-28: through a cursor of the document's own,
-        # and the pane's own is left alone. This set the pane's cursor back
-        # after selecting all of it, which put the caret at the end: with no
-        # pattern or a broken one, a key typed in the middle of the test text
-        # sent it there 300 ms later.
-        cursor = QTextCursor(self.test_text.document())
-        cursor.select(QTextCursor.SelectionType.Document)
-        # RNV-NOT-AN-EDIT 2026-09-28: not an edit of the pane, and not made
-        # when the pane carries no format. The pane's textChanged re-arms the
-        # update that called this, so with no pattern, or a broken one, it
-        # ran again every 300 ms for as long as the dialog was open.
-        if self._carries_format(self.test_text):
-            with self._not_an_edit(self.test_text):
-                cursor.setCharFormat(QTextCharFormat())
+        # RNV-EXTRA-SELECTIONS 2026-09-30: the matches are shown over the
+        # pane, not written into it, so taking them down touches neither
+        # the pane's text, nor its cursor (RNV-CARET-STAYS), nor its undo
+        # history, and fires nothing the update re-arms on (RNV-NOT-AN-EDIT).
+        self.test_text.setExtraSelections([])
     
     def _update_matches_table(self) -> None:
         """Update matches table with current matches."""
@@ -478,31 +469,15 @@ class RegexBuilderDialog(BaseDialog):
     
     def _highlight_matches(self) -> None:
         """Highlight matches in test text area."""
-        # RNV-NOT-AN-EDIT 2026-09-28: one step of the pane's undo history --
-        # a step per match, before -- and not an edit of it. The pane's
-        # textChanged re-arms the update that called this, which highlighted
-        # again, three times a second, for as long as the dialog was open.
-        with self._not_an_edit(self.test_text):
-            # First, clear existing formatting
-            cursor = self.test_text.textCursor()
-            cursor.select(QTextCursor.SelectionType.Document)
-            if self._carries_format(self.test_text):
-                cursor.setCharFormat(QTextCharFormat())
-            
-            if not self._current_matches:
-                return
-            
-            is_dark = self.theme_manager.current_theme in ('dark', 'image')
-            highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)
-            
-            # Highlight each match
-            for match in self._current_matches:
-                cursor.setPosition(match.start)
-                cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)
-                
-                fmt = QTextCharFormat()
-                fmt.setBackground(QBrush(highlight_color))
-                cursor.mergeCharFormat(fmt)
+        # RNV-EXTRA-SELECTIONS 2026-09-30: shown over the pane, not written
+        # into it. This painted character formats -- one step of the pane's
+        # undo history (RNV-NOT-AN-EDIT) -- and setting the selections
+        # replaces the old ones, so nothing is cleared first.
+        is_dark = self.theme_manager.current_theme in ('dark', 'image')
+        highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)
+        self._show_highlights(self.test_text,
+                              [(match.start, match.end) for match in self._current_matches],
+                              highlight_color)
     
     def _update_replace_preview(self) -> None:
         """Update replace preview with replacement applied."""

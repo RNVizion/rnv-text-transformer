@@ -35,6 +35,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 STYLES = ROOT / "utils" / "dialog_styles.py"
 DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 PALETTES = {"DARK": DialogStyleManager.DARK, "LIGHT": DialogStyleManager.LIGHT}
+#: RNV-NAMED-AND-USED, 2026-10-04: the palette that holds the image values.
+#: LIGHT held the same eight, made the same way, and nothing read them --
+#: image mode reads its overlays from DARK by name. They are in DARK alone.
+IMAGE_PALETTES = {"DARK": DialogStyleManager.DARK}
 
 #: constant -> the byte. Every one is the integer alpha the rgba() literal it
 #: replaced already carried: nothing was fractional, so nothing was measured
@@ -188,7 +192,7 @@ def test_the_derivation_sweep_is_looking():
     """Every check below iterates _derived(). If it came back empty they
     would all pass over nothing."""
     where = {w for w, _c, _v in _derived()}
-    want = {f"{p}[{k!r}]" for p in PALETTES for k in MADE_OF}
+    want = {f"{p}[{k!r}]" for p in IMAGE_PALETTES for k in MADE_OF}
     want.add("DragDropTextEdit._DRAG_HIGHLIGHT")
     assert want <= where, sorted(want - where)
 
@@ -264,7 +268,7 @@ def test_no_composed_literal_is_left_in_the_application():
 def test_the_scrollbar_handle_is_grey_44_at_150():
     """RNV-COLLAPSE-505050, closed here 2026-09-25. Ruled 2026-09-02, and
     written out as rgba(80, 80, 80, 150) in both palettes until now."""
-    for mode, palette in PALETTES.items():
+    for mode, palette in IMAGE_PALETTES.items():
         assert decompose(palette["image_scrollbar_handle"]) == (
             colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA), mode
     assert colors.SCROLLBAR_HANDLE_ALPHA == 150
@@ -283,7 +287,7 @@ def test_nothing_moved_that_was_not_ruled():
 
     The byte-for-byte before-and-after was checked once, by the delivery
     script, against the edited module before it was written."""
-    for mode, palette in PALETTES.items():
+    for mode, palette in IMAGE_PALETTES.items():
         for key, (base, alpha) in MADE_OF.items():
             assert decompose(palette[key]) == (getattr(colors, base).lower(), alpha), (
                 f"{mode}[{key!r}] is {palette[key]}, which is not {base} at "
@@ -349,7 +353,9 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
 
 LOWER8_MODULES = ('utils.colors', 'utils.dialog_styles', 'ui.drag_drop_text_edit')
 #: Found when this was written; below the floor, the sweep has gone blind.
-LOWER8_FLOOR = 12
+#: 9 since RNV-NAMED-AND-USED, 2026-10-04: the image values are in DARK
+#: alone, eight of them, and the drag highlight is the ninth.
+LOWER8_FLOOR = 9
 LOWER8_FILES = 40
 
 

@@ -1,8 +1,12 @@
 """The RNV status family, as this application uses it.
 
-    STATUS_SUCCESS / _WARNING / _ERROR               fills, L* 48-59
     STATUS_*_TEXT         #ad85a3 #bc8752 #dd6f77    text on a dark ground
     STATUS_*_TEXT_LIGHT   #825d79 #8e5e2b #ae4650    text on a light ground
+
+RNV-NAMED-AND-USED, 2026-10-04: the family's three fills stood here too, with
+two tests on their arithmetic. This application draws status as text and no
+fill; nothing read the three, so it carries none, and those tests went with
+them. The register holds the fills.
 
 This file replaces the error-red tests, which covered a two-value red that no
 longer exists. Three of their premises are now false, and each is worth saying
@@ -27,24 +31,18 @@ from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
 TEXT_FLOOR = 4.5
-FILL_FLOOR = 3.0
 
 DARK_GROUNDS = ("#1a1a1a", "#2a2a2a")
 # All four registered rungs, down to GOLD_TEXT_GROUND_FLOOR. Narrowed to
 # two while RNV-STATUS-LIGHT-FLOOR was open; restored at rev 31 because
 # the re-walked values REACH them, not to make a point.
 LIGHT_GROUNDS = ("#ffffff", "#f5f5f5", "#eeeeee", "#e8e8e8")
-ALL_GROUNDS = DARK_GROUNDS + LIGHT_GROUNDS
 
-FILLS = ("STATUS_SUCCESS", "STATUS_WARNING", "STATUS_ERROR")
 DARK_TEXT = ("STATUS_SUCCESS_TEXT", "STATUS_WARNING_TEXT", "STATUS_ERROR_TEXT")
 LIGHT_TEXT = ("STATUS_SUCCESS_TEXT_LIGHT", "STATUS_WARNING_TEXT_LIGHT",
               "STATUS_ERROR_TEXT_LIGHT")
 
 REGISTERED = {
-    "STATUS_SUCCESS": "#926c89",
-    "STATUS_WARNING": "#a2703c",
-    "STATUS_ERROR": "#c75b64",
     "STATUS_SUCCESS_TEXT": "#ad85a3",
     "STATUS_WARNING_TEXT": "#bc8752",
     "STATUS_ERROR_TEXT": "#dd6f77",
@@ -70,12 +68,13 @@ def contrast(a: str, b: str) -> float:
 
 # ------------------------------------------------------------ the values
 @pytest.mark.parametrize("name,value", sorted(REGISTERED.items()))
-def test_the_nine_values_are_the_registered_ones(name, value):
+def test_the_six_values_are_the_registered_ones(name, value):
     """Pinned by value, not by relationship.
 
-    A test asserting only that these differ from each other would pass on nine
+    A test asserting only that these differ from each other would pass on six
     wrong colours. The register publishes nine hexes and this repository
-    mirrors them; if the register moves one, this is the line that says so.
+    mirrors the six it draws; if the register moves one, this is the line
+    that says so.
     """
     assert getattr(colors, name) == value
 
@@ -91,30 +90,10 @@ def test_no_retired_status_value_survives(dead):
 
 
 # ------------------------------------------------------------- the fills
-@pytest.mark.parametrize("name", FILLS)
-@pytest.mark.parametrize("ground", ALL_GROUNDS)
-def test_a_fill_clears_the_fill_floor_on_every_ground(name, ground):
-    """One value, four grounds. That is what a fill has to do, and it is why
-    all three sit in the L* 48-59 band."""
-    ratio = contrast(getattr(colors, name), ground)
-    assert ratio >= FILL_FLOOR, f"{name} on {ground} = {ratio:.4f}"
-
-
-@pytest.mark.parametrize("name", FILLS)
-@pytest.mark.parametrize("ground", ALL_GROUNDS)
-def test_a_fill_is_not_usable_as_text(name, ground):
-    """The other half of the fill band, asserted rather than assumed.
-
-    This is the test that would have caught the wrong migration. Swapping the
-    value while a key still means "text" leaves every status message below the
-    text floor; if someone later points a `color:` declaration at a fill, this
-    records that the fill was never able to do that job.
-    """
-    ratio = contrast(getattr(colors, name), ground)
-    assert ratio < TEXT_FLOOR, (
-        f"{name} now reads {ratio:.4f} on {ground} and CLEARS the text floor. "
-        f"Either the register moved it out of the fill band, or this test is "
-        f"measuring the wrong constant. Do not relax it -- find out which.")
+# RNV-NAMED-AND-USED, 2026-10-04: two tests stood here on the arithmetic of
+# the three fills -- that each clears 3:1 on every ground and 4.5:1 on none.
+# This application draws no fill and no longer carries them; the arithmetic
+# is the register's, where the fills are.
 
 
 # -------------------------------------------------------- the text variants

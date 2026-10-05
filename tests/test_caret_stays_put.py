@@ -70,14 +70,9 @@ def _where(edit) -> tuple:
 
 
 def _painted(edit) -> int:
-    runs, block = 0, edit.document().begin()
-    while block.isValid():
-        it = block.begin()
-        while not it.atEnd():
-            runs += bool(it.fragment().charFormat().properties())
-            it += 1
-        block = block.next()
-    return runs
+    """The highlights shown over the text. RNV-EXTRA-SELECTIONS 2026-09-30:
+    this counted the runs of the text carrying a format; none does, now."""
+    return sum(1 for s in edit.extraSelections() if s.cursor.hasSelection())
 
 
 def _found_the_second(win):

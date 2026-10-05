@@ -26,7 +26,16 @@ RETIRED = {
 }
 
 SOURCES = SWEPT = ("utils/colors.py", "utils/dialog_styles.py")
-LIVE_VALUE = "#926c89"
+# the success text: a value utils/colors.py holds. It was the success fill's
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went.
+LIVE_VALUE = "#ad85a3"
+
+#: The register's three status fills: STATUS["success"], ["warning"] and
+#: ["error"] in engine/brand.py. RNV-NAMED-AND-USED, 2026-10-04: this
+#: application drew none of them and no longer carries them, so they are held
+#: here, under the names the register gives them, as what a status key must
+#: never be painted with.
+REGISTER_FILLS = {"success": "#926c89", "warning": "#a2703c", "error": "#c75b64"}
 
 
 def _code_only(text: str) -> str:
@@ -95,10 +104,10 @@ def test_a_status_key_never_carries_a_fill(key, is_dark):
 
     Swapping the value while leaving the key pointed at a fill is the change
     this pass exists NOT to make: it takes these six readings from one failure
-    to six. If someone repoints these keys at STATUS_SUCCESS / _WARNING /
-    _ERROR, this is the line that stops it.
+    to six. If someone repoints these keys at the register's fills, this is
+    the line that stops it.
     """
-    fills = {colors.STATUS_SUCCESS, colors.STATUS_WARNING, colors.STATUS_ERROR}
+    fills = set(REGISTER_FILLS.values())
     value = DialogStyleManager.get_colors(is_dark)[key]
     assert value not in fills, (
         f"{'dark' if is_dark else 'light'} '{key}' is painted with a FILL "
