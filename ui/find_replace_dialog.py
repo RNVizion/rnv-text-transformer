@@ -46,21 +46,28 @@ class FindReplaceDialog(BaseDialog):
         find_requested: Emitted when find is requested
         replace_requested: Emitted when replace is requested
         replace_all_requested: Emitted when replace all is requested
+        output_edited: Emitted after Replace or Replace All has written
+            to the output
     """
     
     # Signals
     find_requested = pyqtSignal(str, dict)  # search_text, options
     replace_requested = pyqtSignal(str, str, dict)  # search, replace, options
     replace_all_requested = pyqtSignal(str, str, dict)  # search, replace, options
+    # RNV-RULINGS-2026-10-05, item 10: Replace works on the output too. The
+    # main window keeps a history of the output, which every writer joins,
+    # so it is told of each write.
+    output_edited = pyqtSignal()
     
     # Dialog configuration
     _DIALOG_WIDTH: ClassVar[int] = 450
     _DIALOG_HEIGHT: ClassVar[int] = 320
     _DIALOG_TITLE: ClassVar[str] = "Text Transformer - Find"
     _MODAL: ClassVar[bool] = False
-    # RNV-FIND-TARGET 2026-10-04: said when Replace is asked of a pane that
-    # cannot be edited. The output is read only: it is searched, not replaced.
-    _READ_ONLY_STATUS: ClassVar[str] = "The output is read-only: Replace is unavailable"
+    # RNV-RULINGS-2026-10-05, item 11: said when Replace is pressed and the
+    # text is no longer the text the matches were found in. Nothing is
+    # replaced on that press: the match is found again and shown.
+    _TEXT_CHANGED_STATUS: ClassVar[str] = "Text changed, nothing replaced: match {} of {}"
     
     # Highlight colors — sourced from DialogStyleManager (no hardcoded hex)
     
@@ -72,7 +79,8 @@ class FindReplaceDialog(BaseDialog):
         'find_btn', 'find_next_btn', 'replace_btn', 'replace_all_btn',
         'status_label', '_current_matches', '_current_match_index',
         '_is_replace_mode', '_painted_highlight',
-        '_input_text_edit', '_output_text_edit'
+        '_input_text_edit', '_output_text_edit',
+        '_found_in', '_found_for'
     )
     
     def __init__(
@@ -107,6 +115,11 @@ class FindReplaceDialog(BaseDialog):
         self._output_text_edit = output_text_edit
         self._current_matches: list[tuple[int, int]] = []  # (start, end) positions
         self._current_match_index: int = -1
+        # RNV-RULINGS-2026-10-05, item 11: the text the matches were found
+        # in, and the search that found them. The matches are positions in
+        # that text, and good for as long as the pane still holds it.
+        self._found_in: str | None = None
+        self._found_for: tuple[str, dict] | None = None
         # RNV-FIND-REPAINT 2026-09-28: the colour the highlights in the text
         # were painted in, while any are there; what a switch finds them by.
         self._painted_highlight: QColor | None = None
@@ -251,7 +264,6 @@ class FindReplaceDialog(BaseDialog):
         buttons_layout.addWidget(close_btn)
         
         layout.addLayout(buttons_layout)
-        self._sync_replace_buttons()
     
     def set_target_text_edit(self, text_edit: QTextEdit, is_output: bool = False) -> None:
         """
@@ -295,28 +307,19 @@ class FindReplaceDialog(BaseDialog):
             return
         self._on_find_text_changed(self.find_input.text())
         self.target_text_edit = text_edit
-        self._sync_replace_buttons()
     
-    def _target_is_read_only(self) -> bool:
+    def _edited(self) -> None:
         """
-        Whether the pane searched cannot be edited, as the output cannot.
+        Say so when the pane just written to is the output.
         
-        RNV-FIND-TARGET 2026-10-04: Replace edits the text, so it is
-        offered only where the text can be edited. A cursor of the
-        document's own writes to a read-only pane all the same, so the
-        pane's own flag is asked.
+        RNV-RULINGS-2026-10-05, item 10: Replace and Replace All work on
+        the pane chosen, the output included. The output stays read only
+        to typing; a cursor of the document's own writes to it all the
+        same, and so does setPlainText(). The main window keeps a history
+        of the output, so it is told.
         """
-        return self.target_text_edit is not None and self.target_text_edit.isReadOnly()
-    
-    def _sync_replace_buttons(self) -> None:
-        """Offer Replace and Replace All only where the text can be edited."""
-        if not self._is_replace_mode:
-            return
-        read_only = self._target_is_read_only()
-        self.replace_all_btn.setEnabled(not read_only)
-        if read_only:
-            self.replace_btn.setEnabled(False)
-            self.status_label.setText(self._READ_ONLY_STATUS)
+        if self.target_text_edit is not None and self.target_text_edit is self._output_text_edit:
+            self.output_edited.emit()
     
     def get_search_options(self) -> dict:
         """
@@ -334,8 +337,7 @@ class FindReplaceDialog(BaseDialog):
     
     def _on_find_text_changed(self, text: str) -> None:
         """Handle find text change - reset matches."""
-        self._current_matches.clear()
-        self._current_match_index = -1
+        self._forget_matches()
         self.find_next_btn.setEnabled(False)
         if self.replace_btn:
             self.replace_btn.setEnabled(False)
@@ -367,6 +369,15 @@ class FindReplaceDialog(BaseDialog):
             self._on_find()
             return
         
+        # RNV-RULINGS-2026-10-05, item 11: the matches are positions in the
+        # text the Find read. Once that text was typed in, or written again
+        # by a transform, this stepped through places where the matches no
+        # longer were. Now the search is run again in the text as it is,
+        # and the next match is the first at or after the caret.
+        if self._matches_are_stale():
+            self._find_again()
+            return
+        
         # Move to next match
         self._current_match_index = (self._current_match_index + 1) % len(self._current_matches)
         self._highlight_current_match()
@@ -380,9 +391,14 @@ class FindReplaceDialog(BaseDialog):
         if self.target_text_edit is None or self.replace_input is None:
             return
         
-        # RNV-FIND-TARGET 2026-10-04: a read-only pane is searched, not edited.
-        if self._target_is_read_only():
-            self.status_label.setText(self._READ_ONLY_STATUS)
+        # RNV-RULINGS-2026-10-05, item 11: the positions recorded are places
+        # in the text the Find read. In a text that had changed since, this
+        # wrote over whatever stood there. The match is found again and
+        # shown, and nothing is replaced until Replace is pressed on it.
+        if self._matches_are_stale():
+            if self._find_again():
+                self.status_label.setText(self._TEXT_CHANGED_STATUS.format(
+                    self._current_match_index + 1, len(self._current_matches)))
             return
         
         replace_text = self.replace_input.text()
@@ -393,6 +409,7 @@ class FindReplaceDialog(BaseDialog):
         cursor.setPosition(start)
         cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
         cursor.insertText(replace_text)
+        self._edited()
         
         # Re-find to update matches
         self._on_find()
@@ -406,11 +423,6 @@ class FindReplaceDialog(BaseDialog):
             return
         
         if self.target_text_edit is None or self.replace_input is None:
-            return
-        
-        # RNV-FIND-TARGET 2026-10-04: a read-only pane is searched, not edited.
-        if self._target_is_read_only():
-            self.status_label.setText(self._READ_ONLY_STATUS)
             return
         
         replace_text = self.replace_input.text()
@@ -439,6 +451,7 @@ class FindReplaceDialog(BaseDialog):
             
             if count > 0:
                 self.target_text_edit.setPlainText(new_text)
+                self._edited()
                 # RNV-EXTRA-SELECTIONS 2026-09-30: the new text has no
                 # matches painted; the old highlights are taken down too.
                 self._clear_highlights()
@@ -449,8 +462,7 @@ class FindReplaceDialog(BaseDialog):
         except re.error as e:
             self.status_label.setText(f"Regex error: {e}")
         
-        self._current_matches.clear()
-        self._current_match_index = -1
+        self._forget_matches()
     
     def _on_close(self) -> None:
         """Close dialog and clear highlights."""
@@ -470,35 +482,17 @@ class FindReplaceDialog(BaseDialog):
             return
         
         text = self.target_text_edit.toPlainText()
-        self._current_matches.clear()
-        self._current_match_index = -1
+        self._forget_matches()
         
         try:
-            if options['regex']:
-                flags = 0 if options['case_sensitive'] else re.IGNORECASE
-                pattern = re.compile(search_text, flags)
-                for match in pattern.finditer(text):
-                    self._current_matches.append((match.start(), match.end()))
-            else:
-                if options['whole_word']:
-                    flags = 0 if options['case_sensitive'] else re.IGNORECASE
-                    pattern = re.compile(r'\b' + re.escape(search_text) + r'\b', flags)
-                    for match in pattern.finditer(text):
-                        self._current_matches.append((match.start(), match.end()))
-                else:
-                    # Simple text search
-                    search_in = text if options['case_sensitive'] else text.lower()
-                    find_text = search_text if options['case_sensitive'] else search_text.lower()
-                    
-                    start = 0
-                    while True:
-                        pos = search_in.find(find_text, start)
-                        if pos == -1:
-                            break
-                        self._current_matches.append((pos, pos + len(search_text)))
-                        start = pos + 1
+            self._current_matches.extend(self._matches_in(text, search_text, options))
             
             if self._current_matches:
+                # RNV-RULINGS-2026-10-05, item 11: the text read and the
+                # search run, kept so that Find Next and Replace can tell
+                # when these positions are no longer the matches'.
+                self._found_in = text
+                self._found_for = (search_text, dict(options))
                 self._current_match_index = 0
                 self._highlight_all_matches()
                 self._highlight_current_match()
@@ -510,8 +504,7 @@ class FindReplaceDialog(BaseDialog):
                 bar.setValue(bar.value() + self.target_text_edit.cursorRect().top())
                 self.find_next_btn.setEnabled(True)
                 if self.replace_btn:
-                    # RNV-FIND-TARGET 2026-10-04: not on a read-only pane.
-                    self.replace_btn.setEnabled(not self._target_is_read_only())
+                    self.replace_btn.setEnabled(True)
                 self.status_label.setText(
                     f"Found {len(self._current_matches)} match(es)"
                 )
@@ -521,6 +514,111 @@ class FindReplaceDialog(BaseDialog):
                 
         except re.error as e:
             self.status_label.setText(f"Regex error: {e}")
+    
+    def _forget_matches(self) -> None:
+        """
+        Forget the search that was showing: its matches, and the text
+        they were found in.
+        
+        RNV-RULINGS-2026-10-05, item 11: one place for it, so that the
+        text is held for exactly as long as the matches are.
+        """
+        self._current_matches.clear()
+        self._current_match_index = -1
+        self._found_in = None
+        self._found_for = None
+    
+    @staticmethod
+    def _matches_in(text: str, search_text: str, options: dict) -> list[tuple[int, int]]:
+        """
+        Where the search matches in a text.
+        
+        RNV-RULINGS-2026-10-05, item 11: the scan Find has always run,
+        line for line, moved here so that it can be run again once the
+        text has changed.
+        
+        Args:
+            text: The text to search
+            search_text: Text to search for
+            options: Search options dictionary
+        
+        Returns:
+            (start, end) of every match, in order
+        
+        Raises:
+            re.error: The pattern does not compile
+        """
+        matches: list[tuple[int, int]] = []
+        if options['regex']:
+            flags = 0 if options['case_sensitive'] else re.IGNORECASE
+            pattern = re.compile(search_text, flags)
+            for match in pattern.finditer(text):
+                matches.append((match.start(), match.end()))
+        else:
+            if options['whole_word']:
+                flags = 0 if options['case_sensitive'] else re.IGNORECASE
+                pattern = re.compile(r'\b' + re.escape(search_text) + r'\b', flags)
+                for match in pattern.finditer(text):
+                    matches.append((match.start(), match.end()))
+            else:
+                # Simple text search
+                search_in = text if options['case_sensitive'] else text.lower()
+                find_text = search_text if options['case_sensitive'] else search_text.lower()
+                
+                start = 0
+                while True:
+                    pos = search_in.find(find_text, start)
+                    if pos == -1:
+                        break
+                    matches.append((pos, pos + len(search_text)))
+                    start = pos + 1
+        return matches
+    
+    def _matches_are_stale(self) -> bool:
+        """
+        Whether the pane no longer holds the text the matches were found in.
+        
+        RNV-RULINGS-2026-10-05, item 11. Asked of the text itself, so it
+        is true exactly when the positions recorded may no longer be the
+        matches': after typing, or after the output has been written
+        again by a transform or an undo. A highlight painted again, a
+        theme switched or a caret moved changes no text.
+        """
+        return (self.target_text_edit is not None
+                and self.target_text_edit.toPlainText() != self._found_in)
+    
+    def _find_again(self) -> bool:
+        """
+        Run the search Find ran again, in the text as it is now, and make
+        the first match at or after the caret the current one.
+        
+        RNV-RULINGS-2026-10-05, item 11. The search is the one Find ran:
+        its text and its options as they were then. Past the last match
+        it comes round to the first, as Find Next does. The view moves
+        only as far as it must to show the match: it is Find that puts
+        the first match at the top.
+        
+        Returns:
+            Whether the text still holds a match
+        """
+        search_text, options = self._found_for
+        text = self.target_text_edit.toPlainText()
+        matches = self._matches_in(text, search_text, options)
+        self._forget_matches()
+        if not matches:
+            self.status_label.setText("No matches found")
+            self._clear_highlights()
+            return False
+        
+        self._current_matches.extend(matches)
+        self._found_in = text
+        self._found_for = (search_text, options)
+        caret = self.target_text_edit.textCursor().selectionEnd()
+        self._current_match_index = next(
+            (index for index, (start, _end) in enumerate(matches) if start >= caret), 0)
+        self._highlight_all_matches()
+        self._highlight_current_match()
+        return True
     
     def _highlight_colour(self) -> QColor:
         """

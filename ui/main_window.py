@@ -1756,6 +1756,21 @@ class MainWindow(QMainWindow):
         else:
             self._set_status("Nothing to redo")
     
+    def _on_output_replaced(self) -> None:
+        """
+        Find and Replace has written to the output: record it, as every
+        writer of the output does.
+        
+        RNV-RULINGS-2026-10-05, item 10. Replace was off for the output
+        because the pane is read only. It is on now. The output's
+        history is this window's own (Ctrl+Z and Ctrl+Y step through
+        it), so the text Replace left joins it, and the statistics are
+        counted again.
+        """
+        self._add_to_output_history(self.output_text.toPlainText())
+        self._update_statistics()
+        self._set_status("Replace applied to output")
+    
     # ==================== RECENT FILES ====================
     
     def _add_recent_file(self, file_path: str) -> None:
@@ -1918,6 +1933,9 @@ class MainWindow(QMainWindow):
             parent=self,
             output_text_edit=self.output_text
         )
+        # RNV-RULINGS-2026-10-05, item 10: a Replace in the output joins
+        # the output's history.
+        dialog.output_edited.connect(self._on_output_replaced)
         self._track_open_dialog(dialog)
         dialog.show()
     

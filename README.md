@@ -5,7 +5,7 @@
 ![Version](https://img.shields.io/badge/version-3.3.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
-![Tests](https://img.shields.io/badge/tests-786%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1000%2B%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-76%25-brightgreen)
 
 [![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
@@ -48,7 +48,7 @@ RNV Text Transformer is a Windows desktop application for transforming, cleaning
 - **Regex builder** — live-preview regex patterns against sample text with capture-group highlighting
 - **Preset system** — chain transforms, cleanups, and split/join operations into reusable workflows
 - **Modular architecture** — clean separation of `core/`, `ui/`, `utils/`, and `cli/` packages with proper `__init__.py` boundaries
-- **Comprehensive test suite** — 786 tests across `unittest`, `pytest`, `hypothesis`, and `syrupy`, with ~76% coverage running on Linux + Windows CI
+- **Comprehensive test suite** — over 1,000 tests across `unittest`, `pytest`, `hypothesis`, and `syrupy`, with ~76% coverage running on Linux + Windows CI
 
 ---
 
@@ -307,7 +307,7 @@ For full architectural detail — dependency rules, startup sequence, threading 
 
 ## Testing
 
-The project ships with **786 tests across two complementary suites**, achieving ~76% coverage on both Linux and Windows. CI runs the full suite on every push and pull request.
+The project ships with **over 1,000 tests across two complementary suites**, achieving ~76% coverage on both Linux and Windows. CI runs the full suite on every push and pull request.
 
 ### Quick start
 
@@ -326,8 +326,8 @@ python -m unittest test_rnv_text_transformer
 
 | Suite | Tests | Purpose |
 |-------|------:|---------|
-| `test_rnv_text_transformer.py` (unittest) | 398 | Frozen regression suite — core logic, file I/O, transformations, exports, error handling. SHA-pinned and never edited after release. |
-| `tests/` (pytest) | 388 | UI interactions, property-based tests (`hypothesis`), snapshot tests (`syrupy`), benchmarks, CLI tests, coverage gap-fill |
+| `test_rnv_text_transformer.py` (unittest) | over 300 | Frozen regression suite — core logic, file I/O, transformations, exports, error handling. SHA-pinned and never edited after release. |
+| `tests/` (pytest) | over 600 | UI interactions, property-based tests (`hypothesis`), snapshot tests (`syrupy`), benchmarks, CLI tests, coverage gap-fill |
 
 ### Methodology
 
@@ -406,5 +406,5 @@ Built by [RNVizion](https://github.com/RNVizion)
 ---
 
 <p align="center">
-  Built with PyQt6 · 786 tests · 76% coverage
+  Built with PyQt6 · over 1,000 tests · 76% coverage
 </p>

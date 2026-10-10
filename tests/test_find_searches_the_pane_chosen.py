@@ -13,8 +13,10 @@ Now the main window hands the dialog both panes and the pair chooses:
 - a Find paints its matches in the pane chosen, and nowhere else;
 - choosing the other pane takes the highlights down from the one searched
   and forgets its matches, as a change of the find text does;
-- the output is read only, so it is searched and not replaced: with Output
-  chosen Replace and Replace All are off, and say why;
+- Replace and Replace All work on the pane chosen. Until 2026-10-05 they
+  were off for the output, which is read only to typing; item 10 of
+  RNV-RULINGS-2026-10-05 turned them on, and what they do there is held
+  by tests/test_replace_edits_the_output.py;
 - a theme switch and a close act on the pane searched.
 
 Every test drives the main window's own openers.
@@ -199,39 +201,43 @@ class TestThePairChoosesThePaneSearched:
                          win.output_text.document().availableUndoSteps())
 
 
-class TestTheOutputIsSearchedNotReplaced:
+class TestReplaceIsOfferedInThePaneChosen:
+    """Until 2026-10-05 this class held that the output was searched and not
+    replaced, because it is read only. Item 10 of RNV-RULINGS-2026-10-05
+    ruled that Replace works there too. What it writes, and how that joins
+    the output's history, is held by tests/test_replace_edits_the_output.py."""
 
     def test_the_premise_the_output_is_read_only_and_the_input_is_not(self, filled):
         assert filled.output_text.isReadOnly() and not filled.text_input.isReadOnly()
 
-    def test_with_output_chosen_replace_and_replace_all_are_off_and_say_why(self, filled):
+    def test_with_output_chosen_replace_and_replace_all_are_offered(self, filled):
         win = filled
         dlg = _opened(win, "_open_replace_dialog")
         assert dlg.replace_all_btn.isEnabled(), "Replace All is off on the input"
         dlg.search_output_radio.click()
-        assert not dlg.replace_all_btn.isEnabled() and not dlg.replace_btn.isEnabled()
-        assert dlg.status_label.text() == FindReplaceDialog._READ_ONLY_STATUS
+        assert dlg.replace_all_btn.isEnabled(), "Replace All is off with Output chosen"
+        assert not dlg.replace_btn.isEnabled(), "Replace is on before anything is found"
+        assert dlg.status_label.text() == ""
         _find(dlg)
         assert _highlighted(win.output_text) == _spots(OUT), "the output is not searched in Find and Replace"
-        assert not dlg.replace_btn.isEnabled(), "a Find turned Replace on for a pane that is read only"
-        assert not dlg.replace_all_btn.isEnabled()
+        assert dlg.replace_btn.isEnabled(), "a Find did not turn Replace on with Output chosen"
         dlg.close()
 
-    def test_asked_all_the_same_they_leave_both_texts_alone(self, filled):
+    def test_they_edit_the_pane_chosen_and_leave_the_other_alone(self, filled):
         win = filled
         dlg = _opened(win, "_open_replace_dialog")
         dlg.search_output_radio.click()
         _find(dlg)
         dlg.replace_input.setText("0")
         dlg._on_replace()
-        assert (win.text_input.toPlainText(), win.output_text.toPlainText()) == (IN, OUT), \
-            "Replace edited a text with Output chosen"
-        assert dlg.status_label.text() == FindReplaceDialog._READ_ONLY_STATUS
-        dlg.status_label.setText("")
+        first = _spots(OUT)[0][0]
+        assert win.output_text.toPlainText() == OUT[:first] + "0" + OUT[first + 1:], \
+            "Replace did not replace the output's first match, and that alone"
+        assert win.text_input.toPlainText() == IN, "Replace edited the input with Output chosen"
         dlg._on_replace_all()
-        assert (win.text_input.toPlainText(), win.output_text.toPlainText()) == (IN, OUT), \
-            "Replace All edited a text with Output chosen"
-        assert dlg.status_label.text() == FindReplaceDialog._READ_ONLY_STATUS
+        assert win.output_text.toPlainText() == OUT.replace("O", "0"), \
+            "Replace All did not replace every match in the output"
+        assert win.text_input.toPlainText() == IN, "Replace All edited the input with Output chosen"
         dlg.close()
 
     def test_back_on_the_input_replace_works_as_it_always_has(self, filled):
@@ -248,7 +254,7 @@ class TestTheOutputIsSearchedNotReplaced:
         assert win.output_text.toPlainText() == OUT
         dlg.close()
 
-    def test_find_alone_has_no_replace_to_turn_off(self, filled):
+    def test_find_alone_has_no_replace(self, filled):
         dlg = _opened(filled, "_open_find_dialog")
         dlg.search_output_radio.click()
         assert dlg.replace_btn is None and dlg.replace_all_btn is None
