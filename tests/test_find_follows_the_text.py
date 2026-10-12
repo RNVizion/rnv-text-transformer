@@ -35,8 +35,9 @@ WHAT THIS GUARD HOLDS.
 5. With the text unchanged, Find Next steps as it always has, and does not
    search again. A theme switched, a caret moved or a highlight painted
    again is not a change; nor is a change that has been undone.
-6. The search run again is the one Find ran: an option ticked since then
-   waits for Find, as it did before this round.
+6. The search run again is Find's search text. Since RNV-RULINGS-2026-10-11,
+   item 24 (a), it reads the options as they are: an option changed since
+   the Find is a change, held in tests/test_find_and_replace_do_what_they_say.py.
 7. What is forgotten with the matches is forgotten whole: choosing the
    other pane or changing the find text leaves no text held.
 """
@@ -329,27 +330,6 @@ class TestWithTheTextUnchangedNothingIsDifferent:
         dlg._on_replace()
         assert win.text_input.toPlainText() == IN[:5] + "OX" + IN[7:]
         assert dlg.status_label.text() == "Replaced 1 occurrence"
-        dlg.close()
-
-
-class TestTheSearchRunAgainIsTheOneFindRan:
-
-    def test_an_option_ticked_since_the_find_waits_for_find(self, filled):
-        """As before this round: the options are read when Find is pressed.
-        Whether ticking one should search again is a question of its own."""
-        win = filled
-        win.text_input.setPlainText("Ox ox OX\n")
-        win.auto_transform_timer.stop()
-        dlg = _opened(win, "_open_find_dialog")
-        dlg._on_find()
-        assert len(dlg._current_matches) == 3
-        dlg.case_sensitive_check.setChecked(True)
-        _type_at(win.text_input, 0, "- ")
-        dlg._on_find_next()
-        assert dlg._current_matches == [(2, 4), (5, 7), (8, 10)], \
-            "the search run again read the options as they are now, not as Find ran it"
-        dlg._on_find()
-        assert dlg._current_matches == [(5, 7)], "Find itself no longer reads the options as they are"
         dlg.close()
 
 

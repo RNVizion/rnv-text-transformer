@@ -106,7 +106,7 @@ def test_light_mode_has_exactly_two_golds():
     golds = {light[k].lower() for k in
              ('accent', 'accent_hover', 'accent_pressed', 'accent_ink',
               'border_focus', 'tooltip_border', 'info', 'selection_bg',
-              'output_text_color', 'line_number_current_fg')}
+              'output_text_color')}
     assert len(golds) == 2, f'expected 2 light golds, found {len(golds)}: {sorted(golds)}'
 
 

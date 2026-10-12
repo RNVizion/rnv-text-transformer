@@ -164,11 +164,14 @@ class TestFindReplaceDialog:
         assert "Find" in dlg.windowTitle()
 
     def test_findreplacedialog_signal_exists(self, qtbot, theme_manager_dark):
+        # RNV-RULINGS-2026-10-11, item 24 (e): find_requested, which this
+        # read, went with two more nothing used. output_edited is the one the
+        # dialog declares, and the main window connects it.
         from ui.find_replace_dialog import FindReplaceDialog
         dlg = FindReplaceDialog(theme_manager_dark)
         qtbot.addWidget(dlg)
-        assert hasattr(dlg, "find_requested")
-        assert isinstance(dlg.find_requested, pyqtBoundSignal)
+        assert hasattr(dlg, "output_edited")
+        assert isinstance(dlg.output_edited, pyqtBoundSignal)
 
 
 # ════════════════════════════════════════════════════════════════════════════

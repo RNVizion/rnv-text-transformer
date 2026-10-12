@@ -30,6 +30,7 @@ RNV Text Transformer is a Windows desktop application for transforming, cleaning
 - [Architecture](#architecture)
 - [Testing](#testing)
 - [Engineering Notes](#engineering-notes)
+- [Considered for Later](#considered-for-later)
 - [Built With](#built-with)
 - [Related Projects](#related-projects)
 - [License](#license)
@@ -249,7 +250,6 @@ rnv-text-transformer/
 │   ├── base_dialog.py             # Common dialog base class
 │   ├── image_button.py            # Image-mode-aware button
 │   ├── drag_drop_text_edit.py     # Drop-target text widget
-│   ├── line_number_text_edit.py   # Gutter-enabled text widget
 │   └── *_dialog.py                # 10 specialized dialogs
 │
 ├── utils/                         # Cross-cutting utilities
@@ -289,7 +289,7 @@ rnv-text-transformer/
 ├── .github/workflows/             # CI workflows
 │   └── tests.yml                  # Linux + Windows test matrix
 │
-└── test_rnv_text_transformer.py   # Frozen unittest regression suite
+└── test_rnv_text_transformer.py   # unittest regression suite
 ```
 
 ### Design Principles
@@ -326,14 +326,14 @@ python -m unittest test_rnv_text_transformer
 
 | Suite | Tests | Purpose |
 |-------|------:|---------|
-| `test_rnv_text_transformer.py` (unittest) | over 300 | Frozen regression suite — core logic, file I/O, transformations, exports, error handling. SHA-pinned and never edited after release. |
+| `test_rnv_text_transformer.py` (unittest) | over 300 | Regression suite — core logic, file I/O, transformations, exports, error handling. |
 | `tests/` (pytest) | over 600 | UI interactions, property-based tests (`hypothesis`), snapshot tests (`syrupy`), benchmarks, CLI tests, coverage gap-fill |
 
 ### Methodology
 
 The test plan uses multiple complementary techniques:
 
-- **`unittest`** for the frozen core regression suite
+- **`unittest`** for the core regression suite
 - **`pytest` + `pytest-qt`** for headless UI interaction tests (qtbot, signal verification, modal dialog mocking)
 - **`hypothesis`** for property-based testing of idempotent transformations
 - **`syrupy`** for snapshot testing of generated stylesheets and export output formats
@@ -358,6 +358,27 @@ The test suite caught **four production bugs** during development, each with a d
 Bug #4 is the most consequential — the dialog would quietly destroy multi-pattern rules (e.g. `["*.py", "*.md"]`) every time a user opened it and made any change. No crash, no error message, no warning. It went undetected through normal manual testing because the corruption was only visible by inspecting the saved settings file. The regression guard test now exercises the multi-pattern load path explicitly.
 
 The methodology that found these bugs — property-based testing for pure logic, interaction testing with qtbot for UI flows — is documented further in `tests/README.md`.
+
+---
+
+## Considered for Later
+
+### Line numbers in the text panes
+
+**What it would be.** A gutter down the left edge of the input and output panes that numbers their lines, marks the line the caret is on, and can be hidden. It serves text where a line's number is how a place in it is named: code, logs, and the formats among those the app reads (`.py`, `.js`, `.html`, `.log`) where a reader is told "see line 120".
+
+**What there was.** A widget for it, `ui/line_number_text_edit.py`: `LineNumberTextEdit`, and a rich-text variant, with a gutter, the caret's line marked, a switch to hide the numbers, and a method to go to a line. Nothing in the app created it: both panes are another class, and no menu, setting or shortcut reached it. It knew dark and light but not image mode; in dark its text area stayed white, so the caret's marked line could not be read; and it lacked what the panes have, from a dropped file to the right-click menu and the app's styling. It was removed on 11 October 2026, with the four colours it read in each palette (`line_number_bg`, `line_number_fg`, `line_number_current_bg`, `line_number_current_fg`) and the tests that built it.
+
+**What would need to be decided before it is built again.**
+
+- **Which panes.** The input, the output, or both; and whether the output's numbers follow the input's lines, which a transform keeps and a cleanup that removes lines does not.
+- **On or off, and where the switch lives.** A setting with a default, a menu entry, a shortcut, or all three; and whether the choice is remembered between runs.
+- **How it looks in each mode.** Dark, light and image, from palette entries named for the gutter's ground, its numbers and the caret's line. In image mode the gutter sits over the background image, as the panes do. Each colour shown drawn, read back from the pixels, and the numbers held to 4.5:1 on their ground.
+- **Wrapped lines.** Whether a line the pane wraps is numbered once, as a line of the file, or on each row it fills.
+- **The caret's line.** Marked in the gutter only, or across the pane as well, and how that sits with Find's highlights, which are drawn over the text.
+- **Going to a line.** Whether it is offered, and from where: a menu, a shortcut, or Find.
+- **Large files.** The gutter repaints as the view scrolls; how large a file it must stay smooth on.
+- **Where it is built.** Into the panes' own class, not beside it: dropping a file, the right-click menu, the output's undo history, Find's highlights and the theme switch all live there.
 
 ---
 

@@ -225,9 +225,10 @@ APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'
 #: pinned in five repositories. Its INPUT was app-owned, so nothing could
 #: mirror the constraint the whole derivation rests on.
 #:
-#: Both uses here are grounds the gold family draws on: bg_tertiary, which
-#: carries the About dialog's tab labels, and line_number_current_bg, whose
-#: foreground is BRAND_DARK_GOLD_DEEP itself.
+#: Its use here is a ground the gold family draws on: bg_tertiary, which
+#: carries the About dialog's tab labels. The second, line_number_current_bg,
+#: went with the line-number editor nothing created: RNV-RULINGS-2026-10-11,
+#: item 7.
 GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'
 
 #: RNV-NAMED-AND-USED (2026-10-04): the family's three fills stood here --

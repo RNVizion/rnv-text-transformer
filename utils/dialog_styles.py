@@ -213,12 +213,6 @@ class DialogStyleManager:
         'border_color': APP_BORDER,
         'text_color': APP_TEXT,
         
-        # Line number gutter widget
-        'line_number_bg': BRAND_BLACK,
-        'line_number_fg': GREY_88,
-        'line_number_current_bg': APP_CARD,
-        'line_number_current_fg': BRAND_GOLD,
-
         # Diff / compare semantic highlight colors
         'diff_added_bg':   SEMANTIC_DIFF_ADDED,
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
@@ -316,12 +310,6 @@ class DialogStyleManager:
         'border_color': GREY_CC,
         'text_color': TRUE_BLACK,
         
-        # Line number gutter widget
-        'line_number_bg': GREY_EE,
-        'line_number_fg': GREY_66,
-        'line_number_current_bg': GOLD_TEXT_GROUND_FLOOR,
-        'line_number_current_fg': BRAND_DARK_GOLD_DEEP,
-
         # Diff / compare semantic highlight colors
         'diff_added_bg':   SEMANTIC_DIFF_ADDED_LIGHT,
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED_LIGHT,

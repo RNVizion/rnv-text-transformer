@@ -66,9 +66,10 @@ GONE = ('GREY_3A', 'GREY_E8')
 
 #: What the split leaves behind: the ramp step, and the static surfaces that
 #: keep it -- two since RNV-NAMED-AND-USED, 2026-10-04, when the dark
-#: palette's copy of diff_html_header_bg, which nothing read, went. If this
-#: list ever empties, the split has collapsed.
-STATIC_EE_KEYS = ('diff_html_header_bg', 'line_number_bg')
+#: palette's copy of diff_html_header_bg, which nothing read, went; one since
+#: RNV-RULINGS-2026-10-11, item 7, when line_number_bg went with the editor
+#: nothing created. If this list ever empties, the split has collapsed.
+STATIC_EE_KEYS = ('diff_html_header_bg',)
 
 #: Palette entries and what they must resolve to. Written as VALUES, because
 #: this pass renames the constants that hold them -- a check that read the new
@@ -77,7 +78,6 @@ PINNED_ENTRIES = {
     ('DARK', 'bg_hover'): '#3a3a3a',
     ('LIGHT', 'bg_hover'): '#eeeeee',
     ('LIGHT', 'bg_tertiary'): '#e8e8e8',
-    ('LIGHT', 'line_number_current_bg'): '#e8e8e8',
 }
 
 
@@ -135,7 +135,8 @@ def test_everything_this_file_reads_still_exists():
 
 def test_the_maps_this_file_iterates_are_not_empty():
     """Every sweep below iterates one of these. An empty map passes all."""
-    assert len(NEW) == 3 and len(PINNED_ENTRIES) == 4 and STATIC_EE_KEYS
+    # 3 entries since RNV-RULINGS-2026-10-11, item 7: line_number_current_bg went.
+    assert len(NEW) == 3 and len(PINNED_ENTRIES) == 3 and STATIC_EE_KEYS
 
 
 # ------------------------------------------------------------------ the values

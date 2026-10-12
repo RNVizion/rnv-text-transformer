@@ -69,7 +69,7 @@ else:
                   "error_handler", "settings_manager", "clipboard_utils",
                   "async_workers", "dialog_helper"],
         "ui":    ["main_window", "base_dialog", "image_button",
-                  "drag_drop_text_edit", "line_number_text_edit"],
+                  "drag_drop_text_edit"],
         "cli":   ["rnv_transform"],
     }
     for _pkg, _names in _LOAD.items():
@@ -1221,8 +1221,8 @@ class TestDialogStyleManager(unittest.TestCase):
             "window_bg", "main_btn_bg", "main_btn_text", "main_btn_hover_bg",
             "input_bg", "input_text", "input_border",
             "output_text_color", "border_color", "text_color",
-            "line_number_bg", "line_number_fg",
-            "line_number_current_bg", "line_number_current_fg",
+            # RNV-RULINGS-2026-10-11, item 7: the line-number editor's four
+            # keys stood here. Nothing created the editor, and they went with it.
         ]
         for key in required:
             self.assertIn(key, DialogStyleManager.DARK, f"Missing DARK key: {key}")

@@ -11,8 +11,6 @@ from ui.drag_drop_text_edit import DragDropTextEdit
 
 from ui.image_button import ImageButton
 
-from ui.line_number_text_edit import LineNumberTextEdit
-
 from ui.settings_dialog import SettingsDialog
 
 from ui.about_dialog import AboutDialog
@@ -42,7 +40,6 @@ __all__ = [
     # Widgets
     'DragDropTextEdit',
     'ImageButton',
-    'LineNumberTextEdit',
     # Dialogs
     'SettingsDialog',
     'AboutDialog',

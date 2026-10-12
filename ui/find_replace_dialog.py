@@ -12,6 +12,7 @@ Python 3.13 Optimized:
 from __future__ import annotations
 
 import re
+from bisect import bisect_left
 from typing import TYPE_CHECKING, ClassVar
 
 from PyQt6.QtWidgets import (
@@ -43,17 +44,15 @@ class FindReplaceDialog(BaseDialog):
     - Search in input or output area
     
     Signals:
-        find_requested: Emitted when find is requested
-        replace_requested: Emitted when replace is requested
-        replace_all_requested: Emitted when replace all is requested
         output_edited: Emitted after Replace or Replace All has written
             to the output
     """
     
     # Signals
-    find_requested = pyqtSignal(str, dict)  # search_text, options
-    replace_requested = pyqtSignal(str, str, dict)  # search, replace, options
-    replace_all_requested = pyqtSignal(str, str, dict)  # search, replace, options
+    # RNV-RULINGS-2026-10-11, item 24 (e): find_requested, replace_requested
+    # and replace_all_requested stood here, declared for the main window. It
+    # never connected them, and nothing emitted them: Find and Replace act on
+    # the pane themselves. They went.
     # RNV-RULINGS-2026-10-05, item 10: Replace works on the output too. The
     # main window keeps a history of the output, which every writer joins,
     # so it is told of each write.
@@ -68,6 +67,10 @@ class FindReplaceDialog(BaseDialog):
     # text is no longer the text the matches were found in. Nothing is
     # replaced on that press: the match is found again and shown.
     _TEXT_CHANGED_STATUS: ClassVar[str] = "Text changed, nothing replaced: match {} of {}"
+    # RNV-RULINGS-2026-10-11, item 24 (a): the same, when what changed since
+    # the Find is an option it read: case, whole word or regular expression.
+    _OPTIONS_CHANGED_STATUS: ClassVar[str] = "Options changed, nothing replaced: match {} of {}"
+    _SEARCH_OPTIONS: ClassVar[tuple[str, ...]] = ('case_sensitive', 'whole_word', 'regex')
     
     # Highlight colors — sourced from DialogStyleManager (no hardcoded hex)
     
@@ -396,13 +399,24 @@ class FindReplaceDialog(BaseDialog):
         # wrote over whatever stood there. The match is found again and
         # shown, and nothing is replaced until Replace is pressed on it.
         if self._matches_are_stale():
+            said = self._TEXT_CHANGED_STATUS if self._text_changed() else self._OPTIONS_CHANGED_STATUS
             if self._find_again():
-                self.status_label.setText(self._TEXT_CHANGED_STATUS.format(
+                self.status_label.setText(said.format(
                     self._current_match_index + 1, len(self._current_matches)))
             return
         
         replace_text = self.replace_input.text()
-        start, end = self._current_matches[self._current_match_index]
+        # RNV-RULINGS-2026-10-11, item 24 (c): with Regular expression on, a
+        # group reference in the replacement is filled in, as Replace All has
+        # always done. Replace wrote \1 as typed.
+        if self._found_for[1]['regex']:
+            try:
+                replace_text = self._expanded(replace_text)
+            except re.error as e:
+                self.status_label.setText(f"Regex error: {e}")
+                return
+        text = self.target_text_edit.toPlainText()
+        start, end = self._in_qt(text, [self._current_matches[self._current_match_index]])[0]
         
         # Replace the current match
         cursor = self.target_text_edit.textCursor()
@@ -437,17 +451,24 @@ class FindReplaceDialog(BaseDialog):
                 pattern = re.compile(search_text, flags)
                 new_text, count = pattern.subn(replace_text, text)
             else:
+                # RNV-RULINGS-2026-10-11, item 24 (b): with Regular expression
+                # off, the replacement is the text as typed. A string handed to
+                # subn() is read as a template, so a backslash in it was an
+                # escape: C:\new\dir was refused as a bad escape, and \n was
+                # written as a new line. Case sensitive alone never did this.
+                def as_typed(_match: re.Match) -> str:
+                    return replace_text
                 if options['whole_word']:
                     flags = 0 if options['case_sensitive'] else re.IGNORECASE
                     pattern = re.compile(r'\b' + re.escape(search_text) + r'\b', flags)
-                    new_text, count = pattern.subn(replace_text, text)
+                    new_text, count = pattern.subn(as_typed, text)
                 elif options['case_sensitive']:
                     count = text.count(search_text)
                     new_text = text.replace(search_text, replace_text)
                 else:
                     # Case insensitive replace
                     pattern = re.compile(re.escape(search_text), re.IGNORECASE)
-                    new_text, count = pattern.subn(replace_text, text)
+                    new_text, count = pattern.subn(as_typed, text)
             
             if count > 0:
                 self.target_text_edit.setPlainText(new_text)
@@ -576,6 +597,18 @@ class FindReplaceDialog(BaseDialog):
     
     def _matches_are_stale(self) -> bool:
         """
+        Whether the matches may no longer be the search's: the text or an
+        option has changed since the Find.
+        
+        RNV-RULINGS-2026-10-11, item 24 (a): an option ticked or unticked
+        since the Find is a change, as an edit is. It waited for Find to be
+        pressed again, and Find Next went on stepping through the matches of
+        the options as they had been.
+        """
+        return self._text_changed() or self._options_changed()
+    
+    def _text_changed(self) -> bool:
+        """
         Whether the pane no longer holds the text the matches were found in.
         
         RNV-RULINGS-2026-10-05, item 11. Asked of the text itself, so it
@@ -587,23 +620,43 @@ class FindReplaceDialog(BaseDialog):
         return (self.target_text_edit is not None
                 and self.target_text_edit.toPlainText() != self._found_in)
     
+    def _options_changed(self) -> bool:
+        """
+        Whether an option the Find read is not what it was then.
+        
+        RNV-RULINGS-2026-10-11, item 24 (a). Ticking one and unticking it
+        again is no change.
+        """
+        if self._found_for is None:
+            return False
+        now, then = self.get_search_options(), self._found_for[1]
+        return any(now[name] != then[name] for name in self._SEARCH_OPTIONS)
+    
     def _find_again(self) -> bool:
         """
         Run the search Find ran again, in the text as it is now, and make
         the first match at or after the caret the current one.
         
-        RNV-RULINGS-2026-10-05, item 11. The search is the one Find ran:
-        its text and its options as they were then. Past the last match
-        it comes round to the first, as Find Next does. The view moves
-        only as far as it must to show the match: it is Find that puts
-        the first match at the top.
+        RNV-RULINGS-2026-10-05, item 11. The search is Find's: its text,
+        and since RNV-RULINGS-2026-10-11, item 24 (a), the options as they
+        are now. Past the last match it comes round to the first, as Find
+        Next does. The view moves only as far as it must to show the match:
+        it is Find that puts the first match at the top.
         
         Returns:
             Whether the text still holds a match
         """
-        search_text, options = self._found_for
+        search_text, _then = self._found_for
+        options = self.get_search_options()
         text = self.target_text_edit.toPlainText()
-        matches = self._matches_in(text, search_text, options)
+        try:
+            matches = self._matches_in(text, search_text, options)
+        except re.error as e:
+            # an option ticked since the Find can make the text a pattern
+            self._forget_matches()
+            self.status_label.setText(f"Regex error: {e}")
+            self._clear_highlights()
+            return False
         self._forget_matches()
         if not matches:
             self.status_label.setText("No matches found")
@@ -612,13 +665,56 @@ class FindReplaceDialog(BaseDialog):
         
         self._current_matches.extend(matches)
         self._found_in = text
-        self._found_for = (search_text, options)
-        caret = self.target_text_edit.textCursor().selectionEnd()
+        self._found_for = (search_text, dict(options))
+        caret = self._text_index(text, self.target_text_edit.textCursor().selectionEnd())
         self._current_match_index = next(
             (index for index, (start, _end) in enumerate(matches) if start >= caret), 0)
         self._highlight_all_matches()
         self._highlight_current_match()
         return True
+    
+    @staticmethod
+    def _in_qt(text: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+        """
+        Spans of a text, as its QTextDocument counts positions.
+        
+        RNV-RULINGS-2026-10-11, item 24 (d). A match is found in the
+        text as Python holds it, where a character outside the basic plane,
+        an emoji, is one position. The document counts it as two, as UTF-16
+        does. Every highlight after one was drawn a place to the left, and
+        Replace wrote over the characters there.
+        """
+        wide = [index for index, char in enumerate(text) if ord(char) > 0xFFFF]
+        if not wide:
+            return list(spans)
+        return [(start + bisect_left(wide, start), end + bisect_left(wide, end)) for start, end in spans]
+    
+    @staticmethod
+    def _text_index(text: str, position: int) -> int:
+        """
+        A document's position, as an index of the text Python holds: the
+        other way round from _in_qt().
+        """
+        units = 0
+        for index, char in enumerate(text):
+            if units >= position:
+                return index
+            units += 2 if ord(char) > 0xFFFF else 1
+        return len(text)
+    
+    def _expanded(self, replace_text: str) -> str:
+        """
+        The replacement for the current match with its group references
+        filled in, as Replace All writes it: the match is the scan's own.
+        
+        RNV-RULINGS-2026-10-11, item 24 (c). Raises re.error for a group
+        the pattern does not have, as Replace All does.
+        """
+        search_text, options = self._found_for
+        flags = 0 if options['case_sensitive'] else re.IGNORECASE
+        text = self.target_text_edit.toPlainText()
+        match = list(re.compile(search_text, flags).finditer(text))[self._current_match_index]
+        return match.expand(replace_text)
     
     def _highlight_colour(self) -> QColor:
         """
@@ -643,7 +739,8 @@ class FindReplaceDialog(BaseDialog):
         # history (RNV-NOT-AN-EDIT), and a colour a copy carried to the
         # clipboard. Setting the selections replaces the old ones.
         highlight_color = self._highlight_colour()
-        self._show_highlights(self.target_text_edit, self._current_matches, highlight_color)
+        spans = self._in_qt(self.target_text_edit.toPlainText(), self._current_matches)
+        self._show_highlights(self.target_text_edit, spans, highlight_color)
         self._painted_highlight = QColor(highlight_color)
     
     def _highlight_current_match(self) -> None:
@@ -654,7 +751,8 @@ class FindReplaceDialog(BaseDialog):
         if self._current_match_index >= len(self._current_matches):
             return
         
-        start, end = self._current_matches[self._current_match_index]
+        start, end = self._in_qt(self.target_text_edit.toPlainText(),
+                                 [self._current_matches[self._current_match_index]])[0]
         
         # Move cursor to current match and select it
         cursor = self.target_text_edit.textCursor()

@@ -13,7 +13,7 @@ A professional text transformation application with support for:
 - Batch processing for multiple files
 - Compare view with difference highlighting
 - Text cleanup and split/join operations
-- Line numbers toggle and clipboard history
+- Clipboard history
 - Text statistics, auto-transform, undo/redo
 - Settings persistence and keyboard shortcuts
 - Professional logging system

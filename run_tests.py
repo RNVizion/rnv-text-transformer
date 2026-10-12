@@ -4,7 +4,7 @@ Unified test runner for RNV Text Transformer.
 Runs both test sources under coverage with branch analysis, then merges
 the data files into a single coverage report.
 
-  Suite 1 — test_rnv_text_transformer.py    (398 unittest tests)
+  Suite 1 — test_rnv_text_transformer.py    (the unittest suite)
   Suite 2 — tests/                           (pytest-qt interaction tests)
 
 Usage:

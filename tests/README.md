@@ -1,9 +1,9 @@
 # RNV Text Transformer — Test Suite
 
 The test suite combines two complementary frameworks: a `unittest` suite for the
-core regression tests (frozen, never edited after each release), and a `pytest`
-suite for the broader test plan covering UI interactions, property-based tests,
-snapshot tests, benchmarks, and gap-fill coverage.
+core regression tests, and a `pytest` suite for the broader test plan covering UI
+interactions, property-based tests, snapshot tests, benchmarks, and gap-fill
+coverage.
 
 Both suites run under a single coverage report via `run_tests.py`.
 
@@ -35,34 +35,37 @@ working directory is added to `sys.path`.
 
 ## Test inventory
 
-### Frozen regression suite
+### Regression suite (`unittest`)
 
 | File | Tests | Purpose |
 |------|------:|---------|
-| `test_rnv_text_transformer.py` | 398 | Core regression suite — covers logic, file I/O, transformations, exports, error handling. Frozen at SHA-256 `404d6b93...`; never edited after release. |
+| `test_rnv_text_transformer.py` | over 300 | Core regression suite — covers logic, file I/O, transformations, exports, error handling. |
 
 ### Pytest suite (`tests/`)
 
-| File | Tests | Purpose |
-|------|------:|---------|
-| `test_main_window.py` | 42 | MainWindow construction, transformation flow, file ops, undo/redo, cleanup, theme cycling, signal handlers |
-| `test_compare_dialog.py` | 22 | Compare & merge UI — ChangeWidget signals, navigation, accept/reject all, export, merge signal |
-| `test_preset_dialog.py` | 19 | StepEditorWidget + PresetDialog + PresetManagerDialog interactions |
-| `test_find_replace_dialog.py` | 16 | Find/replace modes (literal, case-sensitive, whole-word, regex), navigation, highlighting |
-| `test_watch_folder_dialog.py` | 16 | RuleEditWidget + WatchFolderDialog — add/remove rules, start/stop watcher, activity log |
-| `test_regex_builder_dialog.py` | 15 | Pattern validation, flag computation, match/group tables, replace preview |
-| `test_encoding_dialog.py` | 13 | Encoding detection, mojibake fix, conversion preview, EncodingWidget signal |
-| `test_batch_dialog.py` | 12 | Source/output browse, file count, start validation, progress + finished handlers |
-| `test_dialogs.py` | 22 | Construction + signal smoke tests for every dialog |
-| `test_widgets.py` | 13 | Custom widgets (ImageButton, LineNumberTextEdit, DragDropTextEdit) |
-| `test_workers.py` | 18 | QThread workers — FileLoaderThread, TextTransformThread, BatchWorkerThread, FolderWatcher |
-| `test_cli.py` | 14 | CLI command dispatch, validation errors, output writing, argument parsing |
-| `test_logic_gap_fill.py` | 107 | Pure-logic coverage gap-fill across FileHandler, DialogHelper, ErrorHandler, PresetManager, FolderWatcher, ExportManager, ThemeManager |
-| `test_properties.py` | 21 | Hypothesis property-based tests for transformations, cleaning, diffs, statistics |
-| `test_snapshots.py` | 27 | Syrupy snapshot tests for dialog stylesheets and export formats |
-| `test_benchmarks.py` | 6 | Performance benchmarks (import time, stylesheet cache, transforms, diff, file loading) |
+| File | Purpose |
+|------|---------|
+| `test_main_window.py` | MainWindow construction, transformation flow, file ops, undo/redo, cleanup, theme cycling, signal handlers |
+| `test_compare_dialog.py` | Compare & merge UI — ChangeWidget signals, navigation, accept/reject all, export, merge signal |
+| `test_preset_dialog.py` | StepEditorWidget + PresetDialog + PresetManagerDialog interactions |
+| `test_find_replace_dialog.py` | Find/replace modes (literal, case-sensitive, whole-word, regex), navigation, highlighting |
+| `test_watch_folder_dialog.py` | RuleEditWidget + WatchFolderDialog — add/remove rules, start/stop watcher, activity log |
+| `test_regex_builder_dialog.py` | Pattern validation, flag computation, match/group tables, replace preview |
+| `test_encoding_dialog.py` | Encoding detection, mojibake fix, conversion preview, EncodingWidget signal |
+| `test_batch_dialog.py` | Source/output browse, file count, start validation, progress + finished handlers |
+| `test_dialogs.py` | Construction + signal smoke tests for every dialog |
+| `test_widgets.py` | Custom widgets (ImageButton, DragDropTextEdit) |
+| `test_workers.py` | QThread workers — FileLoaderThread, TextTransformThread, BatchWorkerThread, FolderWatcher |
+| `test_cli.py` | CLI command dispatch, validation errors, output writing, argument parsing |
+| `test_logic_gap_fill.py` | Pure-logic coverage gap-fill across FileHandler, DialogHelper, ErrorHandler, PresetManager, FolderWatcher, ExportManager, ThemeManager |
+| `test_properties.py` | Hypothesis property-based tests for transformations, cleaning, diffs, statistics |
+| `test_snapshots.py` | Syrupy snapshot tests for dialog stylesheets and export formats |
+| `test_benchmarks.py` | Performance benchmarks (import time, stylesheet cache, transforms, diff, file loading) |
 
-**Total: 786 tests** (398 unittest + 388 pytest including 27 snapshots and 6 benchmarks)
+These are the suite's first files. Files added since are not listed here; each opens with a
+docstring that says what it holds.
+
+**Total: over 1,000 tests** (over 300 unittest tests and over 600 pytest tests, snapshot tests and benchmarks among them)
 
 ---
 

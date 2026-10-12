@@ -48,7 +48,7 @@ tests/conftest.py
 Shared fixtures for the new pytest-based test suite (pytest discovers
 this file automatically when collecting from `tests/`).
 
-The frozen test_rnv_text_transformer.py at the project root does NOT
+The unittest suite, test_rnv_text_transformer.py, at the project root does NOT
 use this file — it has its own setUp/tearDown machinery via unittest
 and is run separately via `python -m unittest test_rnv_text_transformer`
 (see run_tests.py).
