@@ -30,6 +30,7 @@ Usage:
 
 from __future__ import annotations
 
+from bisect import bisect_left
 from typing import TYPE_CHECKING, ClassVar
 
 from PyQt6.QtWidgets import (
@@ -283,6 +284,37 @@ class BaseDialog(QDialog):
             selection.format = fmt
             selections.append(selection)
         edit.setExtraSelections(selections)
+    
+    @staticmethod
+    def _in_qt(text: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+        """
+        Spans of a text, as its QTextDocument counts positions.
+        
+        RNV-RULINGS-2026-10-11, item 24 (d). A match is found in the
+        text as Python holds it, where a character outside the basic plane,
+        an emoji, is one position. The document counts it as two, as UTF-16
+        does. Every highlight after one was drawn a place to the left, and
+        Replace wrote over the characters there. RNV-RULINGS-2026-10-13,
+        item 30: moved here from FindReplaceDialog, beside
+        _show_highlights(), for the Regex Builder had the same fault.
+        """
+        wide = [index for index, char in enumerate(text) if ord(char) > 0xFFFF]
+        if not wide:
+            return list(spans)
+        return [(start + bisect_left(wide, start), end + bisect_left(wide, end)) for start, end in spans]
+    
+    @staticmethod
+    def _text_index(text: str, position: int) -> int:
+        """
+        A document's position, as an index of the text Python holds: the
+        other way round from _in_qt().
+        """
+        units = 0
+        for index, char in enumerate(text):
+            if units >= position:
+                return index
+            units += 2 if ord(char) > 0xFFFF else 1
+        return len(text)
     
     def get_status_style(self, status: str) -> str:
         """

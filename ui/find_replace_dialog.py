@@ -12,7 +12,6 @@ Python 3.13 Optimized:
 from __future__ import annotations
 
 import re
-from bisect import bisect_left
 from typing import TYPE_CHECKING, ClassVar
 
 from PyQt6.QtWidgets import (
@@ -672,35 +671,6 @@ class FindReplaceDialog(BaseDialog):
         self._highlight_all_matches()
         self._highlight_current_match()
         return True
-    
-    @staticmethod
-    def _in_qt(text: str, spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
-        """
-        Spans of a text, as its QTextDocument counts positions.
-        
-        RNV-RULINGS-2026-10-11, item 24 (d). A match is found in the
-        text as Python holds it, where a character outside the basic plane,
-        an emoji, is one position. The document counts it as two, as UTF-16
-        does. Every highlight after one was drawn a place to the left, and
-        Replace wrote over the characters there.
-        """
-        wide = [index for index, char in enumerate(text) if ord(char) > 0xFFFF]
-        if not wide:
-            return list(spans)
-        return [(start + bisect_left(wide, start), end + bisect_left(wide, end)) for start, end in spans]
-    
-    @staticmethod
-    def _text_index(text: str, position: int) -> int:
-        """
-        A document's position, as an index of the text Python holds: the
-        other way round from _in_qt().
-        """
-        units = 0
-        for index, char in enumerate(text):
-            if units >= position:
-                return index
-            units += 2 if ord(char) > 0xFFFF else 1
-        return len(text)
     
     def _expanded(self, replace_text: str) -> str:
         """

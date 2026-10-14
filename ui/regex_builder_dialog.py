@@ -475,8 +475,12 @@ class RegexBuilderDialog(BaseDialog):
         # replaces the old ones, so nothing is cleared first.
         is_dark = self.theme_manager.current_theme in ('dark', 'image')
         highlight_color = QColor(self._MATCH_COLOR_DARK if is_dark else self._MATCH_COLOR_LIGHT)
+        # RNV-RULINGS-2026-10-13, item 30: the matches are found in the text
+        # as Python counts it, and drawn where the pane counts, which counts
+        # an emoji as two.
         self._show_highlights(self.test_text,
-                              [(match.start, match.end) for match in self._current_matches],
+                              self._in_qt(self.test_text.toPlainText(),
+                                          [(match.start, match.end) for match in self._current_matches]),
                               highlight_color)
     
     def _update_replace_preview(self) -> None:
@@ -503,10 +507,12 @@ class RegexBuilderDialog(BaseDialog):
         if row < len(self._current_matches):
             match = self._current_matches[row]
             
-            # Select the match in test text
+            # Select the match in test text, where the pane counts it
+            # (RNV-RULINGS-2026-10-13, item 30)
+            start, end = self._in_qt(self.test_text.toPlainText(), [(match.start, match.end)])[0]
             cursor = self.test_text.textCursor()
-            cursor.setPosition(match.start)
-            cursor.setPosition(match.end, QTextCursor.MoveMode.KeepAnchor)
+            cursor.setPosition(start)
+            cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
             self.test_text.setTextCursor(cursor)
             self.test_text.ensureCursorVisible()
     
