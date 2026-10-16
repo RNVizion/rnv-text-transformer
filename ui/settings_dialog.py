@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, ClassVar
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QTabWidget, QWidget,
     QLabel, QComboBox, QCheckBox, QSpinBox, QPushButton,
-    QGroupBox, QFormLayout, QTableWidget, QTableWidgetItem,
+    QGroupBox, QFormLayout, QGridLayout, QTableWidget, QTableWidgetItem,
     QHeaderView, QFrame, QListWidget, QListWidgetItem,
     QScrollArea, QStyledItemDelegate
 )
@@ -421,8 +421,13 @@ class SettingsDialog(BaseDialog):
         
         # Export Formats Group
         formats_group = QGroupBox("Available Formats")
-        formats_layout = QVBoxLayout(formats_group)
+        # RNV-RULINGS-2026-10-15, item 35: the names stood in a column fixed
+        # at 200, and on Chris's PC two lost their closing bracket: "Word
+        # Document (.docx" and "HTML Document (.html". In a grid the column
+        # is as wide as the longest name, as its font draws it.
+        formats_layout = QGridLayout(formats_group)
         formats_layout.setSpacing(12)
+        formats_layout.setColumnStretch(1, 1)
         
         # Format descriptions
         formats_info = [
@@ -434,21 +439,15 @@ class SettingsDialog(BaseDialog):
             ("📃 Rich Text (.rtf)", "Cross-platform formatted text"),
         ]
         
-        for format_name, description in formats_info:
-            format_row = QHBoxLayout()
-            
+        for row, (format_name, description) in enumerate(formats_info):
             format_label = QLabel(format_name)
             format_label.setStyleSheet("font-weight: bold;")
-            format_label.setFixedWidth(200)
-            format_row.addWidget(format_label)
+            formats_layout.addWidget(format_label, row, 0)
             
             desc_label = QLabel(description)
             self._style_for_mode(desc_label, lambda: (
                 DialogStyleManager.get_description_style(self._is_dark)))
-            format_row.addWidget(desc_label)
-            
-            format_row.addStretch()
-            formats_layout.addLayout(format_row)
+            formats_layout.addWidget(desc_label, row, 1)
         
         layout.addWidget(formats_group)
         

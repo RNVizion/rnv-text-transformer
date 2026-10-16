@@ -141,7 +141,11 @@ class FindReplaceDialog(BaseDialog):
         self._recolour_highlights()
     
     def _configure_window(self) -> None:
-        """Override to set fixed width only (height adjusts to content)."""
+        """Override to set fixed width only (height adjusts to content).
+        
+        The width set here is the floor: _fit_width() widens the dialog to
+        what its content asks for when it is shown.
+        """
         title = "Find and Replace" if self._is_replace_mode else "Find"
         self.setWindowTitle(f"Text Transformer - {title}")
         self.setModal(self._MODAL)
@@ -149,6 +153,32 @@ class FindReplaceDialog(BaseDialog):
             self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint
         )
         self.setFixedWidth(self._DIALOG_WIDTH)
+    
+    def showEvent(self, event) -> None:
+        """
+        Take the width the content asks for, each time the dialog is shown.
+        
+        RNV-RULINGS-2026-10-15, item 12: both dialogs were fixed at
+        _DIALOG_WIDTH, 450. Find and Replace's content asks for more: Find
+        Next, Replace and Replace All were cut short and Close ran past the
+        edge. Find's asks for a little more, and Regular expression was cut
+        in both. Seen on Chris's PC on 15 October.
+        """
+        self._fit_width()
+        super().showEvent(event)
+    
+    def _fit_width(self) -> None:
+        """
+        Fix the width at what the content asks for, never less than 450.
+        
+        Worked out from the content as it is styled, not written as a
+        number: a label, a font or a mode that asks for more gets more.
+        """
+        self.ensurePolished()
+        layout = self.layout()
+        layout.invalidate()
+        layout.activate()
+        self.setFixedWidth(max(self._DIALOG_WIDTH, layout.minimumSize().width()))
     
     def _setup_ui(self) -> None:
         """Setup the dialog UI."""
