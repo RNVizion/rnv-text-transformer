@@ -173,8 +173,8 @@ class TestFindIsNotAnEdit:
 
     def test_a_highlight_on_a_line_break_is_cleared_too(self, main_window):
         """A regular expression can match line breaks alone. As a format,
-        a line break's colour was its block's and could be left behind,
-        colouring what was typed at the start of the next line. As an
+        a line break's color was its block's and could be left behind,
+        coloring what was typed at the start of the next line. As an
         extra selection it is a selection of one character, cleared like
         any other, and never in the text at all."""
         win = main_window

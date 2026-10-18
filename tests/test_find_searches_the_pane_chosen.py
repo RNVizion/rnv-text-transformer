@@ -51,7 +51,7 @@ def _highlighted(edit) -> list:
                   for s in edit.extraSelections() if s.cursor.hasSelection())
 
 
-def _colours(edit) -> set:
+def _colors(edit) -> set:
     return {s.format.background().color().name() for s in edit.extraSelections()
             if s.cursor.hasSelection()}
 
@@ -270,11 +270,11 @@ class TestASwitchAndACloseActOnThePaneSearched:
         dlg = _opened(win, "_open_find_dialog")
         dlg.search_output_radio.click()
         _find(dlg)
-        dark = _colours(win.output_text)
+        dark = _colors(win.output_text)
         win._cycle_theme()
         QApplication.processEvents()
         assert win.theme_manager.current_theme == "light"
-        light = _colours(win.output_text)
+        light = _colors(win.output_text)
         assert len(dark) == len(light) == 1 and dark != light, (dark, light)
         assert _highlighted(win.output_text) == _spots(OUT)
         assert _highlighted(win.text_input) == []

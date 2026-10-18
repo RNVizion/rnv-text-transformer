@@ -79,7 +79,7 @@ import ast
 import math
 from pathlib import Path
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
@@ -96,7 +96,7 @@ DE_FLOOR = 8.40
 GROUND_KEY, INK_KEY = "bg", "text"
 
 #: rnv-color-picker's ColorAccessibility.COLORBLIND_MATRICES, verbatim, so
-#: that a colour graded acceptable here is graded acceptable by the tool in
+#: that a color graded acceptable here is graded acceptable by the tool in
 #: the next repository along. Achromatopsia is its 601 luma with int()
 #: truncation, which is the same code path.
 MATRICES = {
@@ -279,10 +279,10 @@ def _locals_to_classvars(fn: ast.FunctionDef) -> dict[str, dict[str, str]]:
         "could not find the dark/light branch in _highlight_differences")
 
 
-def _widget_colours(fn: ast.FunctionDef) -> dict[str, set[str]]:
+def _widget_colors(fn: ast.FunctionDef) -> dict[str, set[str]]:
     """{'input_edit': {'removed_color', 'changed_color'}, ...}
 
-    Every _highlight_range call, keyed by the widget it paints. Two colours
+    Every _highlight_range call, keyed by the widget it paints. Two colors
     under one key can be on screen at the same moment.
     """
     out: dict[str, set[str]] = {}
@@ -293,9 +293,9 @@ def _widget_colours(fn: ast.FunctionDef) -> dict[str, set[str]]:
         args = node.args
         if len(args) < 4:
             continue
-        widget, colour = args[0], args[-1]
-        if isinstance(widget, ast.Attribute) and isinstance(colour, ast.Name):
-            out.setdefault(widget.attr, set()).add(colour.id)
+        widget, color = args[0], args[-1]
+        if isinstance(widget, ast.Attribute) and isinstance(color, ast.Name):
+            out.setdefault(widget.attr, set()).add(color.id)
     return out
 
 
@@ -305,8 +305,8 @@ def covisible_keys(mode: str) -> set[frozenset]:
     names = _locals_to_classvars(fn)[mode]
     keys = _classvar_keys()
     pairs = set()
-    for colours in _widget_colours(fn).values():
-        resolved = {keys[names[c]][1] for c in colours
+    for painted in _widget_colors(fn).values():
+        resolved = {keys[names[c]][1] for c in painted
                     if c in names and names[c] in keys}
         for one in resolved:
             for two in resolved:
@@ -348,7 +348,7 @@ def regex_keys() -> tuple[str, ...]:
     just the direct one. A tamper that wired a second fill in stayed green on
     that version. Under-reporting is the one direction a blindness check must
     not fail in, so this counts every reference and accepts that a declared
-    colour nobody draws with would be measured too; a fill that clears the
+    color nobody draws with would be measured too; a fill that clears the
     floors and is never painted costs nothing.
 
     The retired names are not spelled here. tests/test_semantic_naming.py
@@ -524,7 +524,7 @@ def test_the_pairs_were_derived_and_not_assumed():
     matched no file in three of five repositories, and a green suite.
     """
     fn = _highlight_fn()
-    widgets = _widget_colours(fn)
+    widgets = _widget_colors(fn)
     assert len(widgets) >= 2, (
         f"_highlight_differences paints {len(widgets)} widget(s). It paints "
         f"two panes, so the walk is not reading the calls.")
@@ -532,12 +532,12 @@ def test_the_pairs_were_derived_and_not_assumed():
     names = _locals_to_classvars(fn)
     for mode in ("DARK", "LIGHT"):
         assert len(names[mode]) == 3, (
-            f"{mode} resolves {len(names[mode])} colours, not three. The "
+            f"{mode} resolves {len(names[mode])} colors, not three. The "
             f"branch this reads has changed shape.")
 
     keys = _classvar_keys()
     assert all(v in keys for m in names.values() for v in m.values()), (
-        "a local colour name resolves to a ClassVar this guard cannot find "
+        "a local color name resolves to a ClassVar this guard cannot find "
         "in the class body")
 
     for mode in ("DARK", "LIGHT"):
@@ -554,7 +554,7 @@ def test_the_pairs_were_derived_and_not_assumed():
     assert frozenset(("diff_added_bg", "diff_removed_bg")) not in dark, (
         "added and removed now share a widget. That is allowed, but the dark "
         "triple was derived on the basis that they do not -- with a "
-        f"{colors.APP_TEXT} ink ceiling at grey 97 and an achromatopsia floor at grey "
+        f"{colors.APP_TEXT} ink ceiling at gray 97 and an achromatopsia floor at gray "
         "52, a three-level ladder needs 50 steps and there are 45. Re-derive "
         "the dark three before landing this.")
 

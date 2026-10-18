@@ -10,14 +10,14 @@ highlights it had drawn did not, and kept the old mode's accent until the
 next Find -- dark's accent on light's ground. Now the dialog paints them
 again when it is refreshed:
 
-- in the colour a Find run in the new mode paints, on the same characters;
+- in the color a Find run in the new mode paints, on the same characters;
 - where they now are, if the text was edited since the Find;
 - with the caret, the current match's selection and the view where they are;
 - without touching the text: since RNV-EXTRA-SELECTIONS (2026-09-30) the
   highlights are extra selections, shown over the text and not in it, so a
   switch adds nothing to the undo history and fires nothing. The main window
   runs its statistics and its auto-transform on the text's textChanged, and
-  a colour is not a change to the text.
+  a color is not a change to the text.
 
 Every test drives the main window's own opener and its own two roads to a
 switch: the theme cycle, and the theme Settings applies.
@@ -40,7 +40,7 @@ HEADER = "Header line\n"        # no "o" in it: a Find for "o" finds nothing new
 
 
 def _spans(edit) -> list:
-    """(position, length, colour, alpha) of every highlight shown over the
+    """(position, length, color, alpha) of every highlight shown over the
     text: its extra selections. RNV-EXTRA-SELECTIONS 2026-09-30: this read
     the runs of the text painted with a background; none is, now."""
     out = []
@@ -126,7 +126,7 @@ class TestFindHighlightsFollowASwitch:
             seen[mode] = _spans(win.text_input)
             assert seen[mode] == _fresh(win, TEXT), (road, mode)
         assert {"dark", "light", "image"} <= set(seen), sorted(seen)
-        assert seen["dark"] != seen["light"], "dark and light paint the same colour: nothing was tested"
+        assert seen["dark"] != seen["light"], "dark and light paint the same color: nothing was tested"
         dlg.close()
 
     def test_the_caret_the_current_match_and_the_view_stay_put(self, main_window, qtbot):
@@ -182,7 +182,7 @@ class TestFindHighlightsFollowASwitch:
         assert win.text_input.toPlainText() == TEXT
         dlg.close()
 
-    def test_a_switch_that_keeps_the_colour_leaves_the_text_alone(self, main_window):
+    def test_a_switch_that_keeps_the_color_leaves_the_text_alone(self, main_window):
         """Image paints with dark's accent: from image to dark there is
         nothing to repaint, and nothing is added to the text's undo history."""
         win = main_window
@@ -194,7 +194,7 @@ class TestFindHighlightsFollowASwitch:
         spans, steps = _spans(win.text_input), doc.availableUndoSteps()
         assert _switch(win, "cycle") == "dark"
         assert _spans(win.text_input) == spans, "image to dark changed the highlights"
-        assert doc.availableUndoSteps() == steps, "a switch that keeps the colour added to the undo history"
+        assert doc.availableUndoSteps() == steps, "a switch that keeps the color added to the undo history"
         dlg.close()
 
     def test_highlights_moved_by_an_edit_are_repainted_where_they_now_are(self, main_window):

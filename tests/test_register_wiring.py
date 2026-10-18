@@ -37,15 +37,15 @@ from utils.dialog_styles import DialogStyleManager
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / 'utils/dialog_styles.py'
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 #: The register, as this app mirrors it: every name utils/colors.py classes
 #: as 'register' in PROVENANCE, with the value it holds. Value-keyed, because a
 #: literal is found by its value: any entry holding one of these must name it.
-#: RNV-COLOUR-SYNC, 2026-10-16: each value read from the constant, where it
+#: RNV-COLOR-SYNC, 2026-10-16: each value read from the constant, where it
 #: was written out, so the sweep looks for what the register holds today.
 REGISTERED = {name: getattr(colors, name) for name in (
     'BRAND_GOLD', 'BRAND_DARK_GOLD',
@@ -114,7 +114,7 @@ def test_the_register_map_is_not_empty():
     """A sweep with nothing to look for passes forever. The map is every name
     PROVENANCE classes as the register's, at the value the module holds.
 
-    RNV-COLOUR-SYNC, 2026-10-16: the values were written here and checked
+    RNV-COLOR-SYNC, 2026-10-16: the values were written here and checked
     against the module. They are read from it now, and this holds instead
     that brand_map.json takes each from the register."""
     assert len(REGISTERED) >= 4
@@ -216,7 +216,7 @@ def test_the_light_palette_references_only_what_the_register_has_ruled():
 
 def test_the_ruled_light_values_are_actually_wired():
     """The allowlist permits; this requires. An allowlist entry nothing uses is
-    a licence with no subject -- the same shape as a dead exemption."""
+    a license with no subject -- the same shape as a dead exemption."""
     used = set()
     for node in _dicts(LIGHT_DICTS).values():
         for value in node.values:

@@ -30,7 +30,7 @@ sweep leaves out: the use/mention distinction, as in
 tests/test_dependency_file_placement.py. A delivery script is left out as
 well, because it names what it retires. That means a .py file at the
 repository root that carries the fleet's marker, and nothing else: three
-guards under tests/ spell the marker out in order to honour it, and they are
+guards under tests/ spell the marker out in order to honor it, and they are
 source like any other.
 
 WHAT IT DOES NOT HOLD. That coverage is measured. `coverage report` is a
@@ -147,7 +147,7 @@ def test_that_sweep_is_actually_looking():
 
 def test_the_mention_exemption_is_load_bearing():
     """Both directions. An exemption for a file that no longer names it is a
-    licence waiting for a future defect."""
+    license waiting for a future defect."""
     here = pathlib.Path(__file__)
     assert MENTION_ONLY == {here.name}, (
         f"the sweep leaves out {sorted(MENTION_ONLY)}; it may leave out this "

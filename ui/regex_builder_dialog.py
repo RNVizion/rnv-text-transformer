@@ -180,7 +180,7 @@ class RegexBuilderDialog(BaseDialog):
         # Status row
         status_row = QHBoxLayout()
         self.status_label = QLabel("Ready")
-        self._set_status_colour('text_muted')
+        self._set_status_color('text_muted')
         status_row.addWidget(self.status_label)
         status_row.addStretch()
         self.match_count_label = QLabel("Matches: 0")
@@ -317,20 +317,20 @@ class RegexBuilderDialog(BaseDialog):
             is_valid, error = RegexHelper.validate_pattern(text, self._get_flags())
             if is_valid:
                 self.status_label.setText("Pattern is valid")
-                self._set_status_colour('success')
+                self._set_status_color('success')
             else:
                 self.status_label.setText(f"Error: {error}")
-                self._set_status_colour('error')
+                self._set_status_color('error')
         else:
             self.status_label.setText("Enter a pattern")
-            self._set_status_colour('text_muted')
+            self._set_status_color('text_muted')
     
-    def _set_status_colour(self, key: str) -> None:
+    def _set_status_color(self, key: str) -> None:
         """
-        Colour the status line with the palette's `key`, in the dialog's mode.
+        Color the status line with the palette's `key`, in the dialog's mode.
         
         RNV-DIALOG-SWITCH 2026-09-27: through _style_for_mode(), so a theme
-        switch sets it again in the new mode, in the colour of the state it
+        switch sets it again in the new mode, in the color of the state it
         shows (text_muted, success or error).
         """
         self._style_for_mode(self.status_label, lambda: (
@@ -372,7 +372,7 @@ class RegexBuilderDialog(BaseDialog):
         if not is_valid:
             self._clear_results()
             self.status_label.setText(f"Error: {error}")
-            self._set_status_colour('error')
+            self._set_status_color('error')
             return
         
         # Find matches
@@ -388,7 +388,7 @@ class RegexBuilderDialog(BaseDialog):
         count = len(self._current_matches)
         self.match_count_label.setText(f"Matches: {count}")
         self.status_label.setText(f"Found {count} match{'es' if count != 1 else ''}")
-        self._set_status_colour('success' if count > 0 else 'text_muted')
+        self._set_status_color('success' if count > 0 else 'text_muted')
     
     def _clear_results(self) -> None:
         """Clear all results."""

@@ -1,7 +1,7 @@
 {
-  "about": "Where each colour in utils/colors.py comes from. A string is a name in rnv-brand (TABLE.key, or one of its own constants, in engine/brand.py); an object is a value this application owns, with the reason. Edit this file, then run: python tools/sync_colors.py",
+  "about": "Where each color in utils/colors.py comes from. A string is a name in rnv-brand (TABLE.key, or one of its own constants, in engine/brand.py); an object is a value this application owns, with the reason. Edit this file, then run: python tools/sync_colors.py",
   "app": "RNV Text Transformer",
-  "colour_file": "utils/colors.py",
+  "color_file": "utils/colors.py",
   "palettes": [
     {
       "file": "utils/dialog_styles.py",
@@ -12,7 +12,7 @@
       "dict": "DialogStyleManager.LIGHT"
     }
   ],
-  "colours": {
+  "colors": {
     "BRAND_GOLD": "APP.accent",
     "BRAND_DARK_GOLD": "APP.accent-light-mode",
     "TRUE_BLACK": "PERMANENT.black",
@@ -32,37 +32,37 @@
     "STATUS_SUCCESS_TEXT_LIGHT": "STATUS.success-text-light",
     "STATUS_WARNING_TEXT_LIGHT": "STATUS.warning-text-light",
     "STATUS_ERROR_TEXT_LIGHT": "STATUS.error-text-light",
-    "GREY_44": {
+    "GRAY_44": {
       "app": "#444444",
-      "why": "grey(4) on the register's ink grid, which the register states as a rule and does not name."
+      "why": "gray(4) on the register's ink grid, which the register states as a rule and does not name."
     },
-    "GREY_55": {
+    "GRAY_55": {
       "app": "#555555",
-      "why": "grey(5) on the register's ink grid, which the register states as a rule and does not name."
+      "why": "gray(5) on the register's ink grid, which the register states as a rule and does not name."
     },
-    "GREY_66": {
+    "GRAY_66": {
       "app": "#666666",
-      "why": "grey(6) on the register's ink grid, which the register states as a rule and does not name."
+      "why": "gray(6) on the register's ink grid, which the register states as a rule and does not name."
     },
-    "GREY_88": {
+    "GRAY_88": {
       "app": "#888888",
-      "why": "grey(8) on the register's ink grid, which the register states as a rule and does not name."
+      "why": "gray(8) on the register's ink grid, which the register states as a rule and does not name."
     },
-    "GREY_CC": {
+    "GRAY_CC": {
       "app": "#cccccc",
-      "why": "grey(12) on the register's ink grid, which the register states as a rule and does not name."
+      "why": "gray(12) on the register's ink grid, which the register states as a rule and does not name."
     },
-    "GREY_DD": {
+    "GRAY_DD": {
       "app": "#dddddd",
-      "why": "grey(13) on the ramp. Edges and lines that share APP text's hex without being ink."
+      "why": "gray(13) on the ramp. Edges and lines that share APP text's hex without being ink."
     },
-    "GREY_E0": {
+    "GRAY_E0": {
       "app": "#e0e0e0",
-      "why": "grey(14) on the ramp. Static light surfaces that share pressed-light's hex without being a pressed state."
+      "why": "gray(14) on the ramp. Static light surfaces that share pressed-light's hex without being a pressed state."
     },
-    "GREY_EE": {
+    "GRAY_EE": {
       "app": "#eeeeee",
-      "why": "grey(14) on the ramp. Static light surfaces, such as the diff headers, that share hover-light's hex without being a hover."
+      "why": "gray(14) on the ramp. Static light surfaces, such as the diff headers, that share hover-light's hex without being a hover."
     },
     "SEMANTIC_DIFF_ADDED": {
       "app": "#426153",
@@ -102,7 +102,7 @@
     },
     "SEMANTIC_EXPORT_RTF_INK": {
       "app": "#000000",
-      "why": "Data, not chrome: the RTF export's text colour. It does not follow the brand's black (#48 A)."
+      "why": "Data, not chrome: the RTF export's text color. It does not follow the brand's black (#48 A)."
     },
     "SEMANTIC_HEX_PATTERN_EXAMPLE": {
       "app": "#FF5733",

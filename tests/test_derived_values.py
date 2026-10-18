@@ -1,20 +1,20 @@
-"""Derived values: a colour that is a named colour AT AN ALPHA.
+"""Derived values: a color that is a named color AT AN ALPHA.
 
 Image mode draws its chrome translucent, and until 2026-09-25 every one of
 those values was written out: RETIRED_IMAGE_LABEL_RGBA beside BRAND_BLACK, with
 nothing relating the two. A change to BRAND_BLACK would have reached every
 opaque use of it and none of these. Each is now with_alpha(BASE, ALPHA) -- the
 helper this application already had, and already used for the drag highlight
--- so the register row carries every alpha form of its colour.
+-- so the register row carries every alpha form of its color.
 
 WHAT MOVES A PIXEL: ONE THING, BY RULING. The image-mode scrollbar handle
-leaves RETIRED_SCROLLBAR_HANDLE for GREY_44, closing RNV-COLLAPSE-505050 here; its alpha stays
-at 150. Everything else keeps its colour and its alpha byte, respelled from
+leaves RETIRED_SCROLLBAR_HANDLE for GRAY_44, closing RNV-COLLAPSE-505050 here; its alpha stays
+at 150. Everything else keeps its color and its alpha byte, respelled from
 rgba() to #AARRGGBB -- the same pixels, in the one spelling QColor() can also
 read. test_nothing_moved_that_was_not_ruled holds that to the byte.
 
 AND ONE KEY THAT NOTHING READ, REMOVED. image_scrollbar_handle_hover held
-RETIRED_SCROLLBAR_HANDLE_HOVER_RGBA, a grey on no register row, while the image
+RETIRED_SCROLLBAR_HANDLE_HOVER_RGBA, a gray on no register row, while the image
 scrollbar's hover is painted from DARK's 'accent' -- BRAND_GOLD, ruled
 2026-09-12. It could not be derived, having no row to follow, and it could
 not take the painted gold, because LIGHT carries the same image keys and a
@@ -27,7 +27,7 @@ import ast
 import pathlib
 import re
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors
 from utils.colors import with_alpha
 from utils.dialog_styles import DialogStyleManager
@@ -56,8 +56,8 @@ ALPHAS = {
     "DRAG_HIGHLIGHT_ALPHA": 0xBF,
 }
 
-#: What each image value is MADE OF: the constant its colour comes from, and its
-#: alpha byte -- the byte its rgba() literal already carried, and the colour
+#: What each image value is MADE OF: the constant its color comes from, and its
+#: alpha byte -- the byte its rgba() literal already carried, and the color
 #: that literal spelled, except the scrollbar handle's, which was ruled.
 #: By NAME, not by hex: see test_nothing_moved_that_was_not_ruled.
 MADE_OF = {
@@ -65,7 +65,7 @@ MADE_OF = {
     "image_overlay_bg_dark": ("BRAND_BLACK", 191),
     "image_overlay_checkbox": ("TRUE_BLACK", 100),
     "image_scrollbar_border": ("APP_BORDER", 100),
-    "image_scrollbar_handle": ("GREY_44", 150),     # was RETIRED_SCROLLBAR_HANDLE, ruled
+    "image_scrollbar_handle": ("GRAY_44", 150),     # was RETIRED_SCROLLBAR_HANDLE, ruled
     "image_dropdown_bg": ("TRUE_BLACK", 131),
     "image_dropdown_selection": ("APP_BORDER", 200),
     "image_dropdown_border": ("APP_BORDER", 150),
@@ -104,8 +104,8 @@ def _parts_of(spelled: str) -> tuple[str, int]:
                                          else int(a))
 
 
-def colours_in(text: str) -> set[str]:
-    """Every colour in a string, as #rrggbb. #AARRGGBB is alpha FIRST."""
+def colors_in(text: str) -> set[str]:
+    """Every color in a string, as #rrggbb. #AARRGGBB is alpha FIRST."""
     found = set()
     for m in _HEX.finditer(text):
         h = m.group(0)[1:].lower()
@@ -174,7 +174,7 @@ def _derived():
 # ------------------------------------------------------------ guard the guard
 
 def test_with_alpha_composes_alpha_first():
-    """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and
+    """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real color and
     the wrong one, which is the failure that does not look like a failure."""
     assert with_alpha(cv.EXAMPLE_WITH_ALPHA_INPUT, 0xBF) == cv.EXAMPLE_WITH_ALPHA_OUTPUT
     assert decompose(with_alpha(cv.EXAMPLE_ROUND_TRIP, 0x33)) == (cv.EXAMPLE_ROUND_TRIP, 0x33)
@@ -218,7 +218,7 @@ def test_every_derived_value_names_constants_that_exist():
                            f"utils.colors does not define")
         if isinstance(base, ast.Name) and hasattr(colors, base.id):
             if not re.fullmatch(r"#[0-9a-fA-F]{6}", str(getattr(colors, base.id))):
-                bad.append(f"{where}: the base {base.id} is not a six-digit colour")
+                bad.append(f"{where}: the base {base.id} is not a six-digit color")
         if isinstance(alpha, ast.Name) and alpha.id not in ALPHAS:
             bad.append(f"{where}: the alpha {alpha.id} is not a declared "
                        f"composite alpha")
@@ -241,9 +241,9 @@ def test_every_derived_value_decomposes_to_its_base_and_its_alpha():
 
 def test_no_composed_literal_is_left_in_the_application():
     """The completeness half. Every EVALUATED string in the application's own
-    source that spells a named colour at an alpha. Docstrings are mentions --
+    source that spells a named color at an alpha. Docstrings are mentions --
     utils/colors.py shows EXAMPLE_GOLD_AT_BF as an example, and that is prose.
-    Alpha 0 is not a colour; a base no constant names has no row to follow."""
+    Alpha 0 is not a color; a base no constant names has no row to follow."""
     named = {v.lower() for n, v in vars(colors).items()
              if n.isupper() and isinstance(v, str)
              and re.fullmatch(r"#[0-9a-fA-F]{6}", v)}
@@ -267,17 +267,17 @@ def test_no_composed_literal_is_left_in_the_application():
 
 # --------------------------------------------------- what moved, and what not
 
-def test_the_scrollbar_handle_is_grey_44_at_150():
+def test_the_scrollbar_handle_is_gray_44_at_150():
     """RNV-COLLAPSE-505050, closed here 2026-09-25. Ruled 2026-09-02, and
     written out as RETIRED_SCROLLBAR_HANDLE_RGBA in both palettes until now."""
     for mode, palette in IMAGE_PALETTES.items():
         assert decompose(palette["image_scrollbar_handle"]) == (
-            colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA), mode
+            colors.GRAY_44, colors.SCROLLBAR_HANDLE_ALPHA), mode
     assert colors.SCROLLBAR_HANDLE_ALPHA == 150
 
 
 def test_nothing_moved_that_was_not_ruled():
-    """Each image value, held to what it is MADE OF: the constant its colour
+    """Each image value, held to what it is MADE OF: the constant its color
     comes from and its alpha byte.
 
     BY NAME, NOT BY HEX, and that is the point of the round. A register move
@@ -307,7 +307,7 @@ def test_the_unused_hover_key_stays_removed():
     image scrollbar hovers from DARK's 'accent', BRAND_GOLD.
 
     Gone from both palettes and named nowhere in the application. A key
-    brought back would be a grey hover on no register row, against the gold
+    brought back would be a gray hover on no register row, against the gold
     ruling, and it has to be decided rather than inherited."""
     assert DialogStyleManager.DARK["accent"] == colors.BRAND_GOLD
     for mode, palette in PALETTES.items():
@@ -332,7 +332,7 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
         for node in ast.walk(tree):
             if (isinstance(node, ast.Constant) and isinstance(node.value, str)
                     and id(node) not in bare
-                    and cv.RETIRED_SCROLLBAR_HANDLE in colours_in(node.value)):
+                    and cv.RETIRED_SCROLLBAR_HANDLE in colors_in(node.value)):
                 found.append(f"{rel}:{node.lineno}  {node.value[:40]!r}")
             values = None
             if isinstance(node, (ast.Tuple, ast.List)) and len(node.elts) in (3, 4):
@@ -347,7 +347,7 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
                 if ints == (80, 80, 80):
                     found.append(f"{rel}:{node.lineno}  (80, 80, 80)")
     assert not found, f"{cv.RETIRED_SCROLLBAR_HANDLE} is still here:\n  " + "\n  ".join(found)
-    assert colours_in(cv.RETIRED_SCROLLBAR_HANDLE_RGBA) == {cv.RETIRED_SCROLLBAR_HANDLE}, (
+    assert colors_in(cv.RETIRED_SCROLLBAR_HANDLE_RGBA) == {cv.RETIRED_SCROLLBAR_HANDLE}, (
         "the decoder is blind")
 
 # RNV-DERIVE-ALPHA
@@ -364,7 +364,7 @@ LOWER8_FILES = 40
 
 
 def _lower8_values():
-    """(where, value) for every eight-digit hex string the colour modules
+    """(where, value) for every eight-digit hex string the color modules
     build -- their constants, the dicts they hold, and their classes' dicts
     -- as they EVALUATE, which is what a derived value is."""
     import importlib
@@ -414,7 +414,7 @@ def test_eight_digit_hex_is_lower_case():
     changed.
 
     Both halves: every eight-digit value the application BUILDS, as its
-    colour modules evaluate, and every eight-digit literal it WRITES in code.
+    color modules evaluate, and every eight-digit literal it WRITES in code.
     Docstrings are prose, and a sentence that names an upper-case value as
     history keeps its case."""
     built = list(_lower8_values())

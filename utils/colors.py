@@ -10,7 +10,7 @@ to do with them.
 Naming
 ------
 The light-mode value is ``BRAND_DARK_GOLD``, not ``BRAND_GOLD_DARK``.
-"Dark gold" is the colour; "gold dark" reads as a modifier bolted on. It is
+"Dark gold" is the color; "gold dark" reads as a modifier bolted on. It is
 darker *because the ground is lighter* -- it serves light-mode surfaces, which
 is the opposite of what the older name suggested.
 
@@ -56,12 +56,12 @@ Usage
     # Qt #AARRGGBB -- primary gold at 75% alpha
     highlight = with_alpha(BRAND_GOLD, 0xBF)   # '#bfd2bc93'
 """
-# RNV-COLOUR-SYNC (2026-10-16). Every colour value below whose line ends
+# RNV-COLOR-SYNC (2026-10-16). Every color value below whose line ends
 # "# brand: <name>" or "# app-owned" is written by tools/sync_colors.py from
 # brand_map.json: a brand name's value from rnv-brand at the commit pinned in
 # tests/requirements-dev.txt, an app-owned value from the map, with its reason.
 # To change one, change the map and run `python tools/sync_colors.py`. A value
-# edited here is put back by the next sync, and tests/test_colours_in_sync.py
+# edited here is put back by the next sync, and tests/test_colors_in_sync.py
 # fails until then. COLORS.md is the chart of them.
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ def lighten(color: str, step: int) -> str:
     """
     rgb = color.lstrip('#')
     if len(rgb) != 6:
-        raise ValueError(f"expected a six-digit hex colour, got {color!r}")
+        raise ValueError(f"expected a six-digit hex color, got {color!r}")
     chans = [int(rgb[i:i + 2], 16) for i in (0, 2, 4)]
     return '#' + ''.join(f'{max(0, min(255, c + step)):02x}' for c in chans)
 
@@ -184,15 +184,15 @@ APP_TEXT_DIM: Final[str] = '#aaaaaa'  # brand: APP.text-dim
 #: rung of the dark surface ladder BRAND_BLACK + n*0x10, n in -1..+2:
 #: #0a0a0a canvas, #1a1a1a panel, #2a2a2a card, #3a3a3a panel-hover.
 #:
-#: WAS GREY_3A, A RAMP STEP, until rnv-brand rev 22 registered it on
+#: WAS GRAY_3A, A RAMP STEP, until rnv-brand rev 22 registered it on
 #: 2026-08-29. The register had called the ladder "two-thirds specified"
 #: because APP_BORDER #333333 is not #3a3a3a and so looked like a missing rung.
-#: It is not a rung at all: #333333 is grey(3) on the INK grid, which governs
+#: It is not a rung at all: #333333 is gray(3) on the INK grid, which governs
 #: inks and EDGES, and a border is an edge. Two families compared to each
 #: other. The ladder was complete the whole time.
 APP_PANEL_HOVER: Final[str] = '#3a3a3a'  # brand: APP.panel-hover
 
-#: engine/brand.py APP["hover-light"]. grey(14). The light interaction plate --
+#: engine/brand.py APP["hover-light"]. gray(14). The light interaction plate --
 #: bg_hover in the light dialog palette.
 #:
 #: Registered 2026-08-29 as #e8e8e8 and moved here on 2026-08-30 in rev 23,
@@ -202,7 +202,7 @@ APP_PANEL_HOVER: Final[str] = '#3a3a3a'  # brand: APP.panel-hover
 #: and fails the moment the gold moves one step. This clears by 0.2875.
 #: A boundary is not a plate.
 #:
-#: GREY_EE HOLDS THE SAME HEX AND IS NOT THIS. Three static surfaces still use
+#: GRAY_EE HOLDS THE SAME HEX AND IS NOT THIS. Three static surfaces still use
 #: the ramp step; only the hover plate is the register's. Recorded as a
 #: coincidence in tests/test_brand_mirror.py and asserted in both directions.
 APP_HOVER_LIGHT: Final[str] = '#eeeeee'  # brand: APP.hover-light
@@ -210,7 +210,7 @@ APP_HOVER_LIGHT: Final[str] = '#eeeeee'  # brand: APP.hover-light
 #: engine/brand.py APP["surface-light-3"]. The light window, panel and
 #: label ground -- what a dialog sits on in light mode.
 #:
-#: RNV-TT-REGISTER (2026-09-07): WAS GREY_F5, A RAMP STEP. rnv-brand
+#: RNV-TT-REGISTER (2026-09-07): WAS GRAY_F5, A RAMP STEP. rnv-brand
 #: rev 27 registered the light surface ladder and this value with it,
 #: and this application did not follow, because the check that compares
 #: it to the register is guarded with importorskip and rnv-brand is not
@@ -218,13 +218,13 @@ APP_HOVER_LIGHT: Final[str] = '#eeeeee'  # brand: APP.hover-light
 #: revisions of the register owning it.
 #:
 #: Every key that reads it is a surface -- 'bg', 'window_bg',
-#: 'label_bg' -- so unlike GREY_E0 below there is nothing to split.
+#: 'label_bg' -- so unlike GRAY_E0 below there is nothing to split.
 APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'  # brand: APP.surface-light-3
 
 #: engine/brand.py GOLD_TEXT_GROUND_FLOOR. The darkest light ground on which
 #: the gold family carries text.
 #:
-#: WAS GREY_E8, A RAMP STEP, until rnv-brand rev 24 registered it on
+#: WAS GRAY_E8, A RAMP STEP, until rnv-brand rev 24 registered it on
 #: 2026-08-30 -- and it was registered because this file showed it was doing
 #: register work with no register entry. BRAND_DARK_GOLD_DEEP is defined above
 #: as the smallest uniform step that clears #e8e8e8: -14 gives 4.5334, and -13
@@ -285,7 +285,7 @@ STATUS_ERROR_TEXT: Final[str] = '#dd6f77'  # brand: STATUS.error-text
 #:
 #: THE LAST OF THESE WAS STATUS_ERROR_LIGHT, and was lighten(STATUS_ERROR, -20).
 #: Renamed because five siblings now land beside it under the _TEXT_LIGHT shape
-#: and the register names this colour error-text-light; the register's own note
+#: and the register names this color error-text-light; the register's own note
 #: records that three applications derived it under TWO identifiers.
 #:
 #: Written down rather than derived because that formula no longer produces the
@@ -348,7 +348,7 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 # The register declines to name these, deliberately:
 #
 #   "Every neutral in all five desktop apps -- twenty-three distinct
-#    values from #000000 to #ffffff -- is a pure grey, R = G = B,
+#    values from #000000 to #ffffff -- is a pure gray, R = G = B,
 #    without exception. That isn't twenty-three colors; it's one ramp
 #    with steps chosen per surface. The brand doesn't publish them,
 #    doesn't count them, and doesn't drift when an app adds one."
@@ -361,21 +361,21 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 # Named by their byte so the ramp reads in order and a step cannot be
 # confused with a role. Adding one is not drift.
 
-GREY_44: Final[str] = '#444444'  # app-owned
-GREY_55: Final[str] = '#555555'  # app-owned
-GREY_66: Final[str] = '#666666'  # app-owned
-GREY_88: Final[str] = '#888888'  # app-owned
-GREY_CC: Final[str] = '#cccccc'  # app-owned
-GREY_DD: Final[str] = '#dddddd'  # app-owned
+GRAY_44: Final[str] = '#444444'  # app-owned
+GRAY_55: Final[str] = '#555555'  # app-owned
+GRAY_66: Final[str] = '#666666'  # app-owned
+GRAY_88: Final[str] = '#888888'  # app-owned
+GRAY_CC: Final[str] = '#cccccc'  # app-owned
+GRAY_DD: Final[str] = '#dddddd'  # app-owned
 #: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
-#: moved to grey(13) and this did not follow -- it is a surface, and the
+#: moved to gray(13) and this did not follow -- it is a surface, and the
 #: published grid governs inks and edges only. rnv-color-picker and
 #: rnv-icon-builder both carry this same track at this same value.
 #:
 #: THIS COMMENT SAT ONE CONSTANT LOWER until 2026-08-30, where it documented
-#: GREY_E8 while describing GREY_E0's job: the scrollbar track is #e0e0e0
+#: GRAY_E8 while describing GRAY_E0's job: the scrollbar track is #e0e0e0
 #: (utils/dialog_styles.py 'scrollbar_bg'), and #e0e0e0 is what APP["text"]
-#: held before the ink moved. Moved when GREY_E8 became a register mirror --
+#: held before the ink moved. Moved when GRAY_E8 became a register mirror --
 #: carrying a docstring that describes a different value into a mirror is how
 #: a wrong fact acquires the authority of a checked one.
 #:
@@ -383,15 +383,15 @@ GREY_DD: Final[str] = '#dddddd'  # app-owned
 #: rnv-brand rev 27 registered it as APP["pressed-light"], and this
 #: constant STAYS a ramp step anyway. A pressed plate is an
 #: interaction state; this is a scrollbar track at rest, and one
-#: shared byte is not a shared role. Same ruling as GREY_EE two
+#: shared byte is not a shared role. Same ruling as GRAY_EE two
 #: constants down. Declared in COINCIDENT in
 #: tests/test_brand_mirror.py, and asserted in both directions.
-GREY_E0: Final[str] = '#e0e0e0'  # app-owned
-#: grey(14). Three STATIC surfaces: the diff export header in both modes, and
+GRAY_E0: Final[str] = '#e0e0e0'  # app-owned
+#: gray(14). Three STATIC surfaces: the diff export header in both modes, and
 #: the line number gutter's resting ground. NOT the light hover plate, which is
 #: APP_HOVER_LIGHT and holds this same hex -- one value, two roles, and only
 #: one of them is the register's. See COINCIDENT in tests/test_brand_mirror.py.
-GREY_EE: Final[str] = '#eeeeee'  # app-owned
+GRAY_EE: Final[str] = '#eeeeee'  # app-owned
 
 
 # ============ APP SEMANTICS ============
@@ -405,7 +405,7 @@ GREY_EE: Final[str] = '#eeeeee'  # app-owned
 # upstream. The accent swap must never reach these: a purple brand still
 # deletes in red.
 #
-# The regex colours are this app alone. The diff colours were the Bootstrap
+# The regex colors are this app alone. The diff colors were the Bootstrap
 # alert palette until RNV-DIFF-FLOORS; they are now derived, and they are
 # held to three floors per mode by tests/test_diff_floors.py:
 #
@@ -418,7 +418,7 @@ GREY_EE: Final[str] = '#eeeeee'  # app-owned
 # BRAND_GOLD to #b49e75 reads 8.4035.
 #
 # WHAT WAS WRONG WITH THE OLD SIX. Two of them failed the ground rule under
-# achromatopsia, where every colour collapses to luma:
+# achromatopsia, where every color collapses to luma:
 #
 #   '#4d1a1a' dark    -> #292929 on a #191919 panel   CIEDE2000 5.03
 #   '#f8d7da' light   -> #e1e1e1 on a #f5f5f5 pane    CIEDE2000 4.27
@@ -437,7 +437,7 @@ GREY_EE: Final[str] = '#eeeeee'  # app-owned
 # contrast of 12.97 -- every one of which belonged to '#2e0f10', a candidate
 # derived during the same round and rejected. The substitution was of the
 # whole measurement, not of one digit, and nothing checked it, so it read as
-# measured and travelled into two delivery scripts and two project notes. It
+# measured and traveled into two delivery scripts and two project notes. It
 # also overstated the defect: 5.03 is faint, 0.31 is absent. The figures now
 # live in an assertion; see RETIRED_FILLS in the guard.
 #
@@ -496,9 +496,9 @@ def with_alpha(color: str, alpha: int) -> str:
     """
     Express a six-digit brand hex in Qt's ``#AARRGGBB`` form.
 
-    Qt writes translucent colours with the alpha channel *first*, which is why
+    Qt writes translucent colors with the alpha channel *first*, which is why
     a ``#[0-9a-f]{6}`` search does not find them -- it either misses the value
-    or matches the wrong six characters. Any guard that audits brand colour
+    or matches the wrong six characters. Any guard that audits brand color
     usage has to read this form as well as the plain one, and any sweep that
     rewrites a six-digit value has to avoid corrupting it.
 
@@ -508,7 +508,7 @@ def with_alpha(color: str, alpha: int) -> str:
 
     Returns:
         Eight-digit ``#AARRGGBB`` string in lower case, whatever case the
-        colour is given in. The register's notation rule covers eight
+        color is given in. The register's notation rule covers eight
         digits since 2026-09-25 (RNV-LOWER-EIGHT).
 
     Raises:
@@ -522,7 +522,7 @@ def with_alpha(color: str, alpha: int) -> str:
 
     if len(rgb) != 6:
         raise ValueError(
-            f"expected a six-digit hex colour, got {color!r} "
+            f"expected a six-digit hex color, got {color!r} "
             f"({len(rgb)} digits) -- if this is already #AARRGGBB, pass the "
             f"six-digit value instead"
         )
@@ -530,7 +530,7 @@ def with_alpha(color: str, alpha: int) -> str:
     try:
         int(rgb, 16)
     except ValueError as exc:
-        raise ValueError(f"not a hex colour: {color!r}") from exc
+        raise ValueError(f"not a hex color: {color!r}") from exc
 
     if not 0 <= alpha <= 255:
         raise ValueError(f"alpha must be 0-255, got {alpha}")
@@ -540,9 +540,9 @@ def with_alpha(color: str, alpha: int) -> str:
 
 # ==================== COMPOSITE ALPHAS ====================
 #
-# A composite is a named colour AT AN ALPHA: with_alpha(BASE, ALPHA). The colour
+# A composite is a named color AT AN ALPHA: with_alpha(BASE, ALPHA). The color
 # half is a name, so a register move reaches it; the alpha half is one of these,
-# so the same move carries every alpha form of that colour with it. Until
+# so the same move carries every alpha form of that color with it. Until
 # 2026-09-25 image mode wrote all of them out as rgba() and nothing related
 # 'rgba(26, 26, 26, 191)' to BRAND_BLACK.
 #
@@ -567,8 +567,8 @@ SCROLLBAR_BORDER_ALPHA: Final[int] = 0x64
 """100. The image-mode scrollbar edge (APP_BORDER)."""
 
 SCROLLBAR_HANDLE_ALPHA: Final[int] = 0x96
-"""150. The image-mode scrollbar handle (GREY_44). The byte all five
-applications use; its colour was #505050 until 2026-09-25."""
+"""150. The image-mode scrollbar handle (GRAY_44). The byte all five
+applications use; its color was #505050 until 2026-09-25."""
 
 DROPDOWN_BG_ALPHA: Final[int] = 0x83
 """131. The image-mode dropdown list's ground (TRUE_BLACK)."""
@@ -589,29 +589,29 @@ RNV-NAMED-AND-USED (2026-10-04): was setAlpha(80), written out in the
 Find dialog; the same byte."""
 
 
-# ==================== COLOURS THE CODE SPELLED OUT ====================
+# ==================== COLORS THE CODE SPELLED OUT ====================
 #
 # RNV-NAMED-AND-USED (2026-10-04). Ruled: "As long as a color exist in the
 # app it should be named and used no hardcoded or pointless literals should
 # exist". Named here at the value it had: NO PIXEL MOVES.
 
 SEMANTIC_EXPORT_FOOTER: Final[str] = '#808080'  # app-owned
-"""The "Generated by" footer of an exported PDF. Was the colour name
+"""The "Generated by" footer of an exported PDF. Was the color name
 `gray`, which is this value. App-owned, so named for what it means, as
 the ruling of 2026-09-02 asks of every value this application owns.
 
-RNV-COLOUR-SYNC, #56 A (2026-10-17): also the second entry of an exported
-RTF's colour table, which core/export_manager.py wrote out as
+RNV-COLOR-SYNC, #56 A (2026-10-17): also the second entry of an exported
+RTF's color table, which core/export_manager.py wrote out as
 red 128, green 128, blue 128 -- this value. The RTF draws its "Generated
 by" footer in it, and its line numbers, which share that one entry."""
 
-# RNV-COLOUR-SYNC (2026-10-17), #56 A: colours the application's own code
+# RNV-COLOR-SYNC (2026-10-17), #56 A: colors the application's own code
 # still wrote out, named here at the value and in the case they had, so no
 # byte of an export and no line of text moves. Data, the application's
 # own, and a brand move never touches them.
 
 SEMANTIC_EXPORT_RTF_INK: Final[str] = '#000000'  # app-owned
-"""The text colour of an exported RTF: the first entry of its colour
+"""The text color of an exported RTF: the first entry of its color
 table, which core/export_manager.py wrote out as red 0, green 0, blue 0.
 Export data, not chrome, so it does not follow the brand's black (#48 A),
 though it holds the same value: declared in COINCIDENT in
@@ -626,7 +626,7 @@ was written in -- the case is part of the example. App-owned."""
 
 # ==================== PROVENANCE ====================
 #
-# Where every colour constant in this module comes from. Declarative and
+# Where every color constant in this module comes from. Declarative and
 # in the file rather than in the test, because a classification that lives
 # only in a test goes stale in the direction that reports clean: add a
 # constant, forget the test entry, and the test passes while checking one
@@ -642,7 +642,7 @@ was written in -- the case is part of the example. App-owned."""
 #   app-ramp      a step on this app's neutral ramp; the register
 #                 explicitly declines to name these
 #   app-semantic  neither brand nor ramp -- diff and regex highlighting,
-#                 and the grey of an exported PDF's footer
+#                 and the gray of an exported PDF's footer
 
 PROVENANCE: Final[dict[str, str]] = {
     # -- register
@@ -671,14 +671,14 @@ PROVENANCE: Final[dict[str, str]] = {
     'BRAND_GOLD_HOVER': 'derived',
     'BRAND_GOLD_PRESSED': 'derived',
     # -- app-ramp
-    'GREY_44': 'app-ramp',
-    'GREY_55': 'app-ramp',
-    'GREY_66': 'app-ramp',
-    'GREY_88': 'app-ramp',
-    'GREY_CC': 'app-ramp',
-    'GREY_DD': 'app-ramp',
-    'GREY_E0': 'app-ramp',
-    'GREY_EE': 'app-ramp',
+    'GRAY_44': 'app-ramp',
+    'GRAY_55': 'app-ramp',
+    'GRAY_66': 'app-ramp',
+    'GRAY_88': 'app-ramp',
+    'GRAY_CC': 'app-ramp',
+    'GRAY_DD': 'app-ramp',
+    'GRAY_E0': 'app-ramp',
+    'GRAY_EE': 'app-ramp',
     # -- app-semantic
     'SEMANTIC_DIFF_ADDED': 'app-semantic',
     'SEMANTIC_DIFF_REMOVED': 'app-semantic',
@@ -733,14 +733,14 @@ __all__ = [
     'STATUS_ERROR_TEXT_LIGHT',
     'BRAND_GOLD_HOVER',
     'BRAND_GOLD_PRESSED',
-    'GREY_44',
-    'GREY_55',
-    'GREY_66',
-    'GREY_88',
-    'GREY_CC',
-    'GREY_DD',
-    'GREY_E0',
-    'GREY_EE',
+    'GRAY_44',
+    'GRAY_55',
+    'GRAY_66',
+    'GRAY_88',
+    'GRAY_CC',
+    'GRAY_DD',
+    'GRAY_E0',
+    'GRAY_EE',
     'SEMANTIC_DIFF_ADDED',
     'SEMANTIC_DIFF_REMOVED',
     'SEMANTIC_DIFF_CHANGED',

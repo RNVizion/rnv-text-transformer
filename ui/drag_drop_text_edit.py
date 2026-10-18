@@ -47,9 +47,9 @@ class DragDropTextEdit(QTextEdit):
     clearRequested = pyqtSignal()
     
     # RNV-SEMANTIC-NAMING (2026-09-02): this name used to end in the name of
-    # the colour that fills it. A constant names a colour and a key names a
-    # role; this is a role, so it no longer says which colour it holds. The
-    # colour still arrives from BRAND_GOLD -- keep the derivation, drop the
+    # the color that fills it. A constant names a color and a key names a
+    # role; this is a role, so it no longer says which color it holds. The
+    # color still arrives from BRAND_GOLD -- keep the derivation, drop the
     # claim -- so a brand that is not gold flows through this line unchanged.
     #
     # Qt #AARRGGBB, primary brand at 75% alpha. Not a six-digit hex: the

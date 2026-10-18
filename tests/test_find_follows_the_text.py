@@ -302,7 +302,7 @@ class TestWithTheTextUnchangedNothingIsDifferent:
         win._cycle_theme()
         QApplication.processEvents()
         _caret_to(win.text_input, 40)
-        dlg._recolour_highlights()
+        dlg._recolor_highlights()
         assert not dlg._matches_are_stale()
         dlg._on_find_next()
         assert _selection(win.text_input) == (14, 16) and ran == [], \

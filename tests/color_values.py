@@ -1,21 +1,21 @@
-"""Every colour value the tests need that is not the application's colour.
+"""Every color value the tests need that is not the application's color.
 
-RNV-COLOUR-SYNC, #53 A (2026-10-17). The application's own colours and the
+RNV-COLOR-SYNC, #53 A (2026-10-17). The application's own colors and the
 brand's are named in utils/colors.py, which brand_map.json names, and a test
-reads them from there. Every other colour value a test or the root suite
+reads them from there. Every other color value a test or the root suite
 writes is named here, once, with why: samples given to a helper (EXAMPLE_),
 values the application no longer uses (RETIRED_), and values the brand
 publishes that this application does not draw (REGISTER_). It has no DATA_
-and no INVALID_ values. tests/test_colour_values.py holds this file: no
-colour value is written anywhere else in tests/ or in
+and no INVALID_ values. tests/test_color_values.py holds this file: no
+color value is written anywhere else in tests/ or in
 test_rnv_text_transformer.py, not even in a sentence (#57 A), and every name
 here says what kind it is, says why, and is used. What a value is, and why
 it was retired, is said once, here, beside it; a test's comment or docstring
 says the name, and its messages print the value through it.
 
-Tests import it as `from tests import colour_values as cv`, the way
+Tests import it as `from tests import color_values as cv`, the way
 tests/test_tt_register.py already imports tests.test_brand_mirror;
-tests/test_colours_in_sync.py loads it by path.
+tests/test_colors_in_sync.py loads it by path.
 
 No content marker. This application's value sweeps (tests/test_named_and_used.py,
 tests/test_derived_values.py, tests/test_gold_as_text.py,
@@ -29,17 +29,17 @@ inside a longer word, which that sweep does not match.
 # ------------------------------------------------------------------ examples
 
 EXAMPLE_HAND_EDIT = '#123456'
-"""The value tests/test_colours_in_sync.py plants over a brand line of the
-colour file, to show that the sync puts the line back, and the colour it adds
+"""The value tests/test_colors_in_sync.py plants over a brand line of the
+color file, to show that the sync puts the line back, and the color it adds
 on a line of its own, to show that the sync refuses one the map does not
-hold. Any colour would do. Lower case: it is compared with value.lower()."""
+hold. Any color would do. Lower case: it is compared with value.lower()."""
 
 EXAMPLE_HAND_EDIT_FALLBACK = '#654321'
-"""The plant tests/test_colours_in_sync.py uses instead if the brand line
+"""The plant tests/test_colors_in_sync.py uses instead if the brand line
 already holds EXAMPLE_HAND_EDIT."""
 
 EXAMPLE_MOVED_ACCENT = '#6f94bc'
-"""Where tests/test_colours_in_sync.py's simulated brand move sends
+"""Where tests/test_colors_in_sync.py's simulated brand move sends
 APP["accent"]: only somewhere else. It is rnv-brand's BRAND_BLUE from rev 32,
 after this application's pin, which does not publish it. Lower case: the
 sync writes it into the rewritten line as given, and the test looks for it."""
@@ -58,18 +58,18 @@ EXAMPLE_WITH_ALPHA_OUTPUT = '#bf1a1a1a'
 alpha first, in lower case (RNV-LOWER-EIGHT)."""
 
 EXAMPLE_ROUND_TRIP = '#d2bc93'
-"""The colour tests/test_derived_values.py puts through with_alpha() and takes
+"""The color tests/test_derived_values.py puts through with_alpha() and takes
 back apart with decompose(), which must hand it back unchanged. BRAND_GOLD's
 value today, but a sample. Lower case, because decompose() lower-cases."""
 
 EXAMPLE_HASHLESS_INPUT = '444444'
-"""A colour given to with_alpha() without its '#', in
-tests/test_derived_values.py. #54 A: a hash-less colour string, kept with
+"""A color given to with_alpha() without its '#', in
+tests/test_derived_values.py. #54 A: a hash-less color string, kept with
 the value it must come back as, EXAMPLE_HASHLESS_EXPECTED."""
 
 EXAMPLE_HASHLESS_EXPECTED = '#444444'
 """What decompose(with_alpha(EXAMPLE_HASHLESS_INPUT, ...)) hands back: the
-same colour with its '#'. GREY_44's value today, but a sample."""
+same color with its '#'. GRAY_44's value today, but a sample."""
 
 EXAMPLE_CALIBRATION_GOLD = '#d2bc93'
 """One half of the pair tests/test_diff_floors.py calibrates its CIEDE2000
@@ -86,11 +86,11 @@ is not a REGISTER_ value."""
 EXAMPLE_CONTRAST_BLACK = '#000000'
 """The dark end of the contrast scale: tests/test_light_rewalk.py's
 guard-the-guard measures 21:1 from it to EXAMPLE_CONTRAST_WHITE. A sample of
-the maths, not TRUE_BLACK."""
+the math, not TRUE_BLACK."""
 
 EXAMPLE_CONTRAST_WHITE = '#ffffff'
 """The light end of the contrast scale: 21:1 from EXAMPLE_CONTRAST_BLACK, and
-1:1 against itself. A sample of the maths, not WHITE."""
+1:1 against itself. A sample of the math, not WHITE."""
 
 EXAMPLE_READER_WHITE = '#ffffff'
 """What tests/test_ink_on_the_golds.py's stylesheet reader makes of the CSS
@@ -114,7 +114,7 @@ after each comma: the sweep re-joins whitespace that way."""
 EXAMPLE_CLEAR_RGBA = 'rgba(0, 0, 0, 0)'
 """Clear, in the rgba() spelling: what tests/test_named_and_used.py's quiet
 probe writes to show the sweep does not report alpha 0. Clear is not a
-colour; it is how a widget is told to paint nothing."""
+color; it is how a widget is told to paint nothing."""
 
 EXAMPLE_READER_BLACK_SHORT = '#000'
 """The three-digit black tests/test_ink_on_the_golds.py writes in its sample
@@ -151,20 +151,20 @@ EXAMPLE_EIGHT_DIGIT_UPPER = '#ED1A1A1A'
 the point."""
 
 EXAMPLE_RENDER_PROBE = '#ff00ff'
-"""The colour a render set the removed image_scrollbar_handle_hover key to on
+"""The color a render set the removed image_scrollbar_handle_hover key to on
 2026-09-25 (RNV-HOVER-KEY-GONE), to see whether anything painted it. Nothing
 did, across the main window and twelve dialogs in all three modes."""
 
 # ---------------------------------------------------------------------- data
 
-# None in this application. #56 A: the one data colour a test exempted, the
+# None in this application. #56 A: the one data color a test exempted, the
 # Hex Color pattern's example, is named in utils/colors.py now.
 
 # ------------------------------------------------------------------- retired
 
 RETIRED_SCROLLBAR_HANDLE = '#505050'
 """The image-mode scrollbar handle until 2026-09-25, when RNV-COLLAPSE-505050
-moved it to GREY_44. tests/test_derived_values.py sweeps the application for
+moved it to GRAY_44. tests/test_derived_values.py sweeps the application for
 it in every spelling. Lower case: the sweep compares it with what its decoder
 reports."""
 
@@ -252,7 +252,7 @@ relating it to BRAND_BLACK. It is with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA)
 now (RNV-DERIVE-ALPHA)."""
 
 RETIRED_SCROLLBAR_HANDLE_HOVER_RGBA = 'rgba(100, 100, 100, 200)'
-"""What image_scrollbar_handle_hover held, a grey on no register row, until
+"""What image_scrollbar_handle_hover held, a gray on no register row, until
 the key was removed on 2026-09-25 (RNV-HOVER-KEY-GONE): nothing painted it."""
 
 # ------------------------------------------------------------------ register
@@ -265,7 +265,7 @@ every light rung down to GOLD_TEXT_GROUND_FLOOR, this one included."""
 REGISTER_APP_PRESSED_LIGHT = '#e0e0e0'
 """The light pressed plate, the rung below GOLD_TEXT_GROUND_FLOOR where brand
 text stops: tests/test_light_rewalk.py asserts the text fails here. This
-application draws the same hex only as GREY_E0, its scrollbar track, a
+application draws the same hex only as GRAY_E0, its scrollbar track, a
 declared coincidence in another role; it draws no pressed plate at it."""
 
 REGISTER_STATUS_SUCCESS = '#926c89'
@@ -291,4 +291,4 @@ REGISTER_REFS = {
     'REGISTER_STATUS_ERROR': 'STATUS.error',
 }
 """The brand name each REGISTER_ value is published under, at this
-application's pin; tests/test_colour_values.py checks each against it."""
+application's pin; tests/test_color_values.py checks each against it."""

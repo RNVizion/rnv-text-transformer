@@ -4,10 +4,10 @@ in Python.
 
 RULED 2026-08-26.
 
-WHAT WAS WRONG, AND IT WAS NOT THE COLOURS
+WHAT WAS WRONG, AND IT WAS NOT THE COLORS
 
 The app already had a press state: `_on_press` rewrote the base rule's label
-colour, and image mode swapped to a dedicated pressed pixmap. Under the mouse
+color, and image mode swapped to a dedicated pressed pixmap. Under the mouse
 it looked right. It was reached two ways that do not hold up:
 
   1. THE GROUND CAME FROM `:hover`. Pressed and hovered are different states
@@ -30,7 +30,7 @@ Qt applies that rule to the sunken state however the press arrived -- verified
 against `setDown(True)`, which is the path keyboard activation takes -- and
 being declarative it survives every stylesheet rebuild.
 
-`_update_text_mode_pressed` still runs and still sets the same label colour.
+`_update_text_mode_pressed` still runs and still sets the same label color.
 It is now reinforcement rather than the mechanism, and the tests below hold
 the stylesheet, which is the thing that has to be right.
 """

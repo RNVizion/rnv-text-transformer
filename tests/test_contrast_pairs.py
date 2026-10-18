@@ -2,7 +2,7 @@
 Contrast pairing guard.
 
 The rest of the suite asserts hex EQUALITY -- DARK["accent"] == BRAND_GOLD.
-That cannot catch a legible colour placed on the wrong ground, which is how
+That cannot catch a legible color placed on the wrong ground, which is how
 eight failing gold pairings survived every previous audit: every value was
 correct, every pairing was not.
 
@@ -26,7 +26,7 @@ COMPONENTS = ('splitter', 'menu', 'table', 'tab', 'spinbox', 'slider',
               'list', 'progressbar', 'tree')
 
 # (theme, foreground, background) -> why it may sit below the floor.
-# RNV-COLOUR-SYNC, 2026-10-16: each colour by the constant the stylesheet
+# RNV-COLOR-SYNC, 2026-10-16: each color by the constant the stylesheet
 # paints there (text_disabled, text_muted; bg, bg_secondary, bg_tertiary),
 # where it was written as that constant's hex code, so a brand move needs no
 # edit here.
@@ -34,10 +34,10 @@ ACCEPTED = {
     # WCAG 1.4.3 exempts text in an inactive user interface component.
     ('LIGHT', C.APP_TEXT_DIM, C.GOLD_TEXT_GROUND_FLOOR): 'disabled control text -- WCAG-exempt',
     ('LIGHT', C.APP_TEXT_DIM, C.APP_SURFACE_LIGHT_3): 'disabled control text -- WCAG-exempt',
-    ('DARK',  C.GREY_55, C.APP_BORDER): 'disabled control text -- WCAG-exempt',
-    ('DARK',  C.GREY_55, C.BRAND_BLACK): 'disabled control text -- WCAG-exempt',
+    ('DARK',  C.GRAY_55, C.APP_BORDER): 'disabled control text -- WCAG-exempt',
+    ('DARK',  C.GRAY_55, C.BRAND_BLACK): 'disabled control text -- WCAG-exempt',
     # Pre-existing, unrelated to gold: unselected dark tab labels.
-    ('DARK',  C.GREY_88, C.APP_CARD): 'unselected tab label -- 4.05:1',
+    ('DARK',  C.GRAY_88, C.APP_CARD): 'unselected tab label -- 4.05:1',
 }
 
 
@@ -84,7 +84,7 @@ def _pairs(is_dark: bool):
 
 @pytest.mark.parametrize('is_dark,theme', [(False, 'LIGHT'), (True, 'DARK')])
 def test_text_pairs_meet_aa(is_dark, theme):
-    """Every text colour clears 4.5:1 on the ground it renders on."""
+    """Every text color clears 4.5:1 on the ground it renders on."""
     failures = []
     for selector, fg, bg in _pairs(is_dark):
         if (theme, fg, bg) in ACCEPTED:
@@ -120,7 +120,7 @@ def test_deep_gold_serves_both_its_roles():
     light = DialogStyleManager.get_colors(False)
     deep = light['accent_ink']
     assert light['accent_hover'] == deep, 'hover and ink must share the derivative'
-    # RNV-COLOUR-SYNC, 2026-10-16: the ink and the grounds by name. White is
+    # RNV-COLOR-SYNC, 2026-10-16: the ink and the grounds by name. White is
     # what the light stylesheet draws on the deep gold (selection_text); the
     # grounds are the light bg, bg_hover and bg_tertiary it is drawn on as text.
     assert contrast(C.WHITE, deep) >= TEXT_FLOOR, 'white must clear on the deep gold'

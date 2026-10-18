@@ -239,8 +239,8 @@ class BaseDialog(QDialog):
         picker's Settings panel and About dialog, for the same fault. For a
         stylesheet that reads the mode when it is set: set once, it kept
         the mode the dialog was opened in. A widget styled this way again
-        keeps the later sheet, so a status line whose colour follows its
-        state is set again in the colour it shows now.
+        keeps the later sheet, so a status line whose color follows its
+        state is set again in the color it shows now.
         
         Args:
             widget: The widget to style
@@ -251,7 +251,7 @@ class BaseDialog(QDialog):
     
     @staticmethod
     def _show_highlights(edit: QTextEdit, spans: Iterable[tuple[int, int]],
-                         colour: QColor) -> None:
+                         color: QColor) -> None:
         """
         Show highlights over edit's text without touching the text.
         
@@ -259,7 +259,7 @@ class BaseDialog(QDialog):
         Builder's matches were character formats in the text: Qt reports a
         change of format as a change of the text and records it as a step
         of the undo history, and a copy of highlighted text carried the
-        colour to the clipboard as HTML. RNV-NOT-AN-EDIT (2026-09-28) held
+        color to the clipboard as HTML. RNV-NOT-AN-EDIT (2026-09-28) held
         the text's signals and made each paint one step; a step it still
         was. Extra selections are Qt's overlay for search results: drawn
         over the document and kept out of it, so they are no step of the
@@ -270,10 +270,10 @@ class BaseDialog(QDialog):
         Args:
             edit: The text edit the highlights are shown over
             spans: (start, end) positions in the text, in order
-            colour: The colour every span is filled with
+            color: The color every span is filled with
         """
         fmt = QTextCharFormat()
-        fmt.setBackground(QBrush(colour))
+        fmt.setBackground(QBrush(color))
         selections = []
         for start, end in spans:
             cursor = QTextCursor(edit.document())

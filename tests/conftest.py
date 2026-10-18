@@ -1,7 +1,7 @@
-# RNV-DERIVE-ALPHA, 2026-09-25 -- every image-mode colour written at an
+# RNV-DERIVE-ALPHA, 2026-09-25 -- every image-mode color written at an
 # alpha is DERIVED, with_alpha(BASE, ALPHA), so a change to a base reaches
 # every alpha form of it. The image scrollbar handle left
-# RETIRED_SCROLLBAR_HANDLE for GREY_44 at 150, by ruling, closing
+# RETIRED_SCROLLBAR_HANDLE for GRAY_44 at 150, by ruling, closing
 # RNV-COLLAPSE-505050 here.
 # tests/test_derived_values.py holds the derivations.
 # RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired

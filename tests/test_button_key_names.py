@@ -21,14 +21,14 @@ OLD = ("button_bg", "button_text", "button_hover_bg", "button_pressed_bg",
        "button_pressed_text")
 NEW = tuple("main_" + n.replace("button_", "btn_") for n in OLD)
 
-#: RNV-COLOUR-SYNC, 2026-10-16: each key by the constant it paints, where it
+#: RNV-COLOR-SYNC, 2026-10-16: each key by the constant it paints, where it
 #: was written as that constant's hex code, so a brand move needs no edit here.
 PINNED = {
     "dark": {"main_btn_bg": "BRAND_BLACK", "main_btn_text": "APP_TEXT",
-             "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GREY_44",
+             "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GRAY_44",
              "main_btn_pressed_text": "TRUE_BLACK"},
     "light": {"main_btn_bg": "WHITE", "main_btn_text": "TRUE_BLACK",
-              "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GREY_44",
+              "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GRAY_44",
               "main_btn_pressed_text": "WHITE"},
 }
 
@@ -170,7 +170,7 @@ def test_the_rename_moved_no_value():
             "A rename that changes a value is not a rename.")
 
 
-def test_the_dialog_stylesheet_still_owns_its_own_button_colours():
+def test_the_dialog_stylesheet_still_owns_its_own_button_colors():
     """This app's dialogs never read the main family, and must not start.
 
     If a later pass wires the dialog stylesheet to main_btn_*, the two schemes

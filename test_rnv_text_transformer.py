@@ -121,7 +121,7 @@ try:
 except Exception:
     _CLI_AVAILABLE = False
 
-# ANSI colour helpers
+# ANSI color helpers
 _G="\033[92m"; _R="\033[91m"; _Y="\033[93m"; _C="\033[96m"; _B="\033[1m"; _X="\033[0m"
 
 # Temp root for any disk-touching tests

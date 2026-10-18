@@ -51,14 +51,14 @@ from utils.colors import (
     STATUS_ERROR_TEXT_LIGHT,
     BRAND_GOLD_HOVER,
     BRAND_GOLD_PRESSED,
-    GREY_44,
-    GREY_55,
-    GREY_66,
-    GREY_88,
-    GREY_CC,
-    GREY_DD,
-    GREY_E0,
-    GREY_EE,
+    GRAY_44,
+    GRAY_55,
+    GRAY_66,
+    GRAY_88,
+    GRAY_CC,
+    GRAY_DD,
+    GRAY_E0,
+    GRAY_EE,
     APP_PANEL_HOVER,
     APP_HOVER_LIGHT,
     APP_SURFACE_LIGHT_3,
@@ -156,12 +156,12 @@ class DialogStyleManager:
         
         # Text
         'text': APP_TEXT,
-        'text_muted': GREY_88,
-        'text_disabled': GREY_55,
+        'text_muted': GRAY_88,
+        'text_disabled': GRAY_55,
         
         # Borders
         'border': APP_BORDER,
-        'border_light': GREY_44,
+        'border_light': GRAY_44,
         'border_focus': BRAND_GOLD,
         
         # Accent colors
@@ -185,13 +185,13 @@ class DialogStyleManager:
         'selection_bg': BRAND_GOLD,
         'selection_text': TRUE_BLACK,
         'scrollbar_bg': APP_CARD,
-        'scrollbar_handle': GREY_44,
-        'scrollbar_handle_main': GREY_44,
+        'scrollbar_handle': GRAY_44,
+        'scrollbar_handle_main': GRAY_44,
         'tooltip_border': BRAND_GOLD,
         
         # Checkbox indicator
         'checkbox_indicator_bg': BRAND_BLACK,
-        'checkbox_border': GREY_55,
+        'checkbox_border': GRAY_55,
         
         # Dropdown / list hover
         'list_hover_bg': WHITE,
@@ -202,7 +202,7 @@ class DialogStyleManager:
         'main_btn_bg': BRAND_BLACK,
         'main_btn_text': APP_TEXT,
         'main_btn_hover_bg': APP_BORDER,
-        'main_btn_pressed_bg': GREY_44,
+        'main_btn_pressed_bg': GRAY_44,
         'main_btn_pressed_text': TRUE_BLACK,
         'input_bg': BRAND_BLACK,
         'input_text': APP_TEXT,
@@ -218,7 +218,7 @@ class DialogStyleManager:
         'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
         'diff_changed_bg': SEMANTIC_DIFF_CHANGED,
 
-        # RNV-NAMED-AND-USED (2026-10-04): the diff export's seven colours
+        # RNV-NAMED-AND-USED (2026-10-04): the diff export's seven colors
         # stood here too. The export is a standalone page, always light,
         # and reads them from LIGHT by name; this copy was looked up by
         # nothing. They are in LIGHT alone.
@@ -227,16 +227,16 @@ class DialogStyleManager:
         'regex_match_bg': SEMANTIC_REGEX_MATCH,
 
         # Image mode semi-transparent overlay values -- used only in image
-        # mode. DERIVED: a named colour at a declared alpha, so a register
+        # mode. DERIVED: a named color at a declared alpha, so a register
         # move reaches them (RNV-DERIVE-ALPHA, 2026-09-25).
         'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),
         'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),
         'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),
         'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
         # RNV-COLLAPSE-505050, closed here 2026-09-25: this was
-        # rgba(80, 80, 80, 150), the value ruled onto GREY_44 on
+        # rgba(80, 80, 80, 150), the value ruled onto GRAY_44 on
         # 2026-09-02 and left behind because nothing decoded rgba().
-        'image_scrollbar_handle':      with_alpha(GREY_44, SCROLLBAR_HANDLE_ALPHA),
+        'image_scrollbar_handle':      with_alpha(GRAY_44, SCROLLBAR_HANDLE_ALPHA),
         # The image scrollbar hovers from DARK's 'accent'. It has no key of
         # its own: the unused one was removed, RNV-HOVER-KEY-GONE.
         'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
@@ -253,12 +253,12 @@ class DialogStyleManager:
         
         # Text
         'text': TRUE_BLACK,
-        'text_muted': GREY_66,
+        'text_muted': GRAY_66,
         'text_disabled': APP_TEXT_DIM,
         
         # Borders
-        'border': GREY_CC,
-        'border_light': GREY_DD,
+        'border': GRAY_CC,
+        'border_light': GRAY_DD,
         'border_focus': BRAND_DARK_GOLD,
         
         # Accent colors
@@ -281,7 +281,7 @@ class DialogStyleManager:
         # Special
         'selection_bg': BRAND_DARK_GOLD,
         'selection_text': WHITE,
-        'scrollbar_bg': GREY_E0,
+        'scrollbar_bg': GRAY_E0,
         'scrollbar_handle': APP_TEXT_DIM,
         'scrollbar_handle_main': APP_TEXT_DIM,
         'tooltip_border': BRAND_DARK_GOLD,
@@ -299,15 +299,15 @@ class DialogStyleManager:
         'main_btn_bg': WHITE,
         'main_btn_text': TRUE_BLACK,
         'main_btn_hover_bg': APP_BORDER,
-        'main_btn_pressed_bg': GREY_44,
+        'main_btn_pressed_bg': GRAY_44,
         'main_btn_pressed_text': WHITE,
         'input_bg': WHITE,
         'input_text': TRUE_BLACK,
-        'input_border': GREY_CC,
+        'input_border': GRAY_CC,
         'label_bg': APP_SURFACE_LIGHT_3,
         'label_text': TRUE_BLACK,
         'output_text_color': BRAND_DARK_GOLD,
-        'border_color': GREY_CC,
+        'border_color': GRAY_CC,
         'text_color': TRUE_BLACK,
         
         # Diff / compare semantic highlight colors
@@ -319,10 +319,10 @@ class DialogStyleManager:
         'diff_html_equal_bg':  WHITE,
         'diff_html_insert_bg': SEMANTIC_DIFF_ADDED_LIGHT,
         'diff_html_delete_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
-        'diff_html_header_bg': GREY_EE,
-        'diff_html_line_num':  GREY_88,
-        'diff_html_border':    GREY_DD,
-        'diff_html_stats_text':GREY_66,
+        'diff_html_header_bg': GRAY_EE,
+        'diff_html_line_num':  GRAY_88,
+        'diff_html_border':    GRAY_DD,
+        'diff_html_stats_text':GRAY_66,
 
         # Regex builder match highlight
         'regex_match_bg': SEMANTIC_REGEX_MATCH_LIGHT,

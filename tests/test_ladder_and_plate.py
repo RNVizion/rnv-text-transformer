@@ -3,9 +3,9 @@
 WHAT THIS PASS DID. rnv-brand registered three values this app had been
 carrying as anonymous ramp steps:
 
-    GREY_3A  ->  APP_PANEL_HOVER          APP["panel-hover"]  rev 22
-    GREY_EE  ->  APP_HOVER_LIGHT          APP["hover-light"]  rev 23
-    GREY_E8  ->  GOLD_TEXT_GROUND_FLOOR   module constant     rev 24
+    GRAY_3A  ->  APP_PANEL_HOVER          APP["panel-hover"]  rev 22
+    GRAY_EE  ->  APP_HOVER_LIGHT          APP["hover-light"]  rev 23
+    GRAY_E8  ->  GOLD_TEXT_GROUND_FLOOR   module constant     rev 24
 
 THE LATENT FAILURE THIS CLOSES. test_app_owned_values_are_not_register_values
 in tests/test_brand_mirror.py fails when something classified app-owned is in
@@ -14,13 +14,13 @@ not have it -- so all three sat misclassified from the day the register ruled
 them, with the suite reporting clean. The proving run is the one with the brand
 on the path.
 
-GREY_EE IS SPLIT, NOT RENAMED. Four entries hold GREY_EE's value and only one plays the
+GRAY_EE IS SPLIT, NOT RENAMED. Four entries hold GRAY_EE's value and only one plays the
 register's role: bg_hover in the light dialog palette. The other three --
 diff_html_header_bg in both modes, and line_number_bg -- are STATIC surfaces. A
 resting ground is not an interaction state, and wiring all four would claim a
-role for three of them on the strength of a shared hex. GREY_EE therefore
+role for three of them on the strength of a shared hex. GRAY_EE therefore
 survives as a ramp step, and the coincidence is recorded in COINCIDENT beside
-GREY_DD / APP["text"], which is the same shape.
+GRAY_DD / APP["text"], which is the same shape.
 
 WHY GOLD_TEXT_GROUND_FLOOR IS REGISTERED AT ALL, AND WHY THIS FILE'S APP CAUSED IT.
 BRAND_DARK_GOLD_DEEP is defined in utils/colors.py as the smallest uniform
@@ -48,10 +48,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 COLORS = ROOT / 'utils' / 'colors.py'
 STYLES = ROOT / 'utils' / 'dialog_styles.py'
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 GRID_STEP = 0x11
 LADDER_STEP = 0x10
@@ -60,7 +60,7 @@ TEXT_FLOOR = 4.5
 #: Constant -> the register name brand_map.json takes it from. Resolution to
 #: rnv-brand is by the convention tests/test_brand_mirror.py already uses:
 #: APP_<KEY> -> APP["key"], anything else -> the module attribute of the same
-#: name. RNV-COLOUR-SYNC, 2026-10-16: this held the value each must hold; the
+#: name. RNV-COLOR-SYNC, 2026-10-16: this held the value each must hold; the
 #: values are written from the register now, and held there.
 NEW = {
     'APP_PANEL_HOVER': 'APP.panel-hover',
@@ -70,7 +70,7 @@ NEW = {
 
 #: The names this pass removes. A rename is only finished when the old name is
 #: gone from every file, not merely unused in one.
-GONE = ('GREY_3A', 'GREY_E8')
+GONE = ('GRAY_3A', 'GRAY_E8')
 
 #: What the split leaves behind: the ramp step, and the static surfaces that
 #: keep it -- two since RNV-NAMED-AND-USED, 2026-10-04, when the dark
@@ -82,8 +82,8 @@ STATIC_EE_KEYS = ('diff_html_header_bg',)
 #: Palette entries and what they must resolve to. Written as VALUES while
 #: that pass renamed the constants that hold them -- a check that read the new
 #: name's value would have been reading the rename twice and proving nothing.
-#: RNV-COLOUR-SYNC, 2026-10-16: the renames are landed, and each value is held
-#: against the register by tests/test_colours_in_sync.py, outside this file.
+#: RNV-COLOR-SYNC, 2026-10-16: the renames are landed, and each value is held
+#: against the register by tests/test_colors_in_sync.py, outside this file.
 #: Each entry is the constant it resolves to, by name, so a brand move needs
 #: no edit here.
 PINNED_ENTRIES = {
@@ -93,7 +93,7 @@ PINNED_ENTRIES = {
 }
 
 
-def grey(n: int) -> str:
+def gray(n: int) -> str:
     v = n * GRID_STEP
     return '#%02x%02x%02x' % (v, v, v)
 
@@ -139,7 +139,7 @@ def _palette_names(name: str) -> dict:
 def test_everything_this_file_reads_still_exists():
     for name in NEW:
         assert hasattr(colors, name), f'utils.colors has no {name}'
-    assert hasattr(colors, 'GREY_EE'), 'the ramp step survived the split'
+    assert hasattr(colors, 'GRAY_EE'), 'the ramp step survived the split'
     for mode, key in PINNED_ENTRIES:
         live = getattr(DialogStyleManager, mode)
         assert key in live, f'{mode} has no {key!r}'
@@ -158,9 +158,9 @@ def test_the_new_constants_hold_the_registered_values():
     importable -- which is exactly the case that let these three sit
     misclassified for two days.
 
-    RNV-COLOUR-SYNC, 2026-10-16: it held each value written out. It holds now
+    RNV-COLOR-SYNC, 2026-10-16: it held each value written out. It holds now
     that brand_map.json takes each from its register name; the value is
-    written from there, and tests/test_colours_in_sync.py holds it."""
+    written from there, and tests/test_colors_in_sync.py holds it."""
     drift = {n: BRAND_MAP.get(n) for n, v in NEW.items()
              if BRAND_MAP.get(n) != v}
     assert not drift, f'brand_map.json does not take these from their register names: {drift}'
@@ -193,7 +193,7 @@ def _identifiers(source: str) -> set:
 
     Read from the token stream so COMMENTS ARE EXCLUDED. A regex cannot tell a
     use from a mention, and the comment beside APP_PANEL_HOVER says "WAS
-    GREY_3A, A RAMP STEP" -- explaining the rename, in the file the rename
+    GRAY_3A, A RAMP STEP" -- explaining the rename, in the file the rename
     happened in. A word-anchored regex flags that and reports the rename as
     incomplete, which is exactly what it did the first time this ran.
     """
@@ -224,7 +224,7 @@ def test_the_rename_is_still_explained_where_it_happened():
     """Guard the guard, from the other side. The sweep above deliberately
     cannot see comments, so passing it proves nothing about whether the note
     explaining the rename survived -- and that note is the only thing telling
-    the next reader why GREY_3A vanished."""
+    the next reader why GRAY_3A vanished."""
     text = COLORS.read_text(encoding='utf-8')
     for name in GONE:
         assert re.search(rf'WAS {name}\b', text), (
@@ -236,17 +236,17 @@ def test_the_rename_is_still_explained_where_it_happened():
 # --------------------------------------------------------------------- the split
 
 def test_the_ramp_step_survived_and_is_still_app_owned():
-    """GREY_EE is NOT the register's. Three static surfaces keep it, and if it
+    """GRAY_EE is NOT the register's. Three static surfaces keep it, and if it
     ever became a mirror those three would start following an interaction
     plate they have nothing to do with."""
-    # RNV-COLOUR-SYNC, #52 A (2026-10-17): the value was pinned here by its hex
-    # code. brand_map.json holds GREY_EE as the application's own, and
-    # tests/test_colours_in_sync.py holds the colour file to the map.
-    entry = BRAND_MAP['GREY_EE']
-    assert isinstance(entry, dict) and entry['app'] == colors.GREY_EE, (
-        f'brand_map.json holds GREY_EE as {entry!r}, not as the '
+    # RNV-COLOR-SYNC, #52 A (2026-10-17): the value was pinned here by its hex
+    # code. brand_map.json holds GRAY_EE as the application's own, and
+    # tests/test_colors_in_sync.py holds the color file to the map.
+    entry = BRAND_MAP['GRAY_EE']
+    assert isinstance(entry, dict) and entry['app'] == colors.GRAY_EE, (
+        f'brand_map.json holds GRAY_EE as {entry!r}, not as the '
         f'application\'s own ramp step')
-    assert colors.PROVENANCE.get('GREY_EE') == 'app-ramp'
+    assert colors.PROVENANCE.get('GRAY_EE') == 'app-ramp'
 
 
 def test_the_static_surfaces_still_use_the_ramp_step():
@@ -256,9 +256,9 @@ def test_the_static_surfaces_still_use_the_ramp_step():
     names = {}
     for mode in ('DARK', 'LIGHT'):
         names.update(_palette_names(mode))
-    using = [k for k in STATIC_EE_KEYS if names.get(k) == 'GREY_EE']
+    using = [k for k in STATIC_EE_KEYS if names.get(k) == 'GRAY_EE']
     assert len(using) == len(STATIC_EE_KEYS), (
-        f'only {using} still name GREY_EE. The split puts the interaction '
+        f'only {using} still name GRAY_EE. The split puts the interaction '
         f'plate on APP_HOVER_LIGHT and leaves the static grounds on the ramp '
         f'step; if the grounds moved too, static surfaces are now claiming to '
         f'be a hover state.')
@@ -276,8 +276,8 @@ def test_the_coincidence_is_recorded():
     mistake."""
     mirror = pathlib.Path(__file__).with_name('test_brand_mirror.py')
     text = mirror.read_text(encoding='utf-8')
-    assert "'GREY_EE': (" in text, (
-        f'GREY_EE shares {colors.GREY_EE} with APP["hover-light"] and is not in '
+    assert "'GRAY_EE': (" in text, (
+        f'GRAY_EE shares {colors.GRAY_EE} with APP["hover-light"] and is not in '
         'COINCIDENT. The exemption is what keeps the sharing deliberate.')
 
 
@@ -292,9 +292,9 @@ def test_the_dark_rung_is_an_exact_step_on_the_ladder():
 
 
 def test_the_border_is_an_edge_and_not_a_rung():
-    """The distinction that made the ladder look incomplete. APP_BORDER is grey(3)
+    """The distinction that made the ladder look incomplete. APP_BORDER is gray(3)
     on the ink grid, which governs inks and edges; it was never a surface."""
-    assert colors.APP_BORDER == grey(3)
+    assert colors.APP_BORDER == gray(3)
     base = int(colors.BRAND_BLACK.lstrip('#'), 16)
     rungs = {base + n * (LADDER_STEP * 0x010101) for n in range(-1, 3)}
     assert int(colors.APP_BORDER.lstrip('#'), 16) not in rungs
@@ -303,7 +303,7 @@ def test_the_border_is_an_edge_and_not_a_rung():
 # --------------------------------------------------- the floor and the plate
 
 def test_the_plate_is_a_step_on_the_ink_grid():
-    assert colors.APP_HOVER_LIGHT == grey(14)
+    assert colors.APP_HOVER_LIGHT == gray(14)
 
 
 def test_the_deep_gold_is_calibrated_against_the_floor():
@@ -342,9 +342,9 @@ def test_every_renamed_entry_resolves_to_what_it_resolved_to_before():
     check that compared an entry against the name it now uses would be reading
     the rename twice and proving nothing about it.
 
-    RNV-COLOUR-SYNC, 2026-10-16: each value is read from the constant
+    RNV-COLOR-SYNC, 2026-10-16: each value is read from the constant
     PINNED_ENTRIES names now. That value is pinned outside the rename, by
-    tests/test_colours_in_sync.py against the register, so a brand move needs
+    tests/test_colors_in_sync.py against the register, so a brand move needs
     no edit here."""
     wrong = []
     for (mode, key), name in PINNED_ENTRIES.items():

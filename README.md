@@ -4,7 +4,7 @@
 ![PyQt6](https://img.shields.io/badge/PyQt-6-41CD52)
 ![Version](https://img.shields.io/badge/version-3.3.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-yellow)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgray)
 ![Tests](https://img.shields.io/badge/tests-1000%2B%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-76%25-brightgreen)
 
@@ -223,8 +223,8 @@ rnv-text-transformer/
 ├── RNV_Text_Transformer.py       # GUI entry point
 ├── requirements.txt
 ├── pyproject.toml
-├── brand_map.json                 # Where each colour comes from: rnv-brand or the app
-├── COLORS.md                      # This app's colour chart, written by the sync
+├── brand_map.json                 # Where each color comes from: rnv-brand or the app
+├── COLORS.md                      # This app's color chart, written by the sync
 ├── LICENSE
 ├── README.md
 ├── ARCHITECTURE.md
@@ -289,11 +289,11 @@ rnv-text-transformer/
 │   └── screenshots/               # README screenshots
 │
 ├── tools/
-│   └── sync_colors.py             # Writes the colours in utils/colors.py, and COLORS.md
+│   └── sync_colors.py             # Writes the colors in utils/colors.py, and COLORS.md
 │
 ├── .github/workflows/             # CI workflows
 │   ├── tests.yml                  # Linux + Windows test matrix
-│   └── brand-sync.yml             # Daily: colours from rnv-brand; a pull request only if one moved
+│   └── brand-sync.yml             # Daily: colors from rnv-brand; a pull request only if one moved
 │
 └── test_rnv_text_transformer.py   # unittest regression suite
 ```
@@ -373,13 +373,13 @@ The methodology that found these bugs — property-based testing for pure logic,
 
 **What it would be.** A gutter down the left edge of the input and output panes that numbers their lines, marks the line the caret is on, and can be hidden. It serves text where a line's number is how a place in it is named: code, logs, and the formats among those the app reads (`.py`, `.js`, `.html`, `.log`) where a reader is told "see line 120".
 
-**What there was.** A widget for it, `ui/line_number_text_edit.py`: `LineNumberTextEdit`, and a rich-text variant, with a gutter, the caret's line marked, a switch to hide the numbers, and a method to go to a line. Nothing in the app created it: both panes are another class, and no menu, setting or shortcut reached it. It knew dark and light but not image mode; in dark its text area stayed white, so the caret's marked line could not be read; and it lacked what the panes have, from a dropped file to the right-click menu and the app's styling. It was removed on 11 October 2026, with the four colours it read in each palette (`line_number_bg`, `line_number_fg`, `line_number_current_bg`, `line_number_current_fg`) and the tests that built it.
+**What there was.** A widget for it, `ui/line_number_text_edit.py`: `LineNumberTextEdit`, and a rich-text variant, with a gutter, the caret's line marked, a switch to hide the numbers, and a method to go to a line. Nothing in the app created it: both panes are another class, and no menu, setting or shortcut reached it. It knew dark and light but not image mode; in dark its text area stayed white, so the caret's marked line could not be read; and it lacked what the panes have, from a dropped file to the right-click menu and the app's styling. It was removed on 11 October 2026, with the four colors it read in each palette (`line_number_bg`, `line_number_fg`, `line_number_current_bg`, `line_number_current_fg`) and the tests that built it.
 
 **What would need to be decided before it is built again.**
 
 - **Which panes.** The input, the output, or both; and whether the output's numbers follow the input's lines, which a transform keeps and a cleanup that removes lines does not.
 - **On or off, and where the switch lives.** A setting with a default, a menu entry, a shortcut, or all three; and whether the choice is remembered between runs.
-- **How it looks in each mode.** Dark, light and image, from palette entries named for the gutter's ground, its numbers and the caret's line. In image mode the gutter sits over the background image, as the panes do. Each colour shown drawn, read back from the pixels, and the numbers held to 4.5:1 on their ground.
+- **How it looks in each mode.** Dark, light and image, from palette entries named for the gutter's ground, its numbers and the caret's line. In image mode the gutter sits over the background image, as the panes do. Each color shown drawn, read back from the pixels, and the numbers held to 4.5:1 on their ground.
 - **Wrapped lines.** Whether a line the pane wraps is numbered once, as a line of the file, or on each row it fills.
 - **The caret's line.** Marked in the gutter only, or across the pane as well, and how that sits with Find's highlights, which are drawn over the text.
 - **Going to a line.** Whether it is offered, and from where: a menu, a shortcut, or Find.

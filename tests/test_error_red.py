@@ -32,18 +32,18 @@ import pathlib
 
 import pytest
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 TEXT_FLOOR = 4.5
 
-# RNV-COLOUR-SYNC, 2026-10-16: the grounds by name, where they were their hex
+# RNV-COLOR-SYNC, 2026-10-16: the grounds by name, where they were their hex
 # codes: the dark bg and bg_secondary.
 DARK_GROUNDS = (colors.BRAND_BLACK, colors.APP_CARD)
 # All four registered rungs, down to GOLD_TEXT_GROUND_FLOOR. Narrowed to
@@ -56,7 +56,7 @@ DARK_TEXT = ("STATUS_SUCCESS_TEXT", "STATUS_WARNING_TEXT", "STATUS_ERROR_TEXT")
 LIGHT_TEXT = ("STATUS_SUCCESS_TEXT_LIGHT", "STATUS_WARNING_TEXT_LIGHT",
               "STATUS_ERROR_TEXT_LIGHT")
 
-#: Each value by the register name it is written from. RNV-COLOUR-SYNC,
+#: Each value by the register name it is written from. RNV-COLOR-SYNC,
 #: 2026-10-16: the values were written here; they are written from the
 #: register now, and held there.
 REGISTERED = {
@@ -90,12 +90,12 @@ def test_the_six_values_are_the_registered_ones(name, value):
     """Pinned by value, not by relationship.
 
     A test asserting only that these differ from each other would pass on six
-    wrong colours. The register publishes nine hexes and this repository
+    wrong colors. The register publishes nine hexes and this repository
     mirrors the six it draws; if the register moves one, this is the line
     that says so.
 
-    RNV-COLOUR-SYNC, 2026-10-16: pinned by the register name brand_map.json
-    writes it from; tests/test_colours_in_sync.py holds the value, against
+    RNV-COLOR-SYNC, 2026-10-16: pinned by the register name brand_map.json
+    writes it from; tests/test_colors_in_sync.py holds the value, against
     the register at the pin.
     """
     assert BRAND_MAP[name] == value
@@ -106,7 +106,7 @@ def test_no_retired_status_value_survives(dead):
     """RETIRED_ERROR_TEXT_FROM_BOOTSTRAP and RETIRED_ERROR_TEXT_LIGHT_FROM_BOOTSTRAP
     were derived from RETIRED_BOOTSTRAP_RED. With the base retired
     they are orphans -- values derived from something no longer in the palette,
-    which is the RETIRED_OLD_DARK_GOLD_TINT failure this programme has already
+    which is the RETIRED_OLD_DARK_GOLD_TINT failure this program has already
     paid for once."""
     live = {v for k, v in vars(colors).items()
             if isinstance(v, str) and v.startswith("#")}
@@ -164,7 +164,7 @@ def test_light_text_variants_carry_text(name, ground):
     register re-walks against GOLD_TEXT_GROUND_FLOOR the answers are
     STATUS_SUCCESS_TEXT_LIGHT / STATUS_WARNING_TEXT_LIGHT /
     STATUS_ERROR_TEXT_LIGHT -- each moving less than the register's own 8.40
-    threshold, so they stay the same three colours -- and the fix here is to
+    threshold, so they stay the same three colors -- and the fix here is to
     restore APP_HOVER_LIGHT and GOLD_TEXT_GROUND_FLOOR to LIGHT_GROUNDS and
     update REGISTERED.
     """

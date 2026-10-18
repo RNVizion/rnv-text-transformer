@@ -3,14 +3,14 @@ Brand mirror, palette-literal and provenance guard.
 
 Three things this file refuses to let happen:
 
-1. A colour appears in the palette as a bare hex literal instead of a name.
+1. A color appears in the palette as a bare hex literal instead of a name.
 2. A mirrored value drifts from RNVizion/rnv-brand.
 3. A constant is added to utils/colors.py without saying where it came from.
 
 (3) is the one that matters most, and it is why PROVENANCE lives in colors.py
 rather than here. A hand-written list inside a test covers what it covers and
 says nothing about what it misses -- it goes stale in the direction that
-reports clean. The completeness checks below close that: every colour constant
+reports clean. The completeness checks below close that: every color constant
 must have a provenance entry, and every entry must name a real constant.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ import re
 
 import pytest
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
@@ -32,8 +32,8 @@ COLORS = ROOT / 'utils' / 'colors.py'
 VALID_GROUPS = {'register', 'derived', 'app-ramp', 'app-semantic'}
 
 
-def _colour_constants() -> dict[str, ast.AST]:
-    """Every module-level colour constant in colors.py -> its value node."""
+def _color_constants() -> dict[str, ast.AST]:
+    """Every module-level color constant in colors.py -> its value node."""
     tree = ast.parse(COLORS.read_text(encoding='utf-8'))
     out = {}
     for node in tree.body:
@@ -43,10 +43,10 @@ def _colour_constants() -> dict[str, ast.AST]:
         if name == 'PROVENANCE':
             continue
         value = getattr(colors, name, None)
-        is_colour = (isinstance(value, str) and value.startswith('#')) or (
+        is_color = (isinstance(value, str) and value.startswith('#')) or (
             isinstance(value, tuple) and value
             and all(isinstance(v, str) and v.startswith('#') for v in value))
-        if is_colour:
+        if is_color:
             out[name] = node.value
     return out
 
@@ -71,17 +71,17 @@ def _brand_value(brand, name: str):
 # ---------------------------------------------------------------- completeness
 
 def test_provenance_covers_every_constant():
-    """No colour constant may sit outside PROVENANCE."""
-    missing = sorted(set(_colour_constants()) - set(colors.PROVENANCE))
+    """No color constant may sit outside PROVENANCE."""
+    missing = sorted(set(_color_constants()) - set(colors.PROVENANCE))
     assert not missing, (
-        'colour constants with no provenance entry:\n  ' + '\n  '.join(missing)
+        'color constants with no provenance entry:\n  ' + '\n  '.join(missing)
         + '\n\nAdd each to PROVENANCE in utils/colors.py as one of '
         + ', '.join(sorted(VALID_GROUPS)))
 
 
 def test_provenance_has_no_phantom_entries():
     """And no entry may name a constant that no longer exists."""
-    phantom = sorted(set(colors.PROVENANCE) - set(_colour_constants()))
+    phantom = sorted(set(colors.PROVENANCE) - set(_color_constants()))
     assert not phantom, (
         'PROVENANCE names constants that are not defined:\n  '
         + '\n  '.join(phantom))
@@ -129,9 +129,9 @@ def test_register_values_match_rnv_brand():
 #:
 #: name -> (register entry, why it is not the same role)
 COINCIDENT: dict[str, tuple[str, str]] = {
-    'GREY_E0': (
+    'GRAY_E0': (
         'APP["pressed-light"]',
-        'grey(14) is not the only step doing two jobs. rnv-brand rev 27 '
+        'gray(14) is not the only step doing two jobs. rnv-brand rev 27 '
         f'registered {cv.REGISTER_APP_PRESSED_LIGHT} as the LIGHT PRESSED PLATE -- what a control '
         'goes to while it is held down. This ramp step is one STATIC '
         'surface: the light scrollbar track, which rnv-color-picker and '
@@ -140,29 +140,29 @@ COINCIDENT: dict[str, tuple[str, str]] = {
         'must NOT follow it, which is why the hex is spelled by a ramp '
         'name here rather than mirrored. FOUND 2026-09-07, by making '
         'engine.brand importable and letting this file test itself.'),
-    'GREY_DD': (
+    'GRAY_DD': (
         'APP["text"]',
-        'grey(13) does two jobs. In the register it is the DARK ink; here it '
+        'gray(13) does two jobs. In the register it is the DARK ink; here it '
         'is border_light in the LIGHT palette -- one step softer than '
-        'border: GREY_CC -- plus the always-light-styled diff export border. '
-        'Different mode, different role. If APP["text"] moves off grey(13) '
+        'border: GRAY_CC -- plus the always-light-styled diff export border. '
+        'Different mode, different role. If APP["text"] moves off gray(13) '
         'this must NOT follow it, which is exactly why it is named here '
         'rather than mirrored.'),
-    'GREY_EE': (
+    'GRAY_EE': (
         'APP["hover-light"]',
-        'grey(14) does two jobs here, the same way grey(13) does. In the '
+        'gray(14) does two jobs here, the same way gray(13) does. In the '
         'register it is the LIGHT INTERACTION PLATE -- what a control hovers '
         'to in light mode, which this app mirrors as APP_HOVER_LIGHT. This '
         'ramp step is three STATIC surfaces: the diff export header in both '
         'modes, and the line number gutter at rest. A resting ground is not '
-        'an interaction state. If APP["hover-light"] moves off grey(14) these '
+        'an interaction state. If APP["hover-light"] moves off gray(14) these '
         'three must NOT follow it, which is exactly why the hex is spelled by '
         'two names rather than one.'),
-    # RNV-COLOUR-SYNC, #56 A and #48 A (2026-10-17).
+    # RNV-COLOR-SYNC, #56 A and #48 A (2026-10-17).
     'SEMANTIC_EXPORT_RTF_INK': (
         'APP["window"]',
-        'An exported RTF\'s text colour is export data: the first entry of '
-        'the colour table core/export_manager.py writes into the document. '
+        'An exported RTF\'s text color is export data: the first entry of '
+        'the color table core/export_manager.py writes into the document. '
         'It holds the same value as the register\'s black and is not the '
         'brand\'s black: a document the application has written must not '
         'change when the brand moves, so it is the application\'s own (#48 A) '
@@ -182,7 +182,7 @@ def _register_values(brand) -> dict:
     between an app-owned label and a register value wearing it.
 
     That is not hypothetical. rev 24 added GOLD_TEXT_GROUND_FLOOR as a
-    module constant, and this app held its value as GREY_E8, marked app-ramp. The
+    module constant, and this app held its value as GRAY_E8, marked app-ramp. The
     check ran, found nothing, and reported clean -- because the name of the
     thing it needed to look at was not on its list. A list of what to check
     goes stale behind the thing it checks; walking the module does not.
@@ -234,7 +234,7 @@ def test_app_owned_values_are_not_register_values():
 
 def test_every_coincidence_still_coincides():
     """The other direction. A named coincidence that no longer shares a value
-    is a dead exemption, and a dead exemption is a licence waiting for a
+    is a dead exemption, and a dead exemption is a license waiting for a
     defect: it would let a genuinely misclassified value hide behind it."""
     brand = pytest.importorskip(
         'engine.brand', reason='rnv-brand not importable here')
@@ -276,7 +276,7 @@ def test_every_coincidence_says_why():
 
 def test_derived_constants_are_actually_derived():
     """A literal must not wear the 'derived' label."""
-    nodes = _colour_constants()
+    nodes = _color_constants()
     literal = []
     for name, group in colors.PROVENANCE.items():
         if group != 'derived':
@@ -290,7 +290,7 @@ def test_derived_constants_are_actually_derived():
 
 def test_register_constants_are_literals_not_computed():
     """A mirrored value must be written down, so the mirror can be compared."""
-    nodes = _colour_constants()
+    nodes = _color_constants()
     computed = [n for n, g in colors.PROVENANCE.items()
                 if g == 'register' and not isinstance(nodes.get(n), ast.Constant)]
     assert not computed, (
@@ -324,7 +324,7 @@ def test_no_bare_hex_in_palette(theme):
                       'utils/colors.py:\n  ' + '\n  '.join(bare))
 
 
-def test_every_palette_colour_is_a_known_constant():
+def test_every_palette_color_is_a_known_constant():
     unknown = [f'{t}[{key!r}] -> utils.colors.{n.id} missing'
                for t, key, n in _palette_nodes()
                if isinstance(n, ast.Name) and not hasattr(colors, n.id)]

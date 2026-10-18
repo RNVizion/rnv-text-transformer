@@ -22,13 +22,13 @@ import pathlib
 
 import pytest
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors as C
 
-#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
-#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
+#: says. The values are held by tests/test_colors_in_sync.py, against the
 #: register at the pin; what this file holds is the name each one takes.
-BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((pathlib.Path(__file__).resolve().parents[1] / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 TEXT_FLOOR = 4.5
 
@@ -41,12 +41,12 @@ REWALKED = {'STATUS_SUCCESS_TEXT_LIGHT': 'STATUS.success-text-light',
 # is in the list on
 # purpose: it is asserted to FAIL, which is what makes it a boundary.
 #
-# RNV-COLOUR-SYNC, #52 A (2026-10-17): by name. The four rungs this
-# application draws are read from the colour file, under the register entries
-# they mirror (the hover rung is APP_HOVER_LIGHT, not the ramp step GREY_EE
+# RNV-COLOR-SYNC, #52 A (2026-10-17): by name. The four rungs this
+# application draws are read from the color file, under the register entries
+# they mirror (the hover rung is APP_HOVER_LIGHT, not the ramp step GRAY_EE
 # that shares its hex). The second rung, which it does not draw, and the
-# pressed plate, whose hex it draws only as its own scrollbar track (GREY_E0,
-# a declared coincidence), are the register's, in tests/colour_values.py.
+# pressed plate, whose hex it draws only as its own scrollbar track (GRAY_E0,
+# a declared coincidence), are the register's, in tests/color_values.py.
 REACHES = (C.WHITE, cv.REGISTER_APP_SURFACE_LIGHT_2, C.APP_SURFACE_LIGHT_3,
            C.APP_HOVER_LIGHT, C.GOLD_TEXT_GROUND_FLOOR)
 STOPS_AT = cv.REGISTER_APP_PRESSED_LIGHT
@@ -78,8 +78,8 @@ def test_the_light_values_are_the_re_walked_ones(name, value):
     against APP_SURFACE_LIGHT_3; rev 31 holds these, walked against
     GOLD_TEXT_GROUND_FLOOR.
 
-    RNV-COLOUR-SYNC, 2026-10-16: pinned by the register name brand_map.json
-    writes it from; tests/test_colours_in_sync.py holds the value."""
+    RNV-COLOR-SYNC, 2026-10-16: pinned by the register name brand_map.json
+    writes it from; tests/test_colors_in_sync.py holds the value."""
     assert BRAND_MAP[name] == value
 
 

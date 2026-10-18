@@ -1,4 +1,4 @@
-"""A constant names a colour; a key names a role. RNV-SEMANTIC-GUARD
+"""A constant names a color; a key names a role. RNV-SEMANTIC-GUARD
 
 Ruled by Chris on 2026-09-02, on the twenty values this application owns
 outright, after seeing them rendered in situ: name them by MEANING, the way
@@ -26,10 +26,10 @@ ROOT = Path(__file__).resolve().parent.parent
 PALETTE = ROOT / "utils" / "colors.py"
 DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 
-#: RNV-COLOUR-SYNC, 2026-10-17 (#52 A). Where each colour comes from, as
-#: brand_map.json says. The values are held by tests/test_colours_in_sync.py,
+#: RNV-COLOR-SYNC, 2026-10-17 (#52 A). Where each color comes from, as
+#: brand_map.json says. The values are held by tests/test_colors_in_sync.py,
 #: against the map; what this file holds is that each is the application's own.
-BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colors"]
 
 # RNV-DIFF-FLOORS (2026-09-13) moved the six diff values and retired ten
 # others. The six moved for a measured reason, not a taste -- the floors
@@ -38,15 +38,15 @@ BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["c
 # that changes without this file changing is still the defect this guard
 # was written for.
 #
-# RNV-COLOUR-SYNC, #52 A (2026-10-17): the table held each value by its hex
+# RNV-COLOR-SYNC, #52 A (2026-10-17): the table held each value by its hex
 # code. brand_map.json holds each now, as the application's own, and
-# tests/test_colours_in_sync.py holds the colour file to the map, so a value
+# tests/test_colors_in_sync.py holds the color file to the map, so a value
 # that changes without the map changing still fails; this table names them.
 VALUES = ('SEMANTIC_DIFF_ADDED', 'SEMANTIC_DIFF_REMOVED', 'SEMANTIC_DIFF_CHANGED',
           'SEMANTIC_DIFF_ADDED_LIGHT', 'SEMANTIC_DIFF_REMOVED_LIGHT',
           'SEMANTIC_DIFF_CHANGED_LIGHT', 'SEMANTIC_REGEX_MATCH',
           'SEMANTIC_REGEX_MATCH_LIGHT')
-RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60',
+RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GRAY_60',
            # Retired by RNV-DIFF-FLOORS: ten values with no
            # consumer left, and every name that carried one.
            # The two CURRENT names reached a palette key and
@@ -142,11 +142,11 @@ def test_the_drag_highlight_is_a_role_wired_to_the_brand():
     assert getattr(found.func, "id", None) == "with_alpha", (
         "_DRAG_HIGHLIGHT is not built with with_alpha any more")
     assert isinstance(found.args[0], ast.Name) and found.args[0].id == "BRAND_GOLD", (
-        "_DRAG_HIGHLIGHT no longer takes its colour from BRAND_GOLD")
+        "_DRAG_HIGHLIGHT no longer takes its color from BRAND_GOLD")
 
 
 def test_the_drag_highlight_style_holds_no_literal():
     """rule 1, in the one place this application still broke it."""
     text = DRAG.read_text(encoding="utf-8-sig")
     hits = re.findall(r"#[0-9a-fA-F]{6}\b", text)
-    assert not hits, f"{DRAG.name} writes colour literals: {hits}"
+    assert not hits, f"{DRAG.name} writes color literals: {hits}"

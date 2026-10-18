@@ -315,7 +315,7 @@ class ImageButton(QPushButton):
         if button_height <= 0:
             font_size = 10
         else:
-            # Primary: natural size from button height (original behaviour)
+            # Primary: natural size from button height (original behavior)
             font_size = max(8, int(button_height * 0.28))
             
             # Secondary: only reduce if the text would actually clip at this size.

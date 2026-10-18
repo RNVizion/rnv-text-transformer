@@ -183,7 +183,7 @@ class RegexPatterns:
         name="Hex Color",
         pattern=r"#(?:[0-9a-fA-F]{3}){1,2}\b",
         description="Matches hex color codes",
-        # RNV-COLOUR-SYNC, #56 A (2026-10-17): named in the colour file as the
+        # RNV-COLOR-SYNC, #56 A (2026-10-17): named in the color file as the
         # application's own data, in the upper case it was written in.
         example_match=SEMANTIC_HEX_PATTERN_EXAMPLE,
         category="Data"

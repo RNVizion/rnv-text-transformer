@@ -122,7 +122,7 @@ class FindReplaceDialog(BaseDialog):
         # that text, and good for as long as the pane still holds it.
         self._found_in: str | None = None
         self._found_for: tuple[str, dict] | None = None
-        # RNV-FIND-REPAINT 2026-09-28: the colour the highlights in the text
+        # RNV-FIND-REPAINT 2026-09-28: the color the highlights in the text
         # were painted in, while any are there; what a switch finds them by.
         self._painted_highlight: QColor | None = None
         
@@ -138,7 +138,7 @@ class FindReplaceDialog(BaseDialog):
         mode's until the next Find.
         """
         super().refresh_theme()
-        self._recolour_highlights()
+        self._recolor_highlights()
     
     def _configure_window(self) -> None:
         """Override to set fixed width only (height adjusts to content).
@@ -716,9 +716,9 @@ class FindReplaceDialog(BaseDialog):
         match = list(re.compile(search_text, flags).finditer(text))[self._current_match_index]
         return match.expand(replace_text)
     
-    def _highlight_colour(self) -> QColor:
+    def _highlight_color(self) -> QColor:
         """
-        The colour matches are highlighted in: the mode's accent, at
+        The color matches are highlighted in: the mode's accent, at
         FIND_HIGHLIGHT_ALPHA (80).
         
         RNV-FIND-REPAINT 2026-09-28: one place for it, read by the Find that
@@ -736,9 +736,9 @@ class FindReplaceDialog(BaseDialog):
         
         # RNV-EXTRA-SELECTIONS 2026-09-30: shown over the text, not written
         # into it. This painted character formats -- one step of the undo
-        # history (RNV-NOT-AN-EDIT), and a colour a copy carried to the
+        # history (RNV-NOT-AN-EDIT), and a color a copy carried to the
         # clipboard. Setting the selections replaces the old ones.
-        highlight_color = self._highlight_colour()
+        highlight_color = self._highlight_color()
         spans = self._in_qt(self.target_text_edit.toPlainText(), self._current_matches)
         self._show_highlights(self.target_text_edit, spans, highlight_color)
         self._painted_highlight = QColor(highlight_color)
@@ -779,12 +779,12 @@ class FindReplaceDialog(BaseDialog):
         self.target_text_edit.setExtraSelections([])
         self._painted_highlight = None
     
-    def _recolour_highlights(self) -> None:
+    def _recolor_highlights(self) -> None:
         """
         Paint the highlights this dialog drew again, in this mode's accent.
         
-        RNV-FIND-REPAINT 2026-09-28. What is recoloured is whatever carries
-        the colour they were painted in, where it now sits: an edit since
+        RNV-FIND-REPAINT 2026-09-28. What is recolored is whatever carries
+        the color they were painted in, where it now sits: an edit since
         the Find moves the highlights with the text, so the positions the
         Find recorded may no longer be theirs. The caret, the current
         match's selection and the view stay where they are, and the text
@@ -794,20 +794,20 @@ class FindReplaceDialog(BaseDialog):
         painted, edit = self._painted_highlight, self.target_text_edit
         if painted is None or edit is None:
             return
-        colour = self._highlight_colour()
-        if colour == painted:
+        color = self._highlight_color()
+        if color == painted:
             return
         # RNV-EXTRA-SELECTIONS 2026-09-30: the highlights are extra
         # selections now, whose cursors have followed any edit since the
-        # Find. Those that carry the painted colour take the new one; the
+        # Find. Those that carry the painted color take the new one; the
         # text, its cursor and its undo history are not touched.
         selections = edit.extraSelections()
-        recoloured = QTextCharFormat()
-        recoloured.setBackground(QBrush(colour))
+        recolored = QTextCharFormat()
+        recolored.setBackground(QBrush(color))
         for selection in selections:
             if selection.format.background().color() == painted:
-                selection.format = recoloured
-        self._painted_highlight = QColor(colour)
+                selection.format = recolored
+        self._painted_highlight = QColor(color)
         edit.setExtraSelections(selections)
     
     def closeEvent(self, event) -> None:

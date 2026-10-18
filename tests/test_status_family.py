@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from tests import colour_values as cv
+from tests import color_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
@@ -30,7 +30,7 @@ RETIRED = {
 
 SOURCES = SWEPT = ("utils/colors.py", "utils/dialog_styles.py")
 # the success text: a value utils/colors.py holds. It was the success fill's
-# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOUR-SYNC,
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOR-SYNC,
 # 2026-10-16: by name, so it is the value tools/sync_colors.py writes there.
 LIVE_VALUE = colors.STATUS_SUCCESS_TEXT
 
@@ -52,7 +52,7 @@ def _code_only(text: str) -> str:
     about what changed, which is the opposite of what the provenance is for.
 
     Why it is fussier than it looks: an earlier version dropped every STRING
-    token. In Python a colour value IS a string literal -- `X = "#..."` with
+    token. In Python a color value IS a string literal -- `X = "#..."` with
     REGISTER_STATUS_SUCCESS's digits in the quotes --
     so that version removed the uses along with the mentions and the sweep
     could never find anything. It passed on every input, including a file that
@@ -122,7 +122,7 @@ def test_a_status_key_never_carries_a_fill(key, is_dark):
 
 
 def test_the_two_spellings_did_not_come_back():
-    """The register recorded that this one colour was derived independently
+    """The register recorded that this one color was derived independently
     under TWO identifiers across three applications -- STATUS_ERROR_LIGHT here
     and in the picker, STATUS_ERROR_TEXT_LIGHT in the palette manager. One
     name now, and the old one must not reappear alongside it."""
@@ -155,7 +155,7 @@ def test_this_guard_can_still_see():
     """
     src = Path(SWEPT[0]).read_text(encoding="utf-8")
     code = _code_only(src)
-    assert len(code) > 2000, "the tokeniser returned almost nothing"
+    assert len(code) > 2000, "the tokenizer returned almost nothing"
     assert LIVE_VALUE in code, (
         f"the code-only sweep cannot see {LIVE_VALUE}, which is definitely a "
         f"value in {SWEPT[0]}. The sweep for retired values is therefore "

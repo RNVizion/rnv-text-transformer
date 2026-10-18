@@ -90,7 +90,7 @@ class TestTheNonModalDialogsFollowASwitch:
         dlg.close()
 
     def test_watch_folders_without_watchdog_warns_in_the_new_mode(self, main_window, monkeypatch):
-        """The warning shown when watchdog is missing is coloured error."""
+        """The warning shown when watchdog is missing is colored error."""
         import ui.watch_folder_dialog as watch
         monkeypatch.setattr(watch, "WATCHDOG_AVAILABLE", False)
         win = main_window
@@ -213,7 +213,7 @@ class TestSettingsFollowsItsOwnThemeBox:
             differ = [(i, x, y) for i, (x, y) in enumerate(zip(a, b)) if x != y]
             assert not differ, (text, differ[:2])
 
-    def test_the_headings_descriptions_and_tips_change_colour(self, qtbot, tmp_settings):
+    def test_the_headings_descriptions_and_tips_change_color(self, qtbot, tmp_settings):
         """The labels that read the mode, by the ink Qt draws them in: every
         one of them differs between dark and light, and follows the box."""
         dlg = SettingsDialog(tmp_settings, self._theme_manager("dark"))
