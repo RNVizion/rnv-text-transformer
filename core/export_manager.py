@@ -20,7 +20,7 @@ import html
 
 from utils.logger import get_module_logger
 from utils.dialog_styles import DialogStyleManager
-from utils.colors import SEMANTIC_EXPORT_FOOTER
+from utils.colors import SEMANTIC_EXPORT_FOOTER, SEMANTIC_EXPORT_RTF_INK
 
 _logger = get_module_logger("ExportManager")
 
@@ -424,7 +424,11 @@ class ExportManager:
         rtf_font = r"{\fonttbl{\f0 " + options.font_family + r";}{\f1 Consolas;}}"
         
         # Color table (dark theme colors if applicable)
-        rtf_color = r"{\colortbl;\red0\green0\blue0;\red128\green128\blue128;}"
+        # \cf1 is the text, \cf2 the line numbers and the footer.
+        # RNV-COLOUR-SYNC, #56 A (2026-10-17): from the colour file, at the
+        # values the table wrote out, so the document does not move a byte.
+        rtf_color = ("{\\colortbl;" + self._rtf_colour(SEMANTIC_EXPORT_RTF_INK)
+                     + self._rtf_colour(SEMANTIC_EXPORT_FOOTER) + "}")
         
         # Document settings
         font_size_twips = options.font_size * 2  # RTF uses half-points
@@ -463,6 +467,13 @@ class ExportManager:
         
         path.write_text(rtf_content, encoding='utf-8')
     
+    @staticmethod
+    def _rtf_colour(value: str) -> str:
+        """One entry of an RTF colour table, for a six-digit hex colour."""
+        digits = value.lstrip('#')
+        red, green, blue = (int(digits[i:i + 2], 16) for i in (0, 2, 4))
+        return f"\\red{red}\\green{green}\\blue{blue};"
+
     @staticmethod
     def _rtf_escape(text: str) -> str:
         """Escape special RTF characters."""

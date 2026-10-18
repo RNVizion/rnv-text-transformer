@@ -4,8 +4,8 @@ Installed 2026-09-07. It exists because of how the fault it fixes was found:
 not by anybody reading the file, but by making `engine.brand` importable and
 letting a test that had never run say what it had always been going to say.
 
-    GREY_E0 = #e0e0e0 is APP["pressed-light"] in the register, but marked app-ramp
-    GREY_F5 = #f5f5f5 is APP["surface-light-3"] in the register, but marked app-ramp
+    GREY_E0's value is APP["pressed-light"] in the register, but marked app-ramp
+    GREY_F5's value is APP["surface-light-3"] in the register, but marked app-ramp
 
 Both values were app-owned neutrals when this application's light half was
 wired. rnv-brand rev 27 registered the light surface ladder underneath them
@@ -14,11 +14,12 @@ register is guarded with importorskip and rnv-brand is not installable.
 
 The two need OPPOSITE answers, and that is the whole point of this guard:
 
-  * #f5f5f5 is painted by three keys and every one of them is a light window,
+  * GREY_F5's value, APP_SURFACE_LIGHT_3 now, is painted by three keys and
+    every one of them is a light window,
     panel or label ground -- which IS what APP["surface-light-3"] is. So the
     constant becomes a register mirror under the register's name.
 
-  * #e0e0e0 is painted by ONE key, the light scrollbar track. The register's
+  * GREY_E0's value is painted by ONE key, the light scrollbar track. The register's
     pressed-light is an INTERACTION STATE and a groove is a resting surface,
     so the ramp name is right and only the classification was wrong. It is a
     declared coincidence, not a mirror -- the same ruling this file already
@@ -34,6 +35,7 @@ written for.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -45,13 +47,23 @@ from utils.dialog_styles import DialogStyleManager
 ROOT = Path(__file__).resolve().parent.parent
 COLORS = ROOT / 'utils/colors.py'
 STYLES = ROOT / 'utils/dialog_styles.py'
+
+#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
+#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: register at the pin; what this file holds is the name each one takes.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+
 LIGHT = DialogStyleManager.LIGHT
 DARK = DialogStyleManager.DARK
 
 
 def test_the_light_ground_is_a_register_mirror_now():
-    """#f5f5f5 under the register's own key, classified as the register's."""
-    assert colors.APP_SURFACE_LIGHT_3 == '#f5f5f5'
+    """APP_SURFACE_LIGHT_3 under the register's own key, classified as the register's.
+
+    RNV-COLOUR-SYNC, 2026-10-16: the value was pinned here by its hex code. It
+    is pinned by the register name brand_map.json writes it from; the value
+    is held by tests/test_colours_in_sync.py."""
+    assert BRAND_MAP['APP_SURFACE_LIGHT_3'] == 'APP.surface-light-3'
     assert colors.PROVENANCE.get('APP_SURFACE_LIGHT_3') == 'register', (
         'APP_SURFACE_LIGHT_3 is not classified as a register value. It is '
         'APP["surface-light-3"], registered by rnv-brand rev 27.')
@@ -75,15 +87,21 @@ def test_every_light_ground_reads_the_register_name(key):
     src = STYLES.read_text(encoding='utf-8')
     assert f"'{key}': APP_SURFACE_LIGHT_3," in src, (
         f'{key} does not read APP_SURFACE_LIGHT_3')
-    assert LIGHT[key] == '#f5f5f5'
+    assert LIGHT[key] == colors.APP_SURFACE_LIGHT_3
 
 
 def test_the_light_track_keeps_the_ramp_name():
-    """The other half, and the opposite answer. #e0e0e0 IS a register value
+    """The other half, and the opposite answer. GREY_E0's value IS a register value
     now -- APP["pressed-light"] -- but this key is not a pressed state, so it
     keeps the ramp step. Wiring it to the register's name would claim an
     interaction role for a groove on the strength of a shared byte."""
-    assert colors.GREY_E0 == '#e0e0e0'
+    # RNV-COLOUR-SYNC, #52 A (2026-10-17): the value was pinned here by its hex
+    # code. brand_map.json holds GREY_E0 as the application's own, and
+    # tests/test_colours_in_sync.py holds the colour file to the map.
+    entry = BRAND_MAP['GREY_E0']
+    assert isinstance(entry, dict) and entry['app'] == colors.GREY_E0, (
+        f'brand_map.json holds GREY_E0 as {entry!r}, not as the '
+        f'application\'s own ramp step')
     assert LIGHT['scrollbar_bg'] == colors.GREY_E0
     src = STYLES.read_text(encoding='utf-8')
     assert "'scrollbar_bg': GREY_E0," in src
@@ -96,7 +114,7 @@ def test_the_coincidence_is_declared_with_its_reason():
     exists AND that it names the register role it coincides with."""
     from tests import test_brand_mirror as tbm
     assert 'GREY_E0' in tbm.COINCIDENT, (
-        'GREY_E0 shares #e0e0e0 with APP["pressed-light"] and is deliberately '
+        f'GREY_E0 shares {colors.GREY_E0} with APP["pressed-light"] and is deliberately '
         'NOT mirrored. Undeclared, that reads as a misclassification.')
     entry, why = tbm.COINCIDENT['GREY_E0']
     assert entry == 'APP["pressed-light"]'
@@ -107,7 +125,7 @@ def test_no_dark_entry_took_either_light_value():
     """Both values belong to the light half. A dark key holding one of them
     would be a mode leak, and this is cheap to assert while we are here."""
     strays = {k: v for k, v in DARK.items()
-              if v in ('#f5f5f5', '#e0e0e0')}
+              if v in (colors.APP_SURFACE_LIGHT_3, colors.GREY_E0)}
     assert not strays, f'dark entries carrying a light surface: {strays}'
 
 

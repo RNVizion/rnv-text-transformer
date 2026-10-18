@@ -21,6 +21,7 @@ import re
 
 import pytest
 
+from tests import colour_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
@@ -131,7 +132,7 @@ COINCIDENT: dict[str, tuple[str, str]] = {
     'GREY_E0': (
         'APP["pressed-light"]',
         'grey(14) is not the only step doing two jobs. rnv-brand rev 27 '
-        'registered #e0e0e0 as the LIGHT PRESSED PLATE -- what a control '
+        f'registered {cv.REGISTER_APP_PRESSED_LIGHT} as the LIGHT PRESSED PLATE -- what a control '
         'goes to while it is held down. This ramp step is one STATIC '
         'surface: the light scrollbar track, which rnv-color-picker and '
         'rnv-icon-builder both carry at the same value. A resting groove '
@@ -157,6 +158,15 @@ COINCIDENT: dict[str, tuple[str, str]] = {
         'an interaction state. If APP["hover-light"] moves off grey(14) these '
         'three must NOT follow it, which is exactly why the hex is spelled by '
         'two names rather than one.'),
+    # RNV-COLOUR-SYNC, #56 A and #48 A (2026-10-17).
+    'SEMANTIC_EXPORT_RTF_INK': (
+        'APP["window"]',
+        'An exported RTF\'s text colour is export data: the first entry of '
+        'the colour table core/export_manager.py writes into the document. '
+        'It holds the same value as the register\'s black and is not the '
+        'brand\'s black: a document the application has written must not '
+        'change when the brand moves, so it is the application\'s own (#48 A) '
+        'rather than a mirror of TRUE_BLACK.'),
 }
 
 
@@ -171,8 +181,8 @@ def _register_values(brand) -> dict:
     therefore invisible to the test below, which is the only thing standing
     between an app-owned label and a register value wearing it.
 
-    That is not hypothetical. rev 24 added GOLD_TEXT_GROUND_FLOOR #e8e8e8 as a
-    module constant, and this app held #e8e8e8 as GREY_E8, marked app-ramp. The
+    That is not hypothetical. rev 24 added GOLD_TEXT_GROUND_FLOOR as a
+    module constant, and this app held its value as GREY_E8, marked app-ramp. The
     check ran, found nothing, and reported clean -- because the name of the
     thing it needed to look at was not on its list. A list of what to check
     goes stale behind the thing it checks; walking the module does not.
@@ -344,7 +354,7 @@ def test_every_palette_colour_is_a_known_constant():
 #
 # Why count at all, when every pairing already gets a contrast check: an
 # extra gold is usually perfectly legible. rnv-color-picker carried
-# #c4a458 for months, a tint of a gold that had already been retired,
+# RETIRED_OLD_DARK_GOLD_TINT for months, a tint of a gold that had already been retired,
 # rendering on one key with nothing anywhere to notice. Contrast tests
 # cannot see that. Counting can.
 
@@ -418,7 +428,7 @@ def test_the_registered_gold_is_one_of_the_two(mode, base):
 
 def test_pressed_returns_to_the_accent_in_both_modes():
     """What keeps the count at two. Before this pass BRAND_GOLD_PRESSED was
-    #bba57c -- a third gold whose only job was a 2px tab underline."""
+    RETIRED_GOLD_PRESSED -- a third gold whose only job was a 2px tab underline."""
     assert colors.BRAND_GOLD_PRESSED == colors.BRAND_GOLD
     assert colors.BRAND_DARK_GOLD_PRESSED == colors.BRAND_DARK_GOLD
 

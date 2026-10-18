@@ -2,17 +2,18 @@
 The ink moves, the light surface stays behind, and the golds finish their
 rename.
 
-THE FIND THAT SHAPED THIS PASS. APP_TEXT was #e0e0e0 and this app spelled SIX
+THE FIND THAT SHAPED THIS PASS. APP_TEXT held GREY_E0's value and this app
+spelled SIX
 palette entries with it -- five in dark, and ONE IN LIGHT:
 
     utils/dialog_styles.py:273    'scrollbar_bg': APP_TEXT,      <- light
 
-That is #e0e0e0's other half wearing the ink's name. The light scrollbar
+That is GREY_E0's other half wearing the ink's name. The light scrollbar
 track is a SURFACE, and the published grid governs inks and edges and
 deliberately not surfaces. Moving APP_TEXT with the light entry still pointing
 at it would have dragged a surface onto the ink grid and quietly changed a
 light-mode track that rnv-color-picker and rnv-icon-builder both keep at
-#e0e0e0.
+GREY_E0's value.
 
 So the value split before it moved: APP_TEXT went to grey(13) and the light
 track got GREY_E0, named by its byte like every other step in this app's ramp.
@@ -28,6 +29,7 @@ clean and drift hides. APP_TEXT is pinned locally here as well.
 """
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 
@@ -39,6 +41,11 @@ from utils.dialog_styles import DialogStyleManager
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 COLORS = ROOT / 'utils' / 'colors.py'
 STYLES = ROOT / 'utils' / 'dialog_styles.py'
+
+#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
+#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: register at the pin; what this file holds is the name each one takes.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
 
 GRID_STEP = 0x11
 
@@ -71,16 +78,21 @@ def test_the_keys_this_file_reads_still_exist():
 # ------------------------------------------------------------------- the value
 
 def test_the_ink_is_a_step_on_the_grid():
-    assert colors.APP_TEXT == grey(13) == '#dddddd', (
+    assert colors.APP_TEXT == grey(13), (
         f'APP_TEXT is {colors.APP_TEXT}, not grey(13).')
 
 
 def test_the_local_pin_holds_when_the_brand_is_absent():
     """test_brand_mirror.py checks APP_TEXT against engine.brand and SKIPS when
-    rnv-brand is not importable. This is the half that always runs."""
-    assert colors.APP_TEXT == '#dddddd', (
-        'APP_TEXT no longer holds the registered value. If the brand moved, '
-        'update this pin in the same commit that updates utils/colors.py.')
+    rnv-brand is not importable. This is the half that always runs.
+
+    RNV-COLOUR-SYNC, 2026-10-16. This held the value written out, and a brand
+    move meant editing it by hand. Now it holds that brand_map.json takes
+    APP_TEXT from the register's APP["text"]; the value is written from there,
+    and tests/test_colours_in_sync.py holds it."""
+    assert BRAND_MAP['APP_TEXT'] == 'APP.text', (
+        'brand_map.json no longer takes APP_TEXT from APP["text"] in the '
+        'register. The ink is a register value; the map names it as one.')
 
 
 def test_every_dark_ink_entry_carries_the_constant():
@@ -91,18 +103,25 @@ def test_every_dark_ink_entry_carries_the_constant():
 def test_the_light_ink_is_true_black():
     """Primary text is one role with two mode values: dark is a grey on the
     grid, light is TRUE_BLACK."""
-    assert LIGHT['text'] == colors.TRUE_BLACK == '#000000'
+    assert LIGHT['text'] == colors.TRUE_BLACK
 
 
 # ------------------------------------------------------- the half that stayed
 
 def test_the_light_scrollbar_track_did_not_follow_the_ink():
-    """The whole reason this pass split a constant. #e0e0e0 was doing two
+    """The whole reason this pass split a constant. GREY_E0's value was doing two
     jobs under one name; the surface half stays exactly where it was."""
-    assert LIGHT['scrollbar_bg'] == colors.GREY_E0 == '#e0e0e0', (
+    assert LIGHT['scrollbar_bg'] == colors.GREY_E0, (
         f'the light scrollbar track is {LIGHT["scrollbar_bg"]}. It is a '
         f'SURFACE -- the ink grid does not govern it, and picker and '
-        f'icon-builder both keep this track at #e0e0e0.')
+        f'icon-builder both keep this track at {colors.GREY_E0}.')
+    # RNV-COLOUR-SYNC, #52 A (2026-10-17): GREY_E0's value was pinned here by
+    # its hex code. brand_map.json holds it as the application's own, and
+    # tests/test_colours_in_sync.py holds the colour file to the map.
+    entry = BRAND_MAP['GREY_E0']
+    assert isinstance(entry, dict) and entry['app'] == colors.GREY_E0, (
+        f'brand_map.json holds GREY_E0 as {entry!r}. The track is the '
+        f'application\'s own surface, not a register value.')
 
 
 def test_the_light_track_no_longer_reads_the_ink_constant():
@@ -127,9 +146,9 @@ def test_the_new_step_is_classified():
     """RNV-TT-REGISTER (2026-09-07): the assertion is unchanged and still
     right; its REASON was wrong and is corrected here.
 
-    It used to say GREY_E0 is app-owned because '#e0e0e0 is no longer what
+    It used to say GREY_E0 is app-owned because 'its value is no longer what
     the brand holds'. That was true when it was written and stopped being
-    true at rnv-brand rev 27, which registered #e0e0e0 as
+    true at rnv-brand rev 27, which registered GREY_E0's value as
     APP["pressed-light"]. The classification survives on better ground:
     not because the register lacks the value, but because this key does
     not play the register's ROLE. A scrollbar track is a resting surface
@@ -139,7 +158,7 @@ def test_the_new_step_is_classified():
     less than one that fails, because nobody re-reads a green test."""
     assert colors.PROVENANCE.get('GREY_E0') == 'app-ramp', (
         'GREY_E0 has no provenance entry, or the wrong one. The register '
-        'DOES hold #e0e0e0 -- APP["pressed-light"] since rev 27 -- and this '
+        f'DOES hold {colors.GREY_E0} -- APP["pressed-light"] since rev 27 -- and this '
         'is still a ramp step, because the light scrollbar track is a '
         'resting surface and not a pressed state. Declared in COINCIDENT '
         'in tests/test_brand_mirror.py.')
@@ -201,7 +220,8 @@ def _contrast(a: str, b: str) -> float:
 
 
 def test_the_ink_clears_the_text_floor_on_every_dark_ground_it_touches():
-    grounds = ('#000000', '#1a1a1a', '#2a2a2a', '#333333', '#3a3a3a', '#444444')
+    grounds = (colors.TRUE_BLACK, colors.BRAND_BLACK, colors.APP_CARD,
+               colors.APP_BORDER, colors.APP_PANEL_HOVER, colors.GREY_44)
     worst = min((_contrast(colors.APP_TEXT, g), g) for g in grounds)
     assert worst[0] >= 4.5, (
         f'the ink falls to {worst[0]:.2f}:1 on {worst[1]}, under the 4.5 floor')

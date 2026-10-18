@@ -56,6 +56,13 @@ Usage
     # Qt #AARRGGBB -- primary gold at 75% alpha
     highlight = with_alpha(BRAND_GOLD, 0xBF)   # '#bfd2bc93'
 """
+# RNV-COLOUR-SYNC (2026-10-16). Every colour value below whose line ends
+# "# brand: <name>" or "# app-owned" is written by tools/sync_colors.py from
+# brand_map.json: a brand name's value from rnv-brand at the commit pinned in
+# tests/requirements-dev.txt, an app-owned value from the map, with its reason.
+# To change one, change the map and run `python tools/sync_colors.py`. A value
+# edited here is put back by the next sync, and tests/test_colours_in_sync.py
+# fails until then. COLORS.md is the chart of them.
 
 from __future__ import annotations
 
@@ -65,10 +72,10 @@ from typing import Final
 # ==================== BRAND VALUES ====================
 
 #: Bright gold. Dark and image-mode surfaces.
-BRAND_GOLD: Final[str] = '#d2bc93'
+BRAND_GOLD: Final[str] = '#d2bc93'  # brand: APP.accent
 
 #: Deep gold. Light-mode surfaces -- darker because the ground is lighter.
-BRAND_DARK_GOLD: Final[str] = '#8c7337'
+BRAND_DARK_GOLD: Final[str] = '#8c7337'  # brand: APP.accent-light-mode
 
 
 # ==================== DERIVED (NOT REGISTER VALUES) ====================
@@ -153,25 +160,25 @@ BRAND_DARK_GOLD_PRESSED: Final[str] = BRAND_DARK_GOLD
 # this file spelled it out in hex.
 
 #: App window ground; text on gold, on either surface
-TRUE_BLACK: Final[str] = '#000000'
+TRUE_BLACK: Final[str] = '#000000'  # brand: PERMANENT.black
 
 #: Light-surface cards and inputs; the ramp's far anchor
-WHITE: Final[str] = '#ffffff'
+WHITE: Final[str] = '#ffffff'  # brand: PERMANENT.white
 
 #: Brand black (charcoal). Raised surfaces in apps
-BRAND_BLACK: Final[str] = '#1a1a1a'
+BRAND_BLACK: Final[str] = '#1a1a1a'  # brand: APP.panel
 
 #: engine/brand.py APP["card"]
-APP_CARD: Final[str] = '#2a2a2a'
+APP_CARD: Final[str] = '#2a2a2a'  # brand: APP.card
 
 #: engine/brand.py APP["border"]
-APP_BORDER: Final[str] = '#333333'
+APP_BORDER: Final[str] = '#333333'  # brand: APP.border
 
 #: engine/brand.py APP["text"]
-APP_TEXT: Final[str] = '#dddddd'
+APP_TEXT: Final[str] = '#dddddd'  # brand: APP.text
 
 #: engine/brand.py APP["text-dim"]
-APP_TEXT_DIM: Final[str] = '#aaaaaa'
+APP_TEXT_DIM: Final[str] = '#aaaaaa'  # brand: APP.text-dim
 
 #: engine/brand.py APP["panel-hover"]. The dark interaction plate, and the n=+2
 #: rung of the dark surface ladder BRAND_BLACK + n*0x10, n in -1..+2:
@@ -183,7 +190,7 @@ APP_TEXT_DIM: Final[str] = '#aaaaaa'
 #: It is not a rung at all: #333333 is grey(3) on the INK grid, which governs
 #: inks and EDGES, and a border is an edge. Two families compared to each
 #: other. The ladder was complete the whole time.
-APP_PANEL_HOVER: Final[str] = '#3a3a3a'
+APP_PANEL_HOVER: Final[str] = '#3a3a3a'  # brand: APP.panel-hover
 
 #: engine/brand.py APP["hover-light"]. grey(14). The light interaction plate --
 #: bg_hover in the light dialog palette.
@@ -198,7 +205,7 @@ APP_PANEL_HOVER: Final[str] = '#3a3a3a'
 #: GREY_EE HOLDS THE SAME HEX AND IS NOT THIS. Three static surfaces still use
 #: the ramp step; only the hover plate is the register's. Recorded as a
 #: coincidence in tests/test_brand_mirror.py and asserted in both directions.
-APP_HOVER_LIGHT: Final[str] = '#eeeeee'
+APP_HOVER_LIGHT: Final[str] = '#eeeeee'  # brand: APP.hover-light
 
 #: engine/brand.py APP["surface-light-3"]. The light window, panel and
 #: label ground -- what a dialog sits on in light mode.
@@ -212,7 +219,7 @@ APP_HOVER_LIGHT: Final[str] = '#eeeeee'
 #:
 #: Every key that reads it is a surface -- 'bg', 'window_bg',
 #: 'label_bg' -- so unlike GREY_E0 below there is nothing to split.
-APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'
+APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'  # brand: APP.surface-light-3
 
 #: engine/brand.py GOLD_TEXT_GROUND_FLOOR. The darkest light ground on which
 #: the gold family carries text.
@@ -229,7 +236,7 @@ APP_SURFACE_LIGHT_3: Final[str] = '#f5f5f5'
 #: carries the About dialog's tab labels. The second, line_number_current_bg,
 #: went with the line-number editor nothing created: RNV-RULINGS-2026-10-11,
 #: item 7.
-GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'
+GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'  # brand: GOLD_TEXT_GROUND_FLOOR
 
 #: RNV-NAMED-AND-USED (2026-10-04): the family's three fills stood here --
 #: STATUS["success"], STATUS["warning"] and STATUS["error"]. This application
@@ -248,9 +255,9 @@ GOLD_TEXT_GROUND_FLOOR: Final[str] = '#e8e8e8'
 #: is published as PROVENANCE so the choice is auditable. It is not re-run
 #: here. A rule held live becomes an edit anyone can make, and retuning it
 #: would silently change what an error looks like in five applications.
-STATUS_SUCCESS_TEXT: Final[str] = '#ad85a3'
-STATUS_WARNING_TEXT: Final[str] = '#bc8752'
-STATUS_ERROR_TEXT: Final[str] = '#dd6f77'
+STATUS_SUCCESS_TEXT: Final[str] = '#ad85a3'  # brand: STATUS.success-text
+STATUS_WARNING_TEXT: Final[str] = '#bc8752'  # brand: STATUS.warning-text
+STATUS_ERROR_TEXT: Final[str] = '#dd6f77'  # brand: STATUS.error-text
 
 #: engine/brand.py STATUS["*-text-light"] -- TEXT on a light ground.
 #:
@@ -286,9 +293,9 @@ STATUS_ERROR_TEXT: Final[str] = '#dd6f77'
 #: the old value nor the new one. A derived value whose rule no longer produces
 #: it is not derived, it is a coincidence waiting to break -- the same reasoning
 #: that registered BRAND_STANDBY_GOLD rather than deriving it from BRAND_GOLD.
-STATUS_SUCCESS_TEXT_LIGHT: Final[str] = '#825d79'
-STATUS_WARNING_TEXT_LIGHT: Final[str] = '#8e5e2b'
-STATUS_ERROR_TEXT_LIGHT: Final[str] = '#ae4650'
+STATUS_SUCCESS_TEXT_LIGHT: Final[str] = '#825d79'  # brand: STATUS.success-text-light
+STATUS_WARNING_TEXT_LIGHT: Final[str] = '#8e5e2b'  # brand: STATUS.warning-text-light
+STATUS_ERROR_TEXT_LIGHT: Final[str] = '#ae4650'  # brand: STATUS.error-text-light
 
 
 # ============ HAND-PICKED GOLD MODULATIONS ============
@@ -354,12 +361,12 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 # Named by their byte so the ramp reads in order and a step cannot be
 # confused with a role. Adding one is not drift.
 
-GREY_44: Final[str] = '#444444'
-GREY_55: Final[str] = '#555555'
-GREY_66: Final[str] = '#666666'
-GREY_88: Final[str] = '#888888'
-GREY_CC: Final[str] = '#cccccc'
-GREY_DD: Final[str] = '#dddddd'
+GREY_44: Final[str] = '#444444'  # app-owned
+GREY_55: Final[str] = '#555555'  # app-owned
+GREY_66: Final[str] = '#666666'  # app-owned
+GREY_88: Final[str] = '#888888'  # app-owned
+GREY_CC: Final[str] = '#cccccc'  # app-owned
+GREY_DD: Final[str] = '#dddddd'  # app-owned
 #: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
 #: moved to grey(13) and this did not follow -- it is a surface, and the
 #: published grid governs inks and edges only. rnv-color-picker and
@@ -379,12 +386,12 @@ GREY_DD: Final[str] = '#dddddd'
 #: shared byte is not a shared role. Same ruling as GREY_EE two
 #: constants down. Declared in COINCIDENT in
 #: tests/test_brand_mirror.py, and asserted in both directions.
-GREY_E0: Final[str] = '#e0e0e0'
+GREY_E0: Final[str] = '#e0e0e0'  # app-owned
 #: grey(14). Three STATIC surfaces: the diff export header in both modes, and
 #: the line number gutter's resting ground. NOT the light hover plate, which is
 #: APP_HOVER_LIGHT and holds this same hex -- one value, two roles, and only
 #: one of them is the register's. See COINCIDENT in tests/test_brand_mirror.py.
-GREY_EE: Final[str] = '#eeeeee'
+GREY_EE: Final[str] = '#eeeeee'  # app-owned
 
 
 # ============ APP SEMANTICS ============
@@ -449,27 +456,27 @@ GREY_EE: Final[str] = '#eeeeee'
 
 
 #: Inserted line, right pane. text 5.0420, ground 17.75, worst pair 9.75.
-SEMANTIC_DIFF_ADDED: Final[str] = '#426153'
+SEMANTIC_DIFF_ADDED: Final[str] = '#426153'  # app-owned
 
 #: Deleted line, left pane. text 5.5869, ground 19.45.
-SEMANTIC_DIFF_REMOVED: Final[str] = '#704a4a'
+SEMANTIC_DIFF_REMOVED: Final[str] = '#704a4a'  # app-owned
 
 #: Replaced line, BOTH panes -- so it owes a pair to each of the other two,
 #: and it is the value the dark ceiling binds. text 8.0150, ground 9.82.
-SEMANTIC_DIFF_CHANGED: Final[str] = '#403f00'
+SEMANTIC_DIFF_CHANGED: Final[str] = '#403f00'  # app-owned
 
 #: text 8.7897, ground 20.07, worst pair 10.07. Also the HTML export's insert.
-SEMANTIC_DIFF_ADDED_LIGHT: Final[str] = '#8eafa0'
+SEMANTIC_DIFF_ADDED_LIGHT: Final[str] = '#8eafa0'  # app-owned
 
 #: text 5.4683, ground 28.24. Also the HTML export's delete.
-SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#a17877'
+SEMANTIC_DIFF_REMOVED_LIGHT: Final[str] = '#a17877'  # app-owned
 
 #: text 12.9587, ground 10.12.
-SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#d6cd8a'
+SEMANTIC_DIFF_CHANGED_LIGHT: Final[str] = '#d6cd8a'  # app-owned
 
 #: text 6.8090, ground 12.75. Checked under the same five eyes as the diff
 #: values and left alone -- this one never had the defect.
-SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'
+SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'  # app-owned
 
 #: RNV-REGEX-FLOOR (2026-09-13). Was '#ffff99', which read 23.83 from the
 #: test pane in normal vision and 0.41 under achromatopsia -- the pale
@@ -481,7 +488,7 @@ SEMANTIC_REGEX_MATCH: Final[str] = '#4a4a00'
 #: Walked down its own hue line -- hue held to 0.03 degrees, chroma to 0.4 --
 #: until the pane cleared with margin rather than by a whisker.
 #: text 12.7332, ground 11.37, which is 35% over the floor.
-SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#cdcf6b'
+SEMANTIC_REGEX_MATCH_LIGHT: Final[str] = '#cdcf6b'  # app-owned
 
 # ==================== ALPHA HELPER ====================
 
@@ -588,10 +595,33 @@ Find dialog; the same byte."""
 # app it should be named and used no hardcoded or pointless literals should
 # exist". Named here at the value it had: NO PIXEL MOVES.
 
-SEMANTIC_EXPORT_FOOTER: Final[str] = '#808080'
+SEMANTIC_EXPORT_FOOTER: Final[str] = '#808080'  # app-owned
 """The "Generated by" footer of an exported PDF. Was the colour name
 `gray`, which is this value. App-owned, so named for what it means, as
-the ruling of 2026-09-02 asks of every value this application owns."""
+the ruling of 2026-09-02 asks of every value this application owns.
+
+RNV-COLOUR-SYNC, #56 A (2026-10-17): also the second entry of an exported
+RTF's colour table, which core/export_manager.py wrote out as
+red 128, green 128, blue 128 -- this value. The RTF draws its "Generated
+by" footer in it, and its line numbers, which share that one entry."""
+
+# RNV-COLOUR-SYNC (2026-10-17), #56 A: colours the application's own code
+# still wrote out, named here at the value and in the case they had, so no
+# byte of an export and no line of text moves. Data, the application's
+# own, and a brand move never touches them.
+
+SEMANTIC_EXPORT_RTF_INK: Final[str] = '#000000'  # app-owned
+"""The text colour of an exported RTF: the first entry of its colour
+table, which core/export_manager.py wrote out as red 0, green 0, blue 0.
+Export data, not chrome, so it does not follow the brand's black (#48 A),
+though it holds the same value: declared in COINCIDENT in
+tests/test_brand_mirror.py. App-owned."""
+
+SEMANTIC_HEX_PATTERN_EXAMPLE: Final[str] = '#FF5733'  # app-owned
+"""The example the Hex Color regex pattern carries
+(core/regex_patterns.py, RegexPatterns.HEX_COLOR.example_match): a sample
+of what the pattern matches. Data, not chrome, and in the UPPER CASE it
+was written in -- the case is part of the example. App-owned."""
 
 
 # ==================== PROVENANCE ====================
@@ -659,6 +689,8 @@ PROVENANCE: Final[dict[str, str]] = {
     'SEMANTIC_REGEX_MATCH': 'app-semantic',
     'SEMANTIC_REGEX_MATCH_LIGHT': 'app-semantic',
     'SEMANTIC_EXPORT_FOOTER': 'app-semantic',
+    'SEMANTIC_EXPORT_RTF_INK': 'app-semantic',
+    'SEMANTIC_HEX_PATTERN_EXAMPLE': 'app-semantic',
 }
 
 __all__ = [
@@ -680,6 +712,8 @@ __all__ = [
     'DRAG_HIGHLIGHT_ALPHA',
     'FIND_HIGHLIGHT_ALPHA',
     'SEMANTIC_EXPORT_FOOTER',
+    'SEMANTIC_EXPORT_RTF_INK',
+    'SEMANTIC_HEX_PATTERN_EXAMPLE',
     'TRUE_BLACK',
     'WHITE',
     'BRAND_BLACK',

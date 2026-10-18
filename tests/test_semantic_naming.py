@@ -16,6 +16,7 @@ This guard pins three things that are easy to lose in a later pass:
 from __future__ import annotations
 
 import ast
+import json
 import re
 from pathlib import Path
 
@@ -25,13 +26,26 @@ ROOT = Path(__file__).resolve().parent.parent
 PALETTE = ROOT / "utils" / "colors.py"
 DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 
+#: RNV-COLOUR-SYNC, 2026-10-17 (#52 A). Where each colour comes from, as
+#: brand_map.json says. The values are held by tests/test_colours_in_sync.py,
+#: against the map; what this file holds is that each is the application's own.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+
 # RNV-DIFF-FLOORS (2026-09-13) moved the six diff values and retired ten
 # others. The six moved for a measured reason, not a taste -- the floors
 # are held by tests/test_diff_floors.py and the reason is in
 # utils/colors.py. This table is the pin, so it moves WITH them: a value
 # that changes without this file changing is still the defect this guard
 # was written for.
-VALUES = {'SEMANTIC_DIFF_ADDED': '#426153', 'SEMANTIC_DIFF_REMOVED': '#704a4a', 'SEMANTIC_DIFF_CHANGED': '#403f00', 'SEMANTIC_DIFF_ADDED_LIGHT': '#8eafa0', 'SEMANTIC_DIFF_REMOVED_LIGHT': '#a17877', 'SEMANTIC_DIFF_CHANGED_LIGHT': '#d6cd8a', 'SEMANTIC_REGEX_MATCH': '#4a4a00', 'SEMANTIC_REGEX_MATCH_LIGHT': '#cdcf6b'}
+#
+# RNV-COLOUR-SYNC, #52 A (2026-10-17): the table held each value by its hex
+# code. brand_map.json holds each now, as the application's own, and
+# tests/test_colours_in_sync.py holds the colour file to the map, so a value
+# that changes without the map changing still fails; this table names them.
+VALUES = ('SEMANTIC_DIFF_ADDED', 'SEMANTIC_DIFF_REMOVED', 'SEMANTIC_DIFF_CHANGED',
+          'SEMANTIC_DIFF_ADDED_LIGHT', 'SEMANTIC_DIFF_REMOVED_LIGHT',
+          'SEMANTIC_DIFF_CHANGED_LIGHT', 'SEMANTIC_REGEX_MATCH',
+          'SEMANTIC_REGEX_MATCH_LIGHT')
 RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CURRENT_DARK', 'DIFF_ADDED_LIGHT', 'DIFF_REMOVED_LIGHT', 'DIFF_CHANGED_LIGHT', 'DIFF_CURRENT_LIGHT', 'REGEX_MATCH_DARK', 'REGEX_MATCH_LIGHT', 'REGEX_GROUP_PALETTE', '_DRAG_HIGHLIGHT_GOLD', 'GREY_60',
            # Retired by RNV-DIFF-FLOORS: ten values with no
            # consumer left, and every name that carried one.
@@ -58,10 +72,11 @@ RETIRED = ('DIFF_ADDED_DARK', 'DIFF_REMOVED_DARK', 'DIFF_CHANGED_DARK', 'DIFF_CU
 
 def test_the_semantic_values_did_not_move():
     """A rename that changes a value is not a rename."""
-    for name, want in VALUES.items():
+    for name in VALUES:
         assert hasattr(colors, name), f"{name} is gone"
-        assert getattr(colors, name).lower() == want, (
-            f"{name} is {getattr(colors, name)}, was {want} before the rename")
+        entry = BRAND_MAP[name]
+        assert isinstance(entry, dict) and entry['app'] == getattr(colors, name), (
+            f"{name} is {getattr(colors, name)}, and brand_map.json holds {entry!r}")
 
 
 def test_every_app_semantic_constant_says_so():

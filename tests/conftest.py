@@ -1,19 +1,23 @@
 # RNV-DERIVE-ALPHA, 2026-09-25 -- every image-mode colour written at an
 # alpha is DERIVED, with_alpha(BASE, ALPHA), so a change to a base reaches
-# every alpha form of it. The image scrollbar handle left #505050 for
-# GREY_44 at 150, by ruling, closing RNV-COLLAPSE-505050 here.
+# every alpha form of it. The image scrollbar handle left
+# RETIRED_SCROLLBAR_HANDLE for GREY_44 at 150, by ruling, closing
+# RNV-COLLAPSE-505050 here.
 # tests/test_derived_values.py holds the derivations.
 # RNV-FIGURE-PIN, 2026-09-13 -- four figures describing the retired
-# SEMANTIC_DIFF_REMOVED '#4d1a1a' belonged to a different hex: a candidate
-# derived during RNV-DIFF-FLOORS and rejected. 0.31, #181818, 15.87 and a
-# text contrast of 12.97 are all '#2e0f10'. The true readings are 5.03,
-# #292929, 20.85 and 10.4591, and the defect was real but overstated -- a
-# faint band, not an absent one. Its light partner '#f8d7da' failed the same
+# SEMANTIC_DIFF_REMOVED value, RETIRED_DIFF_REMOVED, belonged to a different
+# hex: a candidate derived during RNV-DIFF-FLOORS and rejected. 0.31,
+# RETIRED_DIFF_REMOVED_CANDIDATE_ACHROMATOPSIA, 15.87 and a text contrast of
+# 12.97 are all RETIRED_DIFF_REMOVED_CANDIDATE's. The true readings are 5.03,
+# RETIRED_DIFF_REMOVED_ACHROMATOPSIA, 20.85 and 10.4591, and the defect was
+# real but overstated -- a faint band, not an absent one. Its light partner
+# RETIRED_DIFF_REMOVED_LIGHT failed the same
 # rule at 4.27 and went unmentioned. tests/test_diff_floors.py now pins every
 # figure it prints about a retired value in RETIRED_FILLS and asserts them,
 # because prose cannot be wrong loudly and an assertion can.
-# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was '#ffff99',
-# which collapsed onto the #f5f5f5 test pane under achromatopsia at CIEDE2000
+# RNV-REGEX-FLOOR, 2026-09-13 -- SEMANTIC_REGEX_MATCH_LIGHT was
+# RETIRED_REGEX_MATCH_LIGHT, which collapsed onto the APP_SURFACE_LIGHT_3 test
+# pane under achromatopsia at CIEDE2000
 # 0.41: a matched span carried no visible highlight at all. Same failure as
 # the diff red retired the same day, one line below it in utils/colors.py,
 # and that round did not look at it. tests/test_diff_floors.py now sweeps

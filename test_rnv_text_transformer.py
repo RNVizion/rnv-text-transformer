@@ -106,6 +106,7 @@ from core.folder_watcher    import (
     FolderWatcher, WatchRule, WatchEvent, WatchEventType, WATCHDOG_AVAILABLE
 )
 from utils.dialog_styles    import DialogStyleManager
+from utils.colors           import BRAND_BLACK, BRAND_DARK_GOLD, BRAND_GOLD
 from utils.file_handler     import FileHandler, FileReadError, FileWriteError
 from utils.error_handler    import ErrorHandler, ErrorContext
 from utils.settings_manager import SettingsManager
@@ -706,7 +707,8 @@ class TestExportManager(unittest.TestCase):
         path = os.path.join(self.tmp, "dark.html")
         self.em.export("test", path, self._opts(ExportFormat.HTML, html_dark_theme=True))
         content = Path(path).read_text(encoding="utf-8")
-        self.assertIn("1A1A1A", content.upper().replace("#", "").replace(" ", "").upper()
+        self.assertIn(BRAND_BLACK.lstrip("#").upper(),
+                      content.upper().replace("#", "").replace(" ", "").upper()
                        or content)  # dark bg present
         self.assertTrue(os.path.exists(path))
 
@@ -1183,10 +1185,10 @@ class TestDialogStyleManager(unittest.TestCase):
 
     # ── DARK palette ──────────────────────────────────────────────────────────
     def test_dark_accent_is_brand_gold(self):
-        self.assertEqual(DialogStyleManager.DARK["accent"].lower(), "#d2bc93")
+        self.assertEqual(DialogStyleManager.DARK["accent"].lower(), BRAND_GOLD)
 
     def test_light_accent_is_brand_gold_dark(self):
-        self.assertEqual(DialogStyleManager.LIGHT["accent"].lower(), "#8c7337")
+        self.assertEqual(DialogStyleManager.LIGHT["accent"].lower(), BRAND_DARK_GOLD)
 
     def test_dark_and_light_have_same_keys(self):
         # LOCK EXCEPTION, ruled 2026-10-04 (RNV-NAMED-AND-USED): "for the locked
@@ -1899,11 +1901,11 @@ class TestThemeManager(unittest.TestCase):
 
     def test_colors_dark_accent_is_brand_gold(self):
         self.tm.set_theme("dark")
-        self.assertEqual(self.tm.colors["accent"].lower(), "#d2bc93")
+        self.assertEqual(self.tm.colors["accent"].lower(), BRAND_GOLD)
 
     def test_colors_light_accent_is_brand_gold_dark(self):
         self.tm.set_theme("light")
-        self.assertEqual(self.tm.colors["accent"].lower(), "#8c7337")
+        self.assertEqual(self.tm.colors["accent"].lower(), BRAND_DARK_GOLD)
 
     # ── cycle_theme ────────────────────────────────────────────────────────────
     def test_cycle_theme_dark_to_light(self):

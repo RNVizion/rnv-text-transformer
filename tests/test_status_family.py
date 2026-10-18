@@ -12,30 +12,35 @@ from pathlib import Path
 
 import pytest
 
+from tests import colour_values as cv
 from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
 RETIRED = {
-    "#28a745": "Bootstrap green, retired -- it and the Bootstrap red collapsed "
+    cv.RETIRED_BOOTSTRAP_GREEN: "Bootstrap green, retired -- it and the Bootstrap red collapsed "
                "to one olive under deuteranopia at about 4 apart",
-    "#ffc107": "Bootstrap amber, retired -- 1.63 on #ffffff and 1.49 on "
-               "#f5f5f5 against a 3:1 fill floor",
-    "#dc3545": "Bootstrap red, retired with its family",
-    "#e56b77": "orphan: derived from #dc3545, which no longer exists",
-    "#c82131": "orphan: derived from #dc3545, which no longer exists",
+    cv.RETIRED_BOOTSTRAP_AMBER: f"Bootstrap amber, retired -- 1.63 on {colors.WHITE} and 1.49 on "
+               f"{colors.APP_SURFACE_LIGHT_3} against a 3:1 fill floor",
+    cv.RETIRED_BOOTSTRAP_RED: "Bootstrap red, retired with its family",
+    cv.RETIRED_ERROR_TEXT_FROM_BOOTSTRAP:
+        f"orphan: derived from {cv.RETIRED_BOOTSTRAP_RED}, which no longer exists",
+    cv.RETIRED_ERROR_TEXT_LIGHT_FROM_BOOTSTRAP:
+        f"orphan: derived from {cv.RETIRED_BOOTSTRAP_RED}, which no longer exists",
 }
 
 SOURCES = SWEPT = ("utils/colors.py", "utils/dialog_styles.py")
 # the success text: a value utils/colors.py holds. It was the success fill's
-# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went.
-LIVE_VALUE = "#ad85a3"
+# until RNV-NAMED-AND-USED, 2026-10-04, when the fill went. RNV-COLOUR-SYNC,
+# 2026-10-16: by name, so it is the value tools/sync_colors.py writes there.
+LIVE_VALUE = colors.STATUS_SUCCESS_TEXT
 
 #: The register's three status fills: STATUS["success"], ["warning"] and
 #: ["error"] in engine/brand.py. RNV-NAMED-AND-USED, 2026-10-04: this
 #: application drew none of them and no longer carries them, so they are held
 #: here, under the names the register gives them, as what a status key must
 #: never be painted with.
-REGISTER_FILLS = {"success": "#926c89", "warning": "#a2703c", "error": "#c75b64"}
+REGISTER_FILLS = {"success": cv.REGISTER_STATUS_SUCCESS, "warning": cv.REGISTER_STATUS_WARNING,
+                  "error": cv.REGISTER_STATUS_ERROR}
 
 
 def _code_only(text: str) -> str:
@@ -47,7 +52,8 @@ def _code_only(text: str) -> str:
     about what changed, which is the opposite of what the provenance is for.
 
     Why it is fussier than it looks: an earlier version dropped every STRING
-    token. In Python a colour value IS a string literal -- `X = "#926c89"` --
+    token. In Python a colour value IS a string literal -- `X = "#..."` with
+    REGISTER_STATUS_SUCCESS's digits in the quotes --
     so that version removed the uses along with the mentions and the sweep
     could never find anything. It passed on every input, including a file that
     had just put a retired value back. This file's own guard-the-guard is what

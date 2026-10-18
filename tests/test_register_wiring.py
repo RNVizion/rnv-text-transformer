@@ -26,6 +26,7 @@ sweep looks inside a value, not only at it.
 from __future__ import annotations
 
 import ast
+import json
 import pathlib
 
 import pytest
@@ -36,24 +37,30 @@ from utils.dialog_styles import DialogStyleManager
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SRC = ROOT / 'utils/dialog_styles.py'
 
+#: RNV-COLOUR-SYNC, 2026-10-16. Where each colour comes from, as brand_map.json
+#: says. The values are held by tests/test_colours_in_sync.py, against the
+#: register at the pin; what this file holds is the name each one takes.
+BRAND_MAP = json.loads((ROOT / "brand_map.json").read_text(encoding="utf-8"))["colours"]
+
 #: The register, as this app mirrors it: every name utils/colors.py classes
-#: as 'register' in PROVENANCE, with the value it held when this was written.
-#: Value-keyed, because a literal is found by its value: any entry holding one
-#: of these must name it.
-REGISTERED = {
-    'BRAND_GOLD': '#d2bc93', 'BRAND_DARK_GOLD': '#8c7337',
-    'TRUE_BLACK': '#000000', 'WHITE': '#ffffff',
-    'BRAND_BLACK': '#1a1a1a', 'APP_CARD': '#2a2a2a', 'APP_BORDER': '#333333',
-    'APP_TEXT': '#dddddd', 'APP_TEXT_DIM': '#aaaaaa', 'APP_PANEL_HOVER': '#3a3a3a',
-    'APP_HOVER_LIGHT': '#eeeeee', 'APP_SURFACE_LIGHT_3': '#f5f5f5',
-    'GOLD_TEXT_GROUND_FLOOR': '#e8e8e8',
+#: as 'register' in PROVENANCE, with the value it holds. Value-keyed, because a
+#: literal is found by its value: any entry holding one of these must name it.
+#: RNV-COLOUR-SYNC, 2026-10-16: each value read from the constant, where it
+#: was written out, so the sweep looks for what the register holds today.
+REGISTERED = {name: getattr(colors, name) for name in (
+    'BRAND_GOLD', 'BRAND_DARK_GOLD',
+    'TRUE_BLACK', 'WHITE',
+    'BRAND_BLACK', 'APP_CARD', 'APP_BORDER',
+    'APP_TEXT', 'APP_TEXT_DIM', 'APP_PANEL_HOVER',
+    'APP_HOVER_LIGHT', 'APP_SURFACE_LIGHT_3',
+    'GOLD_TEXT_GROUND_FLOOR',
     # RNV-NAMED-AND-USED, 2026-10-04: the three status fills stood here. The
     # application carried them unread, and no longer does.
-    'STATUS_SUCCESS_TEXT': '#ad85a3', 'STATUS_WARNING_TEXT': '#bc8752',
-    'STATUS_ERROR_TEXT': '#dd6f77',
-    'STATUS_SUCCESS_TEXT_LIGHT': '#825d79', 'STATUS_WARNING_TEXT_LIGHT': '#8e5e2b',
-    'STATUS_ERROR_TEXT_LIGHT': '#ae4650',
-}
+    'STATUS_SUCCESS_TEXT', 'STATUS_WARNING_TEXT',
+    'STATUS_ERROR_TEXT',
+    'STATUS_SUCCESS_TEXT_LIGHT', 'STATUS_WARNING_TEXT_LIGHT',
+    'STATUS_ERROR_TEXT_LIGHT',
+)}
 
 DARK_DICTS = ('DARK',)
 LIGHT_DICTS = ('LIGHT',)
@@ -105,12 +112,16 @@ def test_the_palettes_this_file_reads_still_exist():
 
 def test_the_register_map_is_not_empty():
     """A sweep with nothing to look for passes forever. The map is every name
-    PROVENANCE classes as the register's, at the value the module holds."""
+    PROVENANCE classes as the register's, at the value the module holds.
+
+    RNV-COLOUR-SYNC, 2026-10-16: the values were written here and checked
+    against the module. They are read from it now, and this holds instead
+    that brand_map.json takes each from the register."""
     assert len(REGISTERED) >= 4
-    for name, value in REGISTERED.items():
-        assert getattr(colors, name) == value, (
-            f'{name} is {getattr(colors, name)}, not {value} -- the map this '
-            f'file sweeps for has gone stale against the constants')
+    for name in REGISTERED:
+        assert isinstance(BRAND_MAP.get(name), str), (
+            f'{name} is not taken from the register in brand_map.json -- the '
+            f'map this file sweeps for holds a value the register does not')
     registered = {n for n, kind in colors.PROVENANCE.items() if kind == 'register'}
     assert set(REGISTERED) == registered, (
         f'PROVENANCE classes {sorted(registered - set(REGISTERED))} as the register\'s '
@@ -170,7 +181,8 @@ def test_the_dark_palette_names_the_register_s_ladder():
 # --------------------------------------------------------------- the light half
 
 #: What the light palette may name from the register. Every entry has been
-#: through a ruling: the light surface #f5f5f5 and the light hover #eeeeee
+#: through a ruling: the light surface APP_SURFACE_LIGHT_3 and the light hover
+#: APP_HOVER_LIGHT
 #: (rnv-brand rev 23 and 27, the 2026-09-07 correction), light ink and edges
 #: (TRUE_BLACK, APP_BORDER), the dark gold and the ground it is held to
 #: (BRAND_DARK_GOLD, GOLD_TEXT_GROUND_FLOOR, the gold rounds), the light

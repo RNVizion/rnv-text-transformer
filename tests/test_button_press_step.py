@@ -16,8 +16,8 @@ it looked right. It was reached two ways that do not hold up:
      the mouse down and dragging off -- and `:hover` stops matching while the
      label stays flipped. Measured on this palette:
 
-         DARK   #000000 on #1a1a1a = 1.21:1
-         LIGHT  #ffffff on #ffffff = 1.00:1   -- white on white
+         DARK   TRUE_BLACK on BRAND_BLACK = 1.21:1
+         LIGHT  WHITE on WHITE = 1.00:1   -- white on white
 
   2. A RESIZE WHILE HELD REVERTED THE LABEL. `resizeEvent` calls
      `update_text_font_size`, which rebuilds the stylesheet with no text_color

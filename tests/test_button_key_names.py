@@ -21,13 +21,15 @@ OLD = ("button_bg", "button_text", "button_hover_bg", "button_pressed_bg",
        "button_pressed_text")
 NEW = tuple("main_" + n.replace("button_", "btn_") for n in OLD)
 
+#: RNV-COLOUR-SYNC, 2026-10-16: each key by the constant it paints, where it
+#: was written as that constant's hex code, so a brand move needs no edit here.
 PINNED = {
-    "dark": {"main_btn_bg": "#1a1a1a", "main_btn_text": "#dddddd",
-             "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-             "main_btn_pressed_text": "#000000"},
-    "light": {"main_btn_bg": "#ffffff", "main_btn_text": "#000000",
-              "main_btn_hover_bg": "#333333", "main_btn_pressed_bg": "#444444",
-              "main_btn_pressed_text": "#ffffff"},
+    "dark": {"main_btn_bg": "BRAND_BLACK", "main_btn_text": "APP_TEXT",
+             "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GREY_44",
+             "main_btn_pressed_text": "TRUE_BLACK"},
+    "light": {"main_btn_bg": "WHITE", "main_btn_text": "TRUE_BLACK",
+              "main_btn_hover_bg": "APP_BORDER", "main_btn_pressed_bg": "GREY_44",
+              "main_btn_pressed_text": "WHITE"},
 }
 
 SKIP = {".git", "build", "dist", ".venv", "__pycache__"}
@@ -54,6 +56,12 @@ def _sources():
         if any(marker in text for marker in MARKERS):
             continue
         yield path, text
+
+
+def _values(pins):
+    """Each key's constant, as the value it holds."""
+    from utils import colors
+    return {key: getattr(colors, name) for key, name in pins.items()}
 
 
 def _palettes():
@@ -154,7 +162,8 @@ def test_the_rename_moved_no_value():
     assert not any(v is None for a in actual for v in a.values()), (
         f"a value would not resolve: {actual}. Two unresolved palettes compare "
         "equal, so this assertion has to fail loudly rather than pass quietly.")
-    for mode, pins in PINNED.items():
+    for mode, names in PINNED.items():
+        pins = _values(names)
         assert pins in actual, (
             f"the {mode} palette no longer holds its pinned values.\n"
             f"  wanted {pins}\n  found  {actual}\n"

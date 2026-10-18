@@ -15,6 +15,7 @@ import re
 from typing import ClassVar, Pattern, NamedTuple
 from dataclasses import dataclass
 
+from utils.colors import SEMANTIC_HEX_PATTERN_EXAMPLE
 from utils.logger import get_module_logger
 
 _logger = get_module_logger("RegexPatterns")
@@ -182,7 +183,9 @@ class RegexPatterns:
         name="Hex Color",
         pattern=r"#(?:[0-9a-fA-F]{3}){1,2}\b",
         description="Matches hex color codes",
-        example_match="#FF5733",
+        # RNV-COLOUR-SYNC, #56 A (2026-10-17): named in the colour file as the
+        # application's own data, in the upper case it was written in.
+        example_match=SEMANTIC_HEX_PATTERN_EXAMPLE,
         category="Data"
     )
     

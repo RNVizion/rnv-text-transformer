@@ -223,6 +223,8 @@ rnv-text-transformer/
 ├── RNV_Text_Transformer.py       # GUI entry point
 ├── requirements.txt
 ├── pyproject.toml
+├── brand_map.json                 # Where each colour comes from: rnv-brand or the app
+├── COLORS.md                      # This app's colour chart, written by the sync
 ├── LICENSE
 ├── README.md
 ├── ARCHITECTURE.md
@@ -286,8 +288,12 @@ rnv-text-transformer/
 │   ├── icons/
 │   └── screenshots/               # README screenshots
 │
+├── tools/
+│   └── sync_colors.py             # Writes the colours in utils/colors.py, and COLORS.md
+│
 ├── .github/workflows/             # CI workflows
-│   └── tests.yml                  # Linux + Windows test matrix
+│   ├── tests.yml                  # Linux + Windows test matrix
+│   └── brand-sync.yml             # Daily: colours from rnv-brand; a pull request only if one moved
 │
 └── test_rnv_text_transformer.py   # unittest regression suite
 ```

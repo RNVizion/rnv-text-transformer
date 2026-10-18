@@ -5,16 +5,19 @@ ways no contrast check would ever have reported.
 
 WHAT WENT WRONG, TWICE, AND WHY THIS FILE MEASURES THE WAY IT DOES
 
-  1. SEMANTIC_DIFF_REMOVED was '#4d1a1a'. Under achromatopsia it collapses to
-     #292929, on a panel that collapses to #191919 -- CIEDE2000 **5.03**,
+  1. SEMANTIC_DIFF_REMOVED was RETIRED_DIFF_REMOVED. Under achromatopsia it
+     collapses to RETIRED_DIFF_REMOVED_ACHROMATOPSIA, on a panel that
+     collapses to EXAMPLE_DARK_PANEL_ACHROMATOPSIA -- CIEDE2000 **5.03**,
      under the 8.40 bar. A deleted line carried a band too faint to read as a
-     highlight. Its light partner '#f8d7da' failed the same way at **4.27**.
+     highlight. Its light partner RETIRED_DIFF_REMOVED_LIGHT failed the same
+     way at **4.27**.
      Contrast against the TEXT was 10.4591 and had been checked; the fill had
      never been measured against the GROUND under a simulation, because the
      pairs were and it read as though everything had been.
 
      THOSE FOUR FIGURES WERE WRONG HERE FOR A DAY. This paragraph gave 0.31,
-     #181818, 15.87 and 12.97 -- all of them '#2e0f10', a candidate derived
+     RETIRED_DIFF_REMOVED_CANDIDATE_ACHROMATOPSIA, 15.87 and 12.97 -- all of
+     them RETIRED_DIFF_REMOVED_CANDIDATE's, a candidate derived
      in the same round and rejected. Nothing checked them, so they read as
      measured. RETIRED_FILLS below now pins every figure this file prints
      about a retired value, and test_the_instrument_can_fail asserts them.
@@ -32,7 +35,8 @@ validates its own instrument before it trusts a single figure.
   pair     CIEDE2000, between two roles that can share a widget     >= 8.40
 
 RNV-REGEX-FLOOR (2026-09-13) widened the first two rules past the diff three.
-SEMANTIC_REGEX_MATCH_LIGHT '#ffff99' had the same defect as the diff red and
+SEMANTIC_REGEX_MATCH_LIGHT, then RETIRED_REGEX_MATCH_LIGHT, had the same defect
+as the diff red and
 was one line below it in the same file, and the round that fixed the three
 walked past it: 23.83 from the test pane in normal vision, 0.41 under
 achromatopsia. A rule that names the values it covers will always be one
@@ -41,7 +45,7 @@ application paints behind text -- the diff three, plus whatever the Regex
 Builder is found to draw.
 
 THE GROUND IS READ FROM THE PALETTE THE WIDGET USES, NOT THE ONE THAT SOUNDS
-RIGHT. LIGHT['input_bg'] is #ffffff and LIGHT['bg'] is #f5f5f5; the compare
+RIGHT. LIGHT['input_bg'] is WHITE and LIGHT['bg'] is APP_SURFACE_LIGHT_3; the compare
 panes take the latter, which a rendered frame shows and the palette does not.
 Derived against white, SEMANTIC_DIFF_CHANGED_LIGHT cleared the real ground by
 3% -- inside the bar, and the wrong bar.
@@ -64,7 +68,8 @@ builds one HTML document from DialogStyleManager.LIGHT in BOTH themes, and
 puts .diff-delete and .diff-insert in the two columns of a single row.
 
 8.40 IS THE REGISTER'S OWN BAR, not a number chosen here: BRAND_GOLD to
-#b49e75 is its published walk into "perceptible at a glance" at 8.4035, and
+EXAMPLE_CALIBRATION_GOLD_MINUS_30 is its published walk into "perceptible at
+a glance" at 8.4035, and
 test_the_instrument_is_ciede2000 reproduces exactly that figure before any
 other test in this file is allowed to mean anything.
 """
@@ -74,6 +79,8 @@ import ast
 import math
 from pathlib import Path
 
+from tests import colour_values as cv
+from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -370,18 +377,20 @@ def test_the_instrument_is_ciede2000():
     """Before any figure here means anything, the metric has to be the one
     the bar is published in.
 
-    BRAND_GOLD #d2bc93 walked -30 to #b49e75 is the register's own step into
+    BRAND_GOLD, EXAMPLE_CALIBRATION_GOLD, walked -30 to
+    EXAMPLE_CALIBRATION_GOLD_MINUS_30 is the register's own step into
     "perceptible at a glance", published at 8.4035. dE76 for the same pair is
     11.0877 -- which is exactly the substitution that let a pair reading 8.08
     be reported as 10.43 and shipped.
     """
-    got = ciede2000("#d2bc93", "#b49e75")
+    got = ciede2000(cv.EXAMPLE_CALIBRATION_GOLD, cv.EXAMPLE_CALIBRATION_GOLD_MINUS_30)
     assert abs(got - 8.4035) < 0.0005, (
-        f"CIEDE2000(#d2bc93, #b49e75) = {got:.4f}, and the register publishes "
+        f"CIEDE2000({cv.EXAMPLE_CALIBRATION_GOLD}, {cv.EXAMPLE_CALIBRATION_GOLD_MINUS_30}) "
+        f"= {got:.4f}, and the register publishes "
         f"8.4035. Either the arithmetic changed or this is no longer "
         f"CIEDE2000 -- dE76 for this pair is 11.0877.")
 
-    l1, l2 = _lab("#d2bc93"), _lab("#b49e75")
+    l1, l2 = _lab(cv.EXAMPLE_CALIBRATION_GOLD), _lab(cv.EXAMPLE_CALIBRATION_GOLD_MINUS_30)
     de76 = math.sqrt(sum((x - y) ** 2 for x, y in zip(l1, l2)))
     assert abs(de76 - got) > 2.0, (
         "CIEDE2000 and dE76 are returning the same number for a pair where "
@@ -394,12 +403,14 @@ def test_the_instrument_is_ciede2000():
 #: the ink. RNV-GOLD-GUARD-FILE-NAMES-RETIRED-VALUES-BY-DESIGN.
 #:
 #: PINNED RATHER THAN NARRATED, and the reason is this table's own history.
-#: The first version of this guard described '#4d1a1a' with four figures that
+#: The first version of this guard described RETIRED_DIFF_REMOVED with four figures that
 #: all belonged to a different hex -- a candidate derived during the same
 #: round and rejected. Prose cannot be wrong loudly. An assertion can.
 RETIRED_FILLS = {
-    "#4d1a1a": ("DARK", "#292929", 5.03, 20.85, 10.4591),
-    "#f8d7da": ("LIGHT", "#e1e1e1", 4.27, 13.69, 15.7238),
+    cv.RETIRED_DIFF_REMOVED:
+        ("DARK", cv.RETIRED_DIFF_REMOVED_ACHROMATOPSIA, 5.03, 20.85, 10.4591),
+    cv.RETIRED_DIFF_REMOVED_LIGHT:
+        ("LIGHT", cv.RETIRED_DIFF_REMOVED_LIGHT_ACHROMATOPSIA, 4.27, 13.69, 15.7238),
 }
 
 
@@ -468,7 +479,7 @@ def test_every_fill_is_visible_against_its_own_pane():
     """The rule the old dark red failed at 5.03, and its light partner at 4.27.
 
     Measured under all five, because the failure is invisible under four of
-    them: '#4d1a1a' reads 20.85 from the panel in normal vision and 5.03 at
+    them: RETIRED_DIFF_REMOVED reads 20.85 from the panel in normal vision and 5.03 at
     its worst. The figures are pinned in RETIRED_FILLS above.
     """
     bad = []
@@ -543,7 +554,7 @@ def test_the_pairs_were_derived_and_not_assumed():
     assert frozenset(("diff_added_bg", "diff_removed_bg")) not in dark, (
         "added and removed now share a widget. That is allowed, but the dark "
         "triple was derived on the basis that they do not -- with a "
-        "#dddddd ink ceiling at grey 97 and an achromatopsia floor at grey "
+        f"{colors.APP_TEXT} ink ceiling at grey 97 and an achromatopsia floor at grey "
         "52, a three-level ladder needs 50 steps and there are 45. Re-derive "
         "the dark three before landing this.")
 

@@ -1,20 +1,20 @@
 """Derived values: a colour that is a named colour AT AN ALPHA.
 
 Image mode draws its chrome translucent, and until 2026-09-25 every one of
-those values was written out: 'rgba(26, 26, 26, 191)' beside BRAND_BLACK, with
+those values was written out: RETIRED_IMAGE_LABEL_RGBA beside BRAND_BLACK, with
 nothing relating the two. A change to BRAND_BLACK would have reached every
 opaque use of it and none of these. Each is now with_alpha(BASE, ALPHA) -- the
 helper this application already had, and already used for the drag highlight
 -- so the register row carries every alpha form of its colour.
 
 WHAT MOVES A PIXEL: ONE THING, BY RULING. The image-mode scrollbar handle
-leaves #505050 for GREY_44, closing RNV-COLLAPSE-505050 here; its alpha stays
+leaves RETIRED_SCROLLBAR_HANDLE for GREY_44, closing RNV-COLLAPSE-505050 here; its alpha stays
 at 150. Everything else keeps its colour and its alpha byte, respelled from
 rgba() to #AARRGGBB -- the same pixels, in the one spelling QColor() can also
 read. test_nothing_moved_that_was_not_ruled holds that to the byte.
 
 AND ONE KEY THAT NOTHING READ, REMOVED. image_scrollbar_handle_hover held
-rgba(100, 100, 100, 200), a grey on no register row, while the image
+RETIRED_SCROLLBAR_HANDLE_HOVER_RGBA, a grey on no register row, while the image
 scrollbar's hover is painted from DARK's 'accent' -- BRAND_GOLD, ruled
 2026-09-12. It could not be derived, having no row to follow, and it could
 not take the painted gold, because LIGHT carries the same image keys and a
@@ -27,6 +27,7 @@ import ast
 import pathlib
 import re
 
+from tests import colour_values as cv
 from utils import colors
 from utils.colors import with_alpha
 from utils.dialog_styles import DialogStyleManager
@@ -64,7 +65,7 @@ MADE_OF = {
     "image_overlay_bg_dark": ("BRAND_BLACK", 191),
     "image_overlay_checkbox": ("TRUE_BLACK", 100),
     "image_scrollbar_border": ("APP_BORDER", 100),
-    "image_scrollbar_handle": ("GREY_44", 150),     # was #505050, ruled
+    "image_scrollbar_handle": ("GREY_44", 150),     # was RETIRED_SCROLLBAR_HANDLE, ruled
     "image_dropdown_bg": ("TRUE_BLACK", 131),
     "image_dropdown_selection": ("APP_BORDER", 200),
     "image_dropdown_border": ("APP_BORDER", 150),
@@ -175,9 +176,10 @@ def _derived():
 def test_with_alpha_composes_alpha_first():
     """#AARRGGBB, not #RRGGBBAA. Taking the wrong end gives a real colour and
     the wrong one, which is the failure that does not look like a failure."""
-    assert with_alpha("#1a1a1a", 0xBF) == "#bf1a1a1a"
-    assert decompose(with_alpha("#d2bc93", 0x33)) == ("#d2bc93", 0x33)
-    assert decompose(with_alpha("444444", 0x96)) == ("#444444", 0x96)
+    assert with_alpha(cv.EXAMPLE_WITH_ALPHA_INPUT, 0xBF) == cv.EXAMPLE_WITH_ALPHA_OUTPUT
+    assert decompose(with_alpha(cv.EXAMPLE_ROUND_TRIP, 0x33)) == (cv.EXAMPLE_ROUND_TRIP, 0x33)
+    assert decompose(with_alpha(cv.EXAMPLE_HASHLESS_INPUT, 0x96)) == (
+        cv.EXAMPLE_HASHLESS_EXPECTED, 0x96)
 
 
 def test_the_alphas_are_the_declared_bytes():
@@ -240,7 +242,7 @@ def test_every_derived_value_decomposes_to_its_base_and_its_alpha():
 def test_no_composed_literal_is_left_in_the_application():
     """The completeness half. Every EVALUATED string in the application's own
     source that spells a named colour at an alpha. Docstrings are mentions --
-    utils/colors.py shows '#bfd2bc93' as an example, and that is prose.
+    utils/colors.py shows EXAMPLE_GOLD_AT_BF as an example, and that is prose.
     Alpha 0 is not a colour; a base no constant names has no row to follow."""
     named = {v.lower() for n, v in vars(colors).items()
              if n.isupper() and isinstance(v, str)
@@ -267,7 +269,7 @@ def test_no_composed_literal_is_left_in_the_application():
 
 def test_the_scrollbar_handle_is_grey_44_at_150():
     """RNV-COLLAPSE-505050, closed here 2026-09-25. Ruled 2026-09-02, and
-    written out as rgba(80, 80, 80, 150) in both palettes until now."""
+    written out as RETIRED_SCROLLBAR_HANDLE_RGBA in both palettes until now."""
     for mode, palette in IMAGE_PALETTES.items():
         assert decompose(palette["image_scrollbar_handle"]) == (
             colors.GREY_44, colors.SCROLLBAR_HANDLE_ALPHA), mode
@@ -280,7 +282,7 @@ def test_nothing_moved_that_was_not_ruled():
 
     BY NAME, NOT BY HEX, and that is the point of the round. A register move
     is meant to pass straight through these values; a test that pinned
-    '#333333' would fail the first time one did and ask a person to edit it
+    APP_BORDER's hex would fail the first time one did and ask a person to edit it
     by hand -- the job derivation exists to remove. What this DOES catch is a
     value quietly re-made from something else, which the decomposition check
     accepts as long as source and value agree with each other.
@@ -298,7 +300,7 @@ def test_nothing_moved_that_was_not_ruled():
 
 def test_the_unused_hover_key_stays_removed():
     """RNV-HOVER-KEY-GONE, 2026-09-25. image_scrollbar_handle_hover painted
-    nothing. A render set it to #ff00ff, and then deleted it, and neither
+    nothing. A render set it to EXAMPLE_RENDER_PROBE, and then deleted it, and neither
     changed one pixel across the main window and twelve dialogs in all three
     modes, sixty scrollbars under the pointer among them. A control that
     changed DARK's 'accent' instead changed 65 of the same 159 captures. The
@@ -320,7 +322,7 @@ def test_the_unused_hover_key_stays_removed():
 
 
 def test_the_collapsed_value_is_gone_in_every_spelling():
-    """#505050 in any string spelling -- #rgb, #rrggbb, #aarrggbb, rgb(),
+    """RETIRED_SCROLLBAR_HANDLE in any string spelling -- #rgb, #rrggbb, #aarrggbb, rgb(),
     rgba() -- or as integers in a tuple or a QColor call. The sweeps that
     reported it gone elsewhere compared quoted six-digit hex and nothing
     else; that is how it survived three weeks after its ruling."""
@@ -329,7 +331,8 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
         bare = _bare_strings(tree)
         for node in ast.walk(tree):
             if (isinstance(node, ast.Constant) and isinstance(node.value, str)
-                    and id(node) not in bare and "#505050" in colours_in(node.value)):
+                    and id(node) not in bare
+                    and cv.RETIRED_SCROLLBAR_HANDLE in colours_in(node.value)):
                 found.append(f"{rel}:{node.lineno}  {node.value[:40]!r}")
             values = None
             if isinstance(node, (ast.Tuple, ast.List)) and len(node.elts) in (3, 4):
@@ -343,8 +346,9 @@ def test_the_collapsed_value_is_gone_in_every_spelling():
                              if isinstance(v, ast.Constant) and type(v.value) is int)
                 if ints == (80, 80, 80):
                     found.append(f"{rel}:{node.lineno}  (80, 80, 80)")
-    assert not found, "#505050 is still here:\n  " + "\n  ".join(found)
-    assert colours_in("rgba(80, 80, 80, 150)") == {"#505050"}, "the decoder is blind"
+    assert not found, f"{cv.RETIRED_SCROLLBAR_HANDLE} is still here:\n  " + "\n  ".join(found)
+    assert colours_in(cv.RETIRED_SCROLLBAR_HANDLE_RGBA) == {cv.RETIRED_SCROLLBAR_HANDLE}, (
+        "the decoder is blind")
 
 # RNV-DERIVE-ALPHA
 
@@ -404,7 +408,8 @@ def _lower8_trees():
 def test_eight_digit_hex_is_lower_case():
     """RNV-LOWER-EIGHT, 2026-09-25. The register writes hex in lower case --
     Notation, ruled 2026-08-15, Brand Book decision #19 -- and on 2026-09-25
-    Chris ruled that eight digits are hex too: #ed1a1a1a, never #ED1A1A1A.
+    Chris ruled that eight digits are hex too: EXAMPLE_EIGHT_DIGIT_LOWER, never
+    EXAMPLE_EIGHT_DIGIT_UPPER.
     Qt reads either case, so no pixel moved when this application's helper
     changed.
 
