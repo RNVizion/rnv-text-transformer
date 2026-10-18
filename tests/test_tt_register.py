@@ -46,7 +46,6 @@ from utils.dialog_styles import DialogStyleManager
 
 ROOT = Path(__file__).resolve().parent.parent
 COLORS = ROOT / 'utils/colors.py'
-STYLES = ROOT / 'utils/dialog_styles.py'
 
 #: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
 #: says. The values are held by tests/test_colors_in_sync.py, against the
@@ -84,7 +83,7 @@ def test_the_retired_ramp_name_is_gone():
 def test_every_light_ground_reads_the_register_name(key):
     """Spelling, not only value. A literal or a retired name here cannot
     follow rev 27's ladder the next time it moves."""
-    src = STYLES.read_text(encoding='utf-8')
+    src = COLORS.read_text(encoding='utf-8')
     assert f"'{key}': APP_SURFACE_LIGHT_3," in src, (
         f'{key} does not read APP_SURFACE_LIGHT_3')
     assert LIGHT[key] == colors.APP_SURFACE_LIGHT_3
@@ -103,7 +102,7 @@ def test_the_light_track_keeps_the_ramp_name():
         f'brand_map.json holds GRAY_E0 as {entry!r}, not as the '
         f'application\'s own ramp step')
     assert LIGHT['scrollbar_bg'] == colors.GRAY_E0
-    src = STYLES.read_text(encoding='utf-8')
+    src = COLORS.read_text(encoding='utf-8')
     assert "'scrollbar_bg': GRAY_E0," in src
     assert colors.PROVENANCE.get('GRAY_E0') == 'app-ramp'
 
@@ -140,9 +139,10 @@ def test_the_ramp_is_still_ordered_by_byte():
 
 
 def test_this_guard_can_see_what_it_checks():
-    """Guard the guard. Every assertion above walks these two files and the
-    two resolved palettes; if any of them stopped resolving, the rest would
-    pass over nothing."""
-    assert COLORS.exists() and STYLES.exists()
+    """Guard the guard. Every assertion above walks utils/colors.py, where the
+    palettes are written since #64 A (2026-10-18), and the two resolved
+    palettes; if any of them stopped resolving, the rest would pass over
+    nothing."""
+    assert COLORS.exists()
     assert len(LIGHT) > 20 and len(DARK) > 20
     assert len(colors.PROVENANCE) > 20

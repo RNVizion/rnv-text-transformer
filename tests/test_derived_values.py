@@ -33,7 +33,7 @@ from utils.colors import with_alpha
 from utils.dialog_styles import DialogStyleManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-STYLES = ROOT / "utils" / "dialog_styles.py"
+COLORS = ROOT / "utils" / "colors.py"
 DRAG = ROOT / "ui" / "drag_drop_text_edit.py"
 PALETTES = {"DARK": DialogStyleManager.DARK, "LIGHT": DialogStyleManager.LIGHT}
 #: RNV-NAMED-AND-USED, 2026-10-04: the palette that holds the image values.
@@ -149,10 +149,8 @@ def _derived():
     """(where, call node, resolved value) for every with_alpha() call in the
     palettes and in the drag highlight."""
     out = []
-    tree = ast.parse(STYLES.read_text(encoding="utf-8-sig"))
-    cls = next(n for n in tree.body
-               if isinstance(n, ast.ClassDef) and n.name == "DialogStyleManager")
-    for node in cls.body:
+    tree = ast.parse(COLORS.read_text(encoding="utf-8-sig"))
+    for node in tree.body:
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         target = node.targets[0] if isinstance(node, ast.Assign) else node.target
@@ -313,7 +311,7 @@ def test_the_unused_hover_key_stays_removed():
     for mode, palette in PALETTES.items():
         assert REMOVED not in palette, f"{mode} declares {REMOVED} again"
     sources = list(_sources())
-    assert any(rel.as_posix() == "utils/dialog_styles.py" for rel, _ in sources), (
+    assert any(rel.as_posix() == "utils/colors.py" for rel, _ in sources), (
         "the sweep cannot see the palettes, so it proves nothing")
     named = [f"{rel}:{node.lineno}" for rel, tree in sources
              for node in ast.walk(tree)

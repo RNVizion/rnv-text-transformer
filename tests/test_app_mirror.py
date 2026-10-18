@@ -127,7 +127,7 @@ def test_the_light_scrollbar_track_did_not_follow_the_ink():
 def test_the_light_track_no_longer_reads_the_ink_constant():
     """Spelling, not just value. If it points at APP_TEXT again it will follow
     the next ink move silently, which is what this pass existed to stop."""
-    source = STYLES.read_text(encoding='utf-8')
+    source = COLORS.read_text(encoding='utf-8')
     assert "'scrollbar_bg': APP_TEXT," not in source, (
         'the light scrollbar track reads APP_TEXT again')
     assert "'scrollbar_bg': GRAY_E0," in source

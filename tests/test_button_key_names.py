@@ -65,14 +65,15 @@ def _values(pins):
 
 
 def _palettes():
-    src = (ROOT / "utils" / "dialog_styles.py").read_text(encoding="utf-8-sig")
+    src = (ROOT / "utils" / "colors.py").read_text(encoding="utf-8-sig")
     module = ast.parse(src)
-    # The palette values are NAMES imported from utils/colors.py. A resolver
-    # that reads only dialog_styles.py resolves all of them to None, and then
-    # compares None with None and passes. Read the constants module too.
+    # The palette values are NAMES of the constants beside them in
+    # utils/colors.py, where the palettes are since #64 A (2026-10-18). A
+    # resolver that read the palettes and not the constants would resolve
+    # all of them to None, and then compare None with None and pass. So the
+    # constants are read too.
     consts = {}
-    for source in ((ROOT / "utils" / "colors.py").read_text(encoding="utf-8-sig"),
-                   src):
+    for source in (src,):
         for node in ast.walk(ast.parse(source)):
             target = value = None
             if isinstance(node, ast.Assign) and len(node.targets) == 1 \

@@ -169,7 +169,7 @@ class ThemeManager:
 
 ### `DialogStyleManager` (in `utils/dialog_styles.py`)
 
-Holds *palettes and stylesheets*. Has no state — it is a pure function of `(is_dark, font_family)`.
+Holds the *stylesheets*, and serves the palettes, which live in `utils/colors.py`. Has no state — it is a pure function of `(is_dark, font_family)`.
 
 ```python
 DialogStyleManager.DARK   # dict[str, str] — complete dark palette
@@ -317,7 +317,7 @@ The project enforces single-source-of-truth for two critical values:
 
 ### Color palette
 
-- **Lives in:** `utils/dialog_styles.py` as `DialogStyleManager.DARK` and `LIGHT`
+- **Lives in:** `utils/colors.py` as `DARK` and `LIGHT`, which `DialogStyleManager.DARK` and `.LIGHT` serve
 - **Accessed via:** `DialogStyleManager.get_colors(is_dark)` — returns the class-level dict by reference
 - **Every component** that needs a color — main window, every dialog, diff highlighting, regex match coloring, line number gutters, scrollbar styling — reads from this one place
 - **No component** ever constructs its own colors

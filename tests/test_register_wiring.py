@@ -15,13 +15,14 @@ THE POINT OF IT. A literal cannot follow its base. APP["text"] moved on
 old one silently. Every registered value in the palettes is a name, so the
 next register move carries.
 
-WHAT IS DIFFERENT HERE. This app has two palettes, DARK and LIGHT, both class
-attributes of DialogStyleManager; image mode reads DARK. Both were wired at
-the same time, so both halves are swept for literals, and the light allowlist
-is what the light palette names today, every entry of which has been through
-a ruling (the light wiring, the gold rounds, the 2026-09-07 correction).
-Eight entries in each palette are with_alpha(NAME, ALPHA) calls, so the
-sweep looks inside a value, not only at it.
+WHAT IS DIFFERENT HERE. This app has two palettes, DARK and LIGHT. They are
+in utils/colors.py since #64 A (2026-10-18), and DialogStyleManager serves
+them; image mode reads DARK. Both were wired at the same time, so both halves
+are swept for literals, and the light allowlist is what the light palette
+names today, every entry of which has been through a ruling (the light
+wiring, the gold rounds, the 2026-09-07 correction). Eight entries in each
+palette are with_alpha(NAME, ALPHA) calls, so the sweep looks inside a
+value, not only at it.
 """
 from __future__ import annotations
 
@@ -35,7 +36,7 @@ from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / 'utils/dialog_styles.py'
+SRC = ROOT / 'utils/colors.py'
 
 #: RNV-COLOR-SYNC, 2026-10-16. Where each color comes from, as brand_map.json
 #: says. The values are held by tests/test_colors_in_sync.py, against the

@@ -46,12 +46,20 @@ TEXT ON GOLD IS STILL #000000. At this value black is 4.6226 and white is
 4.5429, so black stays correct and the register's rule survives untouched.
 
 
+Palettes
+--------
+DARK and LIGHT, the two theme palettes, are defined here too: every key a
+dialog, the main window or an export looks up, and the named color it takes
+in that mode. DialogStyleManager serves them under the same names; they were
+its class attributes until #64 A (2026-10-18).
+
+
 Usage
 -----
-    from utils.colors import BRAND_GOLD, BRAND_DARK_GOLD, with_alpha
+    from utils.colors import BRAND_GOLD, DARK, LIGHT, with_alpha
 
-    DARK  = {'accent': BRAND_GOLD}
-    LIGHT = {'accent': BRAND_DARK_GOLD}
+    DARK['accent']    # BRAND_GOLD
+    LIGHT['accent']   # BRAND_DARK_GOLD
 
     # Qt #AARRGGBB -- primary gold at 75% alpha
     highlight = with_alpha(BRAND_GOLD, 0xBF)   # '#bfd2bc93'
@@ -374,7 +382,7 @@ GRAY_DD: Final[str] = '#dddddd'  # app-owned
 #:
 #: THIS COMMENT SAT ONE CONSTANT LOWER until 2026-08-30, where it documented
 #: GRAY_E8 while describing GRAY_E0's job: the scrollbar track is #e0e0e0
-#: (utils/dialog_styles.py 'scrollbar_bg'), and #e0e0e0 is what APP["text"]
+#: (LIGHT['scrollbar_bg'], below), and #e0e0e0 is what APP["text"]
 #: held before the ink moved. Moved when GRAY_E8 became a register mirror --
 #: carrying a docstring that describes a different value into a mirror is how
 #: a wrong fact acquires the authority of a checked one.
@@ -624,6 +632,200 @@ of what the pattern matches. Data, not chrome, and in the UPPER CASE it
 was written in -- the case is part of the example. App-owned."""
 
 
+# ==================== PALETTES ====================
+#
+# The two theme palettes: each key a dialog, the main window or an export
+# looks up, and the named color it takes in that mode. Image mode reads DARK.
+# DialogStyleManager serves them under the same names, the same two dicts;
+# they were its class attributes until #64 A (2026-10-18).
+
+DARK: Final[dict[str, str]] = {
+    # Backgrounds
+    'bg': BRAND_BLACK,
+    'bg_secondary': APP_CARD,
+    'bg_tertiary': APP_BORDER,
+    'bg_hover': APP_PANEL_HOVER,
+
+    # Text
+    'text': APP_TEXT,
+    'text_muted': GRAY_88,
+    'text_disabled': GRAY_55,
+
+    # Borders
+    'border': APP_BORDER,
+    'border_light': GRAY_44,
+    'border_focus': BRAND_GOLD,
+
+    # Accent colors
+    'accent': BRAND_GOLD,
+    'accent_hover': BRAND_GOLD_HOVER,
+    'accent_pressed': BRAND_GOLD_PRESSED,
+    'accent_ink': BRAND_GOLD,  # Accent when it carries text
+    'accent_text': TRUE_BLACK,  # Text on accent background
+
+    # Semantic colors
+    # RNV-STATUS-FAMILY: these three keys are read in fourteen
+    # places and every one is a `color:` declaration, so they
+    # carry the TEXT variants rather than the fills. The fills
+    # sit at L* 48-59 and cannot reach 4.5:1 on either ground.
+    'success': STATUS_SUCCESS_TEXT,
+    'error': STATUS_ERROR_TEXT,
+    'warning': STATUS_WARNING_TEXT,
+    'info': BRAND_GOLD,
+
+    # Special
+    'selection_bg': BRAND_GOLD,
+    'selection_text': TRUE_BLACK,
+    'scrollbar_bg': APP_CARD,
+    'scrollbar_handle': GRAY_44,
+    'scrollbar_handle_main': GRAY_44,
+    'tooltip_border': BRAND_GOLD,
+
+    # Checkbox indicator
+    'checkbox_indicator_bg': BRAND_BLACK,
+    'checkbox_border': GRAY_55,
+
+    # Dropdown / list hover
+    'list_hover_bg': WHITE,
+    'list_hover_text': TRUE_BLACK,
+
+    # MainWindow-specific (pure black background, distinct from dialog bg)
+    'window_bg': TRUE_BLACK,
+    'main_btn_bg': BRAND_BLACK,
+    'main_btn_text': APP_TEXT,
+    'main_btn_hover_bg': APP_BORDER,
+    'main_btn_pressed_bg': GRAY_44,
+    'main_btn_pressed_text': TRUE_BLACK,
+    'input_bg': BRAND_BLACK,
+    'input_text': APP_TEXT,
+    'input_border': APP_BORDER,
+    'label_bg': TRUE_BLACK,
+    'label_text': APP_TEXT,
+    'output_text_color': BRAND_GOLD,
+    'border_color': APP_BORDER,
+    'text_color': APP_TEXT,
+
+    # Diff / compare semantic highlight colors
+    'diff_added_bg':   SEMANTIC_DIFF_ADDED,
+    'diff_removed_bg': SEMANTIC_DIFF_REMOVED,
+    'diff_changed_bg': SEMANTIC_DIFF_CHANGED,
+
+    # RNV-NAMED-AND-USED (2026-10-04): the diff export's seven colors
+    # stood here too. The export is a standalone page, always light,
+    # and reads them from LIGHT by name; this copy was looked up by
+    # nothing. They are in LIGHT alone.
+
+    # Regex builder match highlight
+    'regex_match_bg': SEMANTIC_REGEX_MATCH,
+
+    # Image mode semi-transparent overlay values -- used only in image
+    # mode. DERIVED: a named color at a declared alpha, so a register
+    # move reaches them (RNV-DERIVE-ALPHA, 2026-09-25).
+    'image_overlay_bg':            with_alpha(TRUE_BLACK, IMAGE_FIELD_ALPHA),
+    'image_overlay_bg_dark':       with_alpha(BRAND_BLACK, IMAGE_LABEL_ALPHA),
+    'image_overlay_checkbox':      with_alpha(TRUE_BLACK, IMAGE_CHECKBOX_ALPHA),
+    'image_scrollbar_border':      with_alpha(APP_BORDER, SCROLLBAR_BORDER_ALPHA),
+    # RNV-COLLAPSE-505050, closed here 2026-09-25: this was
+    # rgba(80, 80, 80, 150), the value ruled onto GRAY_44 on
+    # 2026-09-02 and left behind because nothing decoded rgba().
+    'image_scrollbar_handle':      with_alpha(GRAY_44, SCROLLBAR_HANDLE_ALPHA),
+    # The image scrollbar hovers from DARK's 'accent'. It has no key of
+    # its own: the unused one was removed, RNV-HOVER-KEY-GONE.
+    'image_dropdown_bg':           with_alpha(TRUE_BLACK, DROPDOWN_BG_ALPHA),
+    'image_dropdown_selection':    with_alpha(APP_BORDER, DROPDOWN_SELECTION_ALPHA),
+    'image_dropdown_border':       with_alpha(APP_BORDER, DROPDOWN_BORDER_ALPHA),
+}
+
+LIGHT: Final[dict[str, str]] = {
+    # Backgrounds
+    'bg': APP_SURFACE_LIGHT_3,
+    'bg_secondary': WHITE,
+    'bg_tertiary': GOLD_TEXT_GROUND_FLOOR,
+    'bg_hover': APP_HOVER_LIGHT,
+
+    # Text
+    'text': TRUE_BLACK,
+    'text_muted': GRAY_66,
+    'text_disabled': APP_TEXT_DIM,
+
+    # Borders
+    'border': GRAY_CC,
+    'border_light': GRAY_DD,
+    'border_focus': BRAND_DARK_GOLD,
+
+    # Accent colors
+    'accent': BRAND_DARK_GOLD,
+    'accent_hover': BRAND_DARK_GOLD_DEEP,
+    'accent_pressed': BRAND_DARK_GOLD_PRESSED,
+    'accent_ink': BRAND_DARK_GOLD_DEEP,  # Accent when it carries text
+    'accent_text': WHITE,  # Text on accent background
+
+    # Semantic colors
+    # RNV-STATUS-FAMILY: light's siblings. success and warning
+    # had no light variant before this and read 2.87 and 1.50
+    # on #f5f5f5 -- illegal as text, live, and unnoticed because
+    # the only boundary test in this repo covered the red.
+    'success': STATUS_SUCCESS_TEXT_LIGHT,
+    'error': STATUS_ERROR_TEXT_LIGHT,
+    'warning': STATUS_WARNING_TEXT_LIGHT,
+    'info': BRAND_DARK_GOLD_DEEP,
+
+    # Special
+    'selection_bg': BRAND_DARK_GOLD,
+    'selection_text': WHITE,
+    'scrollbar_bg': GRAY_E0,
+    'scrollbar_handle': APP_TEXT_DIM,
+    'scrollbar_handle_main': APP_TEXT_DIM,
+    'tooltip_border': BRAND_DARK_GOLD,
+
+    # Checkbox indicator
+    'checkbox_indicator_bg': WHITE,
+    'checkbox_border': APP_TEXT_DIM,
+
+    # Dropdown / list hover
+    'list_hover_bg': BRAND_BLACK,
+    'list_hover_text': WHITE,
+
+    # MainWindow-specific
+    'window_bg': APP_SURFACE_LIGHT_3,
+    'main_btn_bg': WHITE,
+    'main_btn_text': TRUE_BLACK,
+    'main_btn_hover_bg': APP_BORDER,
+    'main_btn_pressed_bg': GRAY_44,
+    'main_btn_pressed_text': WHITE,
+    'input_bg': WHITE,
+    'input_text': TRUE_BLACK,
+    'input_border': GRAY_CC,
+    'label_bg': APP_SURFACE_LIGHT_3,
+    'label_text': TRUE_BLACK,
+    'output_text_color': BRAND_DARK_GOLD,
+    'border_color': GRAY_CC,
+    'text_color': TRUE_BLACK,
+
+    # Diff / compare semantic highlight colors
+    'diff_added_bg':   SEMANTIC_DIFF_ADDED_LIGHT,
+    'diff_removed_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
+    'diff_changed_bg': SEMANTIC_DIFF_CHANGED_LIGHT,
+
+    # Diff HTML export colors (standalone document — always light-styled)
+    'diff_html_equal_bg':  WHITE,
+    'diff_html_insert_bg': SEMANTIC_DIFF_ADDED_LIGHT,
+    'diff_html_delete_bg': SEMANTIC_DIFF_REMOVED_LIGHT,
+    'diff_html_header_bg': GRAY_EE,
+    'diff_html_line_num':  GRAY_88,
+    'diff_html_border':    GRAY_DD,
+    'diff_html_stats_text':GRAY_66,
+
+    # Regex builder match highlight
+    'regex_match_bg': SEMANTIC_REGEX_MATCH_LIGHT,
+
+    # RNV-NAMED-AND-USED (2026-10-04): the image overlays' eight values
+    # stood here too, the same derivations as DARK. Image mode reads
+    # them from DARK by name, as the note that stood with them said:
+    # "nothing reads these". They are in DARK alone.
+}
+
+
 # ==================== PROVENANCE ====================
 #
 # Where every color constant in this module comes from. Declarative and
@@ -695,6 +897,8 @@ PROVENANCE: Final[dict[str, str]] = {
 
 __all__ = [
     'PROVENANCE',
+    'DARK',
+    'LIGHT',
     'BRAND_GOLD',
     'BRAND_DARK_GOLD',
     'BRAND_DARK_GOLD_DEEP',

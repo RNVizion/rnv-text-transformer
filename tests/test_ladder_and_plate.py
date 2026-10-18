@@ -119,7 +119,7 @@ def _shift(value: str, step: int) -> str:
 def _palette_names(name: str) -> dict:
     """key -> the NAME each entry is written as, read from the source. The live
     dict gives values; only the source says which constant was used."""
-    tree = ast.parse(STYLES.read_text(encoding='utf-8'))
+    tree = ast.parse(COLORS.read_text(encoding='utf-8'))
     for node in ast.walk(tree):
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
@@ -131,7 +131,7 @@ def _palette_names(name: str) -> dict:
             if isinstance(k, ast.Constant) and isinstance(v, ast.Name):
                 out[k.value] = v.id
         return out
-    raise AssertionError(f'{name} is not a dict in utils/dialog_styles.py')
+    raise AssertionError(f'{name} is not a dict in utils/colors.py')
 
 
 # ------------------------------------------------------------- guard the guard

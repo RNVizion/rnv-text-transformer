@@ -26,7 +26,6 @@ from utils import colors
 from utils.dialog_styles import DialogStyleManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-STYLES = ROOT / 'utils' / 'dialog_styles.py'
 COLORS = ROOT / 'utils' / 'colors.py'
 
 VALID_GROUPS = {'register', 'derived', 'app-ramp', 'app-semantic'}
@@ -300,10 +299,10 @@ def test_register_constants_are_literals_not_computed():
 # ------------------------------------------------------------------- palette
 
 def _palette_nodes():
-    tree = ast.parse(STYLES.read_text(encoding='utf-8'))
-    cls = next(n for n in ast.walk(tree)
-               if isinstance(n, ast.ClassDef) and n.name == 'DialogStyleManager')
-    for node in cls.body:
+    # Module-level in utils/colors.py since #64 A (2026-10-18); they were
+    # DialogStyleManager's class attributes.
+    tree = ast.parse(COLORS.read_text(encoding='utf-8'))
+    for node in tree.body:
         target = None
         if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
             target = node.target.id
@@ -363,15 +362,17 @@ GOLD_CONSTANTS = ('BRAND_GOLD', 'BRAND_DARK_GOLD', 'BRAND_DARK_GOLD_DEEP',
 
 
 def _theme_dicts() -> dict[str, dict]:
-    """The two theme dicts, resolved from source.
-
-    Read through the AST rather than imported because the dicts are built
-    inline in dialog_styles and there is no accessor that hands them over.
+    """The two theme dicts, resolved from source: utils/colors.py, where they
+    are since #64 A (2026-10-18). They were built inline in dialog_styles.
     """
-    src = STYLES.read_text(encoding='utf-8')
+    src = COLORS.read_text(encoding='utf-8')
     out = {}
-    for node in ast.walk(ast.parse(src)):
-        if not isinstance(node, ast.Dict) or len(node.keys) <= 30:
+    # The two palettes, by name: PROVENANCE beside them is a dict as long.
+    for node in [n.value for n in ast.parse(src).body
+                 if isinstance(n, (ast.Assign, ast.AnnAssign)) and isinstance(n.value, ast.Dict)
+                 and getattr(n.targets[0] if isinstance(n, ast.Assign) else n.target, 'id', None)
+                 in ('DARK', 'LIGHT')]:
+        if len(node.keys) <= 30:
             continue
         d = {}
         for k, v in zip(node.keys, node.values):
@@ -440,13 +441,13 @@ def test_no_theme_key_is_defined_twice():
     changed nothing -- but the day the two lines differ, the first is dead
     code that reads as live.
     """
-    src = STYLES.read_text(encoding='utf-8')
+    src = COLORS.read_text(encoding='utf-8')
     dupes = []
     for node in ast.walk(ast.parse(src)):
         if not isinstance(node, ast.Dict):
             continue
         keys = [k.value for k in node.keys if isinstance(k, ast.Constant)]
         for k in sorted({k for k in keys if keys.count(k) > 1}):
-            dupes.append(f'utils/dialog_styles.py:{node.lineno}: '
+            dupes.append(f'utils/colors.py:{node.lineno}: '
                          f'{k!r} defined {keys.count(k)} times')
     assert not dupes, '\n  '.join(dupes)

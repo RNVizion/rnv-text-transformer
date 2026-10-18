@@ -255,8 +255,9 @@ rnv-text-transformer/
 │   └── *_dialog.py                # 10 specialized dialogs
 │
 ├── utils/                         # Cross-cutting utilities
+│   ├── colors.py                  # Single source of truth for colors, the two palettes among them
 │   ├── config.py                  # Single source of truth for version, paths, constants
-│   ├── dialog_styles.py           # Single source of truth for all colors and stylesheets
+│   ├── dialog_styles.py           # The dialog stylesheets, drawn from those palettes
 │   ├── file_handler.py            # Multi-format file I/O
 │   ├── settings_manager.py        # QSettings-backed persistence
 │   ├── clipboard_utils.py         # Clipboard operations
@@ -300,7 +301,7 @@ rnv-text-transformer/
 
 ### Design Principles
 
-- **Single source of truth.** All colors live in `utils/dialog_styles.py` (`DARK` and `LIGHT` dicts). The version string lives only in `utils/config.py`. No duplication.
+- **Single source of truth.** All colors live in `utils/colors.py`, the `DARK` and `LIGHT` palettes among them. The version string lives only in `utils/config.py`. No duplication.
 - **Centralized styling.** Every dialog inherits from `BaseDialog`, which delegates appearance to `DialogStyleManager` — a single stylesheet generator with LRU caching for performance.
 - **Pre-warmed caches.** At startup, the app pre-warms the stylesheet cache and pre-loads button images so the first dialog opens instantly.
 - **Threaded file I/O.** Large files load on `FileLoaderThread`; expensive transforms run on `TextTransformThread`. The UI never blocks.

@@ -48,7 +48,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 #: Where this application writes its colors: the one place a literal belongs.
 COLOR_MODULES = ("utils/colors.py",)
 #: Where its palettes are written: their own keys are not lookups.
-PALETTE_MODULES = ("utils/dialog_styles.py",)
+PALETTE_MODULES = ("utils/colors.py",)
 SKIP_DIRS = {"tests", "build", "dist", "docs", "resources", "scripts", "snapshots", "__pycache__"}
 
 from utils.dialog_styles import DialogStyleManager  # noqa: E402

@@ -4,12 +4,12 @@
   "color_file": "utils/colors.py",
   "palettes": [
     {
-      "file": "utils/dialog_styles.py",
-      "dict": "DialogStyleManager.DARK"
+      "file": "utils/colors.py",
+      "dict": "DARK"
     },
     {
-      "file": "utils/dialog_styles.py",
-      "dict": "DialogStyleManager.LIGHT"
+      "file": "utils/colors.py",
+      "dict": "LIGHT"
     }
   ],
   "colors": {
