@@ -625,11 +625,12 @@ Export data, not chrome, so it does not follow the brand's black (#48 A),
 though it holds the same value: declared in COINCIDENT in
 tests/test_brand_mirror.py. App-owned."""
 
-SEMANTIC_HEX_PATTERN_EXAMPLE: Final[str] = '#FF5733'  # app-owned
+SEMANTIC_HEX_PATTERN_EXAMPLE: Final[str] = '#ff5733'  # app-owned
 """The example the Hex Color regex pattern carries
 (core/regex_patterns.py, RegexPatterns.HEX_COLOR.example_match): a sample
-of what the pattern matches. Data, not chrome, and in the UPPER CASE it
-was written in -- the case is part of the example. App-owned."""
+of what the pattern matches. Data, not chrome. Written in lower case, as
+every hex in the source is (#66 A, 2026-10-18); the pattern matches
+either case. App-owned."""
 
 
 # ==================== PALETTES ====================

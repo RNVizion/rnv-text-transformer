@@ -105,8 +105,8 @@
       "why": "Data, not chrome: the RTF export's text color. It does not follow the brand's black (#48 A)."
     },
     "SEMANTIC_HEX_PATTERN_EXAMPLE": {
-      "app": "#FF5733",
-      "why": "Data: the example the Hex Color regex pattern carries, in the upper case it is written in (#56 A)."
+      "app": "#ff5733",
+      "why": "Data: the example the Hex Color regex pattern carries, in lower case like every hex in the source (#56 A, #66 A)."
     }
   }
 }
