@@ -350,6 +350,7 @@ class ImageButton(QPushButton):
             }}
             QPushButton:hover {{
                 background-color: {theme['main_btn_hover_bg']};
+                color: {theme['main_btn_hover_text']};
             }}
             QPushButton:pressed {{
                 background-color: {theme['main_btn_pressed_bg']};

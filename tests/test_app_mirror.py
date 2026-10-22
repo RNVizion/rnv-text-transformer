@@ -56,7 +56,7 @@ LIGHT = DialogStyleManager.get_colors(False)
 INK_KEYS = ('text', 'main_btn_text', 'input_text', 'label_text', 'text_color')
 
 #: The golds that finished their rename in this pass. Upstream settled on the
-#: BRAND_ prefix in rnv-brand@faf1fd6; four of the five apps already used it.
+#: BRAND_ prefix in rnv-brand@1f0804d; four of the five apps already used it.
 RENAMED_GOLDS = ('BRAND_GOLD_HOVER', 'BRAND_GOLD_PRESSED')
 
 

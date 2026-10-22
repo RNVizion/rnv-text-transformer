@@ -69,7 +69,8 @@ class DialogStyleManager:
     
     MainWindow Colors (separate from dialog bg for intentional contrast):
     - window_bg: Main window background (#000000 dark, #f5f5f5 light)
-    - main_btn_bg/main_btn_text/main_btn_hover_bg/main_btn_pressed_text: Button colors
+    - main_btn_bg/main_btn_text/main_btn_hover_bg/main_btn_hover_text/
+      main_btn_pressed_bg/main_btn_pressed_text: Button colors
     - input_bg/input_text/input_border: Input field colors
     - label_bg/label_text: Label colors
     - text_color/border_color: Aliases for backward compat with ThemeColors
