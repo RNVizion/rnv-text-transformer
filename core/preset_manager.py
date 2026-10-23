@@ -21,6 +21,7 @@ from enum import StrEnum
 
 from utils.logger import get_module_logger
 from utils.error_handler import ErrorHandler
+from utils.atomic_write import atomic_write_json
 
 _logger = get_module_logger("PresetManager")
 
@@ -520,8 +521,8 @@ class PresetManager:
             
             data = {'presets': user_presets}
             
-            with open(self._presets_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+            # Atomic (#83 A): the file is the old one or the new one, never a mixture.
+            atomic_write_json(self._presets_path, data, indent=2)
             
             return True
         

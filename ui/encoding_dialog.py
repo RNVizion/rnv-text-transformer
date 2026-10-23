@@ -63,6 +63,24 @@ class CommonEncoding(StrEnum):
         }
         return display_names.get(encoding, encoding.upper())
 
+#: Confidence tiers, highest first: (lowest percent in the tier, word, color key).
+#: The word is shown beside the percent, so the tier is never carried by color
+#: alone (#85 A).
+CONFIDENCE_TIERS: tuple[tuple[float, str, str], ...] = (
+    (90.0, "high", "success"),
+    (70.0, "medium", "warning"),
+    (0.0, "low", "error"),
+)
+
+
+def confidence_tier(confidence_pct: float) -> tuple[str, str]:
+    """Return (word, color key) for a detection confidence given in percent."""
+    for floor, word, color_key in CONFIDENCE_TIERS:
+        if confidence_pct >= floor:
+            return word, color_key
+    return CONFIDENCE_TIERS[-1][1:]
+
+
 @dataclass
 class EncodingResult:
     """Result of encoding detection or conversion."""
@@ -495,15 +513,11 @@ class EncodingDialog(BaseDialog):
                     break
             
             confidence_pct = result.confidence * 100
-            self.confidence_label.setText(f"Confidence: {confidence_pct:.1f}%")
-            
-            if confidence_pct >= 90:
-                self.confidence_label.setStyleSheet(f"color: {self.get_colors()['success']};")
-            elif confidence_pct >= 70:
-                self.confidence_label.setStyleSheet(f"color: {self.get_colors()['warning']};")
-            else:
-                self.confidence_label.setStyleSheet(f"color: {self.get_colors()['error']};")
-            
+            # The tier is said in a word as well as a color (#85 A).
+            tier_word, color_key = confidence_tier(confidence_pct)
+            self.confidence_label.setText(f"Confidence: {confidence_pct:.1f}% ({tier_word})")
+            self.confidence_label.setStyleSheet(f"color: {self.get_colors()[color_key]};")
+
             self.status_label.setText(result.message)
         else:
             self.status_label.setText(f"Detection failed: {result.message}")
