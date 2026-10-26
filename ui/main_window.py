@@ -259,6 +259,9 @@ class MainWindow(QMainWindow):
         
         # Apply saved settings
         self._apply_stats_position_from_settings()
+        # (#95 A) Show button tooltips and Maximum recent files, as saved
+        self._update_tooltips_visibility(self.settings_manager.load_show_tooltips())
+        self._apply_recent_files_max()
         
         # Apply theme
         self.apply_theme()
@@ -1535,7 +1538,7 @@ class MainWindow(QMainWindow):
         self._file_loader_thread.start()
         
         # Add to recent files
-        self.settings_manager.add_recent_file(file_path)
+        self._add_recent_file(file_path)
     
     def _on_file_loaded_dragdrop(self, content: str, filename: str) -> None:
         """Handle successful drag-drop file load."""
@@ -1624,7 +1627,7 @@ class MainWindow(QMainWindow):
             self._file_loader_thread.start()
             
             # Add to recent files
-            self.settings_manager.add_recent_file(file_path)
+            self._add_recent_file(file_path)
     
     def _on_file_loaded(self, content: str, filename: str) -> None:
         """Handle successful file load."""
@@ -1783,6 +1786,12 @@ class MainWindow(QMainWindow):
         max_files = self.settings_manager.load_recent_files_max()
         if max_files > 0:
             self.settings_manager.add_recent_file(file_path, max_files)
+    
+    def _apply_recent_files_max(self) -> None:
+        """Trim the recent files list to the Maximum recent files setting."""
+        self.settings_manager.trim_recent_files(
+            self.settings_manager.load_recent_files_max()
+        )
     
     def _open_recent_file(self, file_path: str) -> None:
         """

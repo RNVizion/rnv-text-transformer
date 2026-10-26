@@ -282,6 +282,17 @@ class SettingsManager:
         
         self.save_recent_files(files)
     
+    def trim_recent_files(self, max_files: int) -> None:
+        """
+        Keep only the newest max_files entries of the recent files list.
+        
+        Args:
+            max_files: Maximum number of recent files to keep (0 = none)
+        """
+        files = self.load_recent_files()
+        if len(files) > max(0, max_files):
+            self.save_recent_files(files[:max(0, max_files)])
+    
     def clear_recent_files(self) -> None:
         """Clear the recent files list."""
         self._settings.setValue(self.Keys.RECENT_FILES, [])

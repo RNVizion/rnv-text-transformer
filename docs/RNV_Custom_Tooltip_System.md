@@ -4,7 +4,7 @@
 
 **Version:** 1.0  
 **Tested With:** Python 3.13, PyQt6, Windows 10/11  
-**Applications:** RNV Text Transformer, RNV ICO Builder (integration target)
+**Applications:** RNV Text Transformer, RNV Icon Builder (integration target)
 
 ---
 
@@ -80,6 +80,8 @@ Add these to your main window file's import block:
 from PyQt6.QtWidgets import QApplication, QLabel, QWidget
 from PyQt6.QtCore import Qt, QTimer, QEvent, QPoint
 from PyQt6.QtGui import QCursor, QPainter, QPen, QPainterPath, QColor
+
+from utils.dialog_styles import DialogStyleManager
 ```
 
 ### The `_ThemedToolTip` Class
@@ -114,9 +116,9 @@ class _ThemedToolTip(QLabel):
         self.setMaximumWidth(self._MAX_WIDTH)
         self.hide()
 
-        # Colors for paintEvent (updated on each show)
-        self._bg_color = QColor("#2A2A2A")
-        self._border_color = QColor("#d2bc93")
+        # Colors for paintEvent (updated on each show via show_tip)
+        self._bg_color = QColor(DialogStyleManager.DARK['bg_secondary'])
+        self._border_color = QColor(DialogStyleManager.DARK['tooltip_border'])
 
         self._hide_timer = QTimer(self)
         self._hide_timer.setSingleShot(True)
@@ -227,8 +229,8 @@ def eventFilter(self, obj, event) -> bool:
             _ThemedToolTip.instance().show_tip(
                 QCursor.pos(),
                 obj.toolTip(),
-                self.theme_manager.colors,  # ← your theme color dict
-                self.font_family            # ← your font family string
+                self.theme_manager.colors,
+                self.font_family
             )
             return True  # Consume event — prevent native tooltip
     elif event_type in (QEvent.Type.Leave, QEvent.Type.MouseButtonPress,
@@ -254,15 +256,15 @@ def closeEvent(self, event) -> None:
 
 ## Color Dictionary Requirements
 
-The `show_tip()` method expects a `colors` dict with these three keys:
+The `show_tip()` method expects a `colors` dict with these three keys. In this app it is `self.theme_manager.colors`, which is `DARK` in Dark and Image mode and `LIGHT` in Light mode:
 
 | Key | Purpose | Dark/Image Mode | Light Mode |
 |-----|---------|-----------------|------------|
-| `bg_secondary` | Tooltip background | `#2A2A2A` | `#FFFFFF` |
-| `text` | Text color | `#E0E0E0` | `#000000` |
+| `bg_secondary` | Tooltip background | `#2a2a2a` | `#ffffff` |
+| `text` | Text color | `#dddddd` | `#000000` |
 | `tooltip_border` | Border color | `#d2bc93` (brand gold) | `#8c7337` (dark gold) |
 
-Your theme manager's color dictionary must include these keys. If your app uses different key names, update the references in `show_tip()` accordingly.
+The values are written by `python tools/sync_colors.py`; [`COLORS.md`](../COLORS.md) holds the current ones. Your theme manager's color dictionary must include these keys. If your app uses different key names, update the references in `show_tip()` accordingly.
 
 ---
 
@@ -369,7 +371,7 @@ When adding this system to a new application:
 1. **Add imports**: `QEvent`, `QPoint`, `QCursor`, `QPainter`, `QPen`, `QPainterPath`, `QColor`
 2. **Add `_ThemedToolTip` class** before your main window class
 3. **Add `installEventFilter`** at end of `MainWindow.__init__()`
-4. **Add `eventFilter()` method** to MainWindow — update `self.theme_manager.colors` and `self.font_family` references to match your app's API
+4. **Add `eventFilter()` method** to MainWindow — `self.theme_manager.colors` is your theme color dict and `self.font_family` your font family string; change both references to match your app's API
 5. **Add cleanup** to `closeEvent()` — `removeEventFilter` + `hide_tip()`
 6. **Ensure color dict** has `bg_secondary`, `text`, and `tooltip_border` keys
 7. **Remove all `QToolTip { }` CSS blocks** from stylesheets

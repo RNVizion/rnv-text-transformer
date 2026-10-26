@@ -4,21 +4,22 @@ RNV Text Transformer - Main Application Entry Point
 
 A professional text transformation application with support for:
 - 11 transformation modes (UPPERCASE, lowercase, Title Case, Sentence case,
-  camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, Alternating, Reverse)
+  camelCase, PascalCase, snake_case, CONSTANT_CASE, kebab-case, dot.case,
+  iNVERTED cASE)
 - Multiple file formats (TXT, MD, DOCX, PDF, RTF, PY, JS, HTML, LOG)
 - Multi-format export (TXT, DOCX, HTML, PDF, MD, RTF)
-- Drag & drop file loading with async support for large files
+- Drag & drop file loading, read on a background thread
 - Three theme modes (Dark, Light, Image with custom graphics)
-- Find & Replace with regex support
-- Batch processing for multiple files
-- Compare view with difference highlighting
-- Text cleanup and split/join operations
-- Text statistics, auto-transform, undo/redo
+- Find & Replace with regex support, and a Regex Builder
+- Batch processing for multiple files, and watch folders
+- Compare & Merge with difference highlighting
+- Text cleanup and split/join operations, and multi-step presets
+- Text statistics, auto-transform, undo/redo of the output
 - Settings persistence and keyboard shortcuts
 - Professional logging system
 
-Requires: Python 3.10+, PyQt6, Pillow, python-docx, pypdf, striprtf
-Optional: reportlab (for PDF export)
+Requires: Python 3.13+, PyQt6, Pillow, python-docx, pypdf, striprtf,
+reportlab, chardet, watchdog (see requirements.txt)
 """
 
 from __future__ import annotations
@@ -58,8 +59,8 @@ def main() -> None:
     # Create Qt application
     app = QApplication(sys.argv)
     
-    # Use Fusion style for consistent cross-platform rendering
-    # Prevents Windows native tooltip frames from overriding Qt CSS styling
+    # Use Fusion style for consistent cross-platform rendering.
+    # Tooltips are drawn by MainWindow's own _ThemedToolTip, not by the style.
     app.setStyle("Fusion")
     
     # Load and set custom font globally

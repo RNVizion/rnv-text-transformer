@@ -14,7 +14,7 @@ These tests use:
   - tmp_path (built into pytest) for filesystem isolation
   - monkeypatch to replace sys.stdin for stdin-mode tests
 
-All 12 tests run in <1 second. They exercise the CLI from main() down to
+All of them run in under a second. They exercise the CLI from main() down to
 the file system and back, catching the orchestration-layer mutations that
 the pure-logic tests can't reach.
 """
@@ -147,6 +147,22 @@ class TestCLIOutputWriting:
                    for f in out_files)
 
 
+    def test_main_preset_transforms_the_output(self, tmp_path, capsys):
+        """--preset applies a built-in preset and exits 0 (#92 A).
+
+        It used to exit 1 with "PresetExecutor.__init__() takes 1 positional
+        argument but 2 were given", leaving no output file.
+        """
+        in_path = tmp_path / "input.txt"
+        in_path.write_text("  Hello   World  ", encoding="utf-8")
+        out_path = tmp_path / "out.txt"
+
+        rc = main([str(in_path), "--preset", "Code Variable Cleanup",
+                   "--output", str(out_path)])
+        assert rc == 0, capsys.readouterr().err
+        assert out_path.read_text(encoding="utf-8") == "hello_world"
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # 4. parse_args expansion — exercise lines 598-658
 # ════════════════════════════════════════════════════════════════════════════
@@ -199,3 +215,54 @@ class TestParseArgsExpansion:
         opts_q = parse_args(["-", "--mode", "UPPERCASE", "--quiet"])
         assert opts_q.quiet is True
         assert opts_q.verbose is False
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 5. --cleanup takes the names --list-cleanup prints (#94 A)
+# ════════════════════════════════════════════════════════════════════════════
+
+class TestCLICleanup:
+    """
+    --cleanup rejected the snake_case names it documents
+    (`trim_whitespace,remove_blank_lines`), and a display name passed the
+    check and then crashed on TextCleaner.apply_operation, which does not
+    exist.
+    """
+
+    def test_documented_example_cleans_the_file(self, tmp_path, capsys):
+        """The example in --help and --list-cleanup works."""
+        in_path = tmp_path / "input.txt"
+        in_path.write_text("  one\n\n\ntwo  \n", encoding="utf-8")
+        out_path = tmp_path / "out.txt"
+
+        rc = main([str(in_path), "--cleanup", "trim_whitespace,remove_blank_lines",
+                   "--output", str(out_path)])
+        assert rc == 0, capsys.readouterr().err
+        assert out_path.read_text(encoding="utf-8") == "one\ntwo"
+
+    def test_display_name_cleans_the_file(self, tmp_path, capsys):
+        """The name the GUI shows is accepted too, and applied."""
+        in_path = tmp_path / "input.txt"
+        in_path.write_text("<b>bold</b>", encoding="utf-8")
+        out_path = tmp_path / "out.txt"
+
+        rc = main([str(in_path), "--cleanup", "Strip HTML Tags",
+                   "--output", str(out_path)])
+        assert rc == 0, capsys.readouterr().err
+        assert out_path.read_text(encoding="utf-8") == "bold"
+
+    def test_every_listed_name_is_accepted_and_every_operation_listed(self, capsys):
+        """--list-cleanup and --cleanup agree, and no operation is left out."""
+        import re
+        from core.text_cleaner import TextCleaner, CleanupOperation
+
+        assert main(["--list-cleanup"]) == 0
+        out = capsys.readouterr().out
+        listed = re.findall(r"^  • (\w+)(?: \(also: ([\w, ]+)\))?$", out, re.MULTILINE)
+        names = [name for name, _ in listed]
+        aliases = [a.strip() for _, also in listed if also for a in also.split(",")]
+
+        assert sorted(names) == sorted(TextCleaner.operation_key(op) for op in CleanupOperation)
+        for name in names + aliases:
+            assert TextCleaner.resolve_operation(name) is not None, name
+            assert CLIProcessor(CLIOptions(cleanup_ops=[name], use_stdin=True))._validate_options(), name

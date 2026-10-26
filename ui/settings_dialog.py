@@ -713,6 +713,8 @@ class SettingsDialog(BaseDialog):
         self.settings_manager.save_recent_files_max(
             self.recent_files_spin.value()
         )
+        # A lower maximum trims the list at once
+        self.settings_manager.trim_recent_files(self.recent_files_spin.value())
         
         # Save and emit stats position change
         position = self.stats_position_combo.currentText()
@@ -720,6 +722,7 @@ class SettingsDialog(BaseDialog):
         self.stats_position_changed.emit(position)
         
         self.settings_changed.emit()
+        self._populate_recent_files()
     
     def _clear_recent_files(self) -> None:
         """Clear the recent files list."""

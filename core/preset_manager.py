@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -67,10 +68,22 @@ class PresetStep:
     
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> PresetStep:
-        """Create PresetStep from dictionary."""
+        """Create PresetStep from dictionary.
+
+        A cleanup step saved under an older operation name (such as
+        'trim_whitespace', which the built-in presets used) is read as the
+        CleanupOperation it stands for, so presets already on disk work.
+        """
+        action = data.get('action', '')
+        params = data.get('params', {})
+        if action == ActionType.CLEANUP and isinstance(params.get('operation'), str):
+            from core.text_cleaner import TextCleaner
+            op = TextCleaner.resolve_operation(params['operation'])
+            if op is not None and op.value != params['operation']:
+                params = {**params, 'operation': op.value}
         return cls(
-            action=data.get('action', ''),
-            params=data.get('params', {}),
+            action=action,
+            params=params,
             enabled=data.get('enabled', True),
             description=data.get('description', '')
         )
@@ -299,7 +312,9 @@ class PresetExecutor:
             case ActionType.CLEANUP:
                 cleaner = self._get_cleaner()
                 operation = params.get('operation', 'trim_whitespace')
-                return cleaner(text, operation)
+                from core.text_cleaner import TextCleaner
+                op = TextCleaner.resolve_operation(operation) if isinstance(operation, str) else None
+                return cleaner(text, op if op is not None else operation)
             
             case ActionType.REPLACE:
                 find = params.get('find', '')
@@ -364,6 +379,56 @@ class PresetExecutor:
                 return text
 
 
+# The name Qt gives the GUI when it is started from its script: on Windows
+# the name of the process's .exe (python), on Linux the script's file name.
+_GUI_SCRIPT: str = "RNV_Text_Transformer.py"
+
+
+def _gui_application_name() -> str:
+    """The application name the GUI runs under, worked out without a QApplication."""
+    if sys.platform == "win32":
+        import ctypes
+        from PyQt6.QtCore import QFileInfo
+        buffer = ctypes.create_unicode_buffer(32768)
+        ctypes.windll.kernel32.GetModuleFileNameW(None, buffer, len(buffer))
+        return QFileInfo(buffer.value).baseName()
+    return _GUI_SCRIPT
+
+
+def default_presets_dirs() -> tuple[Path, list[Path]]:
+    """
+    Where presets are kept, and the older folders that are still read.
+
+    The GUI asks Qt for its AppDataLocation, which ends in the application's
+    name. The CLI has no QApplication, so Qt's answer had no name in it and
+    the CLI kept presets in a folder of its own. Both now use the GUI's
+    folder; the CLI's old folder is still read, and never written or deleted.
+
+    Returns:
+        (folder presets are saved in, [older folders to merge on load])
+    """
+    from PyQt6.QtCore import QCoreApplication, QStandardPaths
+    app_data = Path(QStandardPaths.writableLocation(
+        QStandardPaths.StandardLocation.AppDataLocation
+    ))
+    org = QCoreApplication.organizationName()
+    app = QCoreApplication.applicationName()
+
+    # Qt appends the organization, then the application, when they are set.
+    root = app_data
+    for part in (app, org):
+        if part:
+            root = root.parent
+
+    if app:
+        primary = app_data / "RNV" / "TextTransformer"
+    else:
+        primary = app_data / _gui_application_name() / "RNV" / "TextTransformer"
+
+    legacy = root / "RNV" / "TextTransformer"
+    return primary, ([legacy] if legacy != primary else [])
+
+
 class PresetManager:
     """
     Manages preset storage, loading, and organization.
@@ -374,7 +439,7 @@ class PresetManager:
     # Default presets file name
     _PRESETS_FILE: ClassVar[str] = "presets.json"
     
-    # Built-in presets
+    # Built-in presets. A cleanup step names a CleanupOperation by its value.
     _BUILTIN_PRESETS: ClassVar[list[dict]] = [
         {
             "name": "Code Variable Cleanup",
@@ -382,8 +447,8 @@ class PresetManager:
             "category": "Developer",
             "is_builtin": True,
             "steps": [
-                {"action": "cleanup", "params": {"operation": "trim_whitespace"}},
-                {"action": "cleanup", "params": {"operation": "collapse_whitespace"}},
+                {"action": "cleanup", "params": {"operation": "Trim Whitespace"}},
+                {"action": "cleanup", "params": {"operation": "Remove Extra Spaces"}},
                 {"action": "transform", "params": {"mode": "snake_case"}}
             ]
         },
@@ -393,9 +458,9 @@ class PresetManager:
             "category": "Writing",
             "is_builtin": True,
             "steps": [
-                {"action": "cleanup", "params": {"operation": "normalize_line_endings"}},
-                {"action": "cleanup", "params": {"operation": "remove_trailing_whitespace"}},
-                {"action": "cleanup", "params": {"operation": "collapse_blank_lines"}}
+                {"action": "cleanup", "params": {"operation": "Fix Line Endings (→ LF)"}},
+                {"action": "cleanup", "params": {"operation": "Remove Trailing Spaces"}},
+                {"action": "cleanup", "params": {"operation": "Remove Extra Blank Lines"}}
             ]
         },
         {
@@ -404,9 +469,9 @@ class PresetManager:
             "category": "General",
             "is_builtin": True,
             "steps": [
-                {"action": "cleanup", "params": {"operation": "strip_html"}},
-                {"action": "cleanup", "params": {"operation": "normalize_unicode"}},
-                {"action": "cleanup", "params": {"operation": "trim_whitespace"}}
+                {"action": "cleanup", "params": {"operation": "Strip HTML Tags"}},
+                {"action": "cleanup", "params": {"operation": "Normalize Unicode"}},
+                {"action": "cleanup", "params": {"operation": "Trim Whitespace"}}
             ]
         },
         {
@@ -425,7 +490,7 @@ class PresetManager:
             "category": "Developer",
             "is_builtin": True,
             "steps": [
-                {"action": "cleanup", "params": {"operation": "collapse_whitespace"}},
+                {"action": "cleanup", "params": {"operation": "Remove Extra Spaces"}},
                 {"action": "transform", "params": {"mode": "CONSTANT_CASE"}}
             ]
         },
@@ -435,13 +500,13 @@ class PresetManager:
             "category": "Developer",
             "is_builtin": True,
             "steps": [
-                {"action": "cleanup", "params": {"operation": "remove_non_printable"}},
+                {"action": "cleanup", "params": {"operation": "Remove Non-Printable"}},
                 {"action": "transform", "params": {"mode": "kebab-case"}}
             ]
         }
     ]
     
-    __slots__ = ('_presets', '_presets_path', '_executor')
+    __slots__ = ('_presets', '_presets_path', '_executor', '_legacy_paths')
     
     def __init__(self, presets_dir: Path | None = None) -> None:
         """
@@ -452,15 +517,13 @@ class PresetManager:
         """
         self._presets: dict[str, TransformPreset] = {}
         self._executor = PresetExecutor()
+        self._legacy_paths: list[Path] = []
         
         # Determine presets path
         if presets_dir is None:
-            # Use app data directory
-            from PyQt6.QtCore import QStandardPaths
-            app_data = QStandardPaths.writableLocation(
-                QStandardPaths.StandardLocation.AppDataLocation
-            )
-            presets_dir = Path(app_data) / "RNV" / "TextTransformer"
+            # The GUI's app data folder, shared with the CLI; older folders are read too
+            presets_dir, legacy_dirs = default_presets_dirs()
+            self._legacy_paths = [d / self._PRESETS_FILE for d in legacy_dirs]
         
         self._presets_path = presets_dir / self._PRESETS_FILE
         
@@ -478,22 +541,77 @@ class PresetManager:
     
     def load_presets(self) -> bool:
         """
-        Load presets from file.
+        Load presets from file, then merge any found in an older folder.
         
         Returns:
             True if loaded successfully
         """
-        if not self._presets_path.exists():
+        loaded = self._load_file(self._presets_path, merge=False)
+        for legacy_path in self._legacy_paths:
+            loaded = self._load_file(legacy_path, merge=True) or loaded
+        return loaded
+    
+    @staticmethod
+    def _content(preset: TransformPreset) -> tuple:
+        """What a preset does, leaving out its name and timestamps."""
+        return (
+            preset.description,
+            [step.to_dict() for step in preset.steps],
+            preset.category,
+            preset.keyboard_shortcut,
+        )
+    
+    def _merge_preset(self, preset: TransformPreset) -> None:
+        """
+        Add a preset from an older folder without losing one already loaded.
+        
+        A preset already present unchanged is skipped. One whose name is
+        taken by a different preset is added as "Name (1)", "Name (2)", ...
+        """
+        existing = self._presets.get(preset.name)
+        if existing is None:
+            self._presets[preset.name] = preset
+            return
+        if existing.is_builtin:
+            return  # Don't overwrite built-in presets
+        
+        content = self._content(preset)
+        if self._content(existing) == content:
+            return
+        
+        original_name = preset.name
+        counter = 1
+        while f"{original_name} ({counter})" in self._presets:
+            if self._content(self._presets[f"{original_name} ({counter})"]) == content:
+                return
+            counter += 1
+        preset.name = f"{original_name} ({counter})"
+        self._presets[preset.name] = preset
+    
+    def _load_file(self, path: Path, merge: bool) -> bool:
+        """
+        Load the presets in one file.
+        
+        Args:
+            path: presets.json to read
+            merge: True for an older folder's file (see _merge_preset)
+            
+        Returns:
+            True if loaded successfully
+        """
+        if not path.exists():
             return False
         
         def _do_load() -> bool:
-            with open(self._presets_path, 'r', encoding='utf-8') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             for preset_data in data.get('presets', []):
                 preset = TransformPreset.from_dict(preset_data)
+                if merge:
+                    self._merge_preset(preset)
                 # Don't overwrite built-in presets
-                if preset.name not in self._presets or not self._presets[preset.name].is_builtin:
+                elif preset.name not in self._presets or not self._presets[preset.name].is_builtin:
                     self._presets[preset.name] = preset
             
             return True

@@ -18,7 +18,7 @@ Usage:
     rnv-transform *.txt --mode snake_case --output-dir ./converted/
     
     # Apply preset
-    rnv-transform input.txt --preset "Code Cleanup" --output clean.txt
+    rnv-transform input.txt --preset "Code Variable Cleanup" --output clean.txt
     
     # Pipeline (stdin/stdout)
     cat input.txt | rnv-transform --mode lowercase > output.txt
@@ -35,7 +35,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Sequence
+from typing import ClassVar, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.text_transformer import TextTransformer
-from core.text_cleaner import TextCleaner, CleanupOperation
+from core.text_cleaner import TextCleaner, CleanupOperation, CLEANUP_ALIASES
 from core.preset_manager import PresetManager, PresetExecutor
 from utils.config import APP_NAME, APP_VERSION
 from utils.file_handler import FileHandler, FileReadError
@@ -179,9 +179,10 @@ class CLIProcessor:
         
         # Validate cleanup ops if specified
         if self.options.cleanup_ops:
-            valid_ops = [op.value for op in CleanupOperation]
+            # The names --list-cleanup prints, their display names, or an older alias
+            valid_ops = [TextCleaner.operation_key(op) for op in CleanupOperation]
             for op in self.options.cleanup_ops:
-                if op not in valid_ops:
+                if TextCleaner.resolve_operation(op) is None:
                     self._error(f"Unknown cleanup operation: {op}")
                     self._info(f"Available operations: {', '.join(valid_ops)}")
                     return False
@@ -289,16 +290,19 @@ class CLIProcessor:
             # Apply cleanup operations first
             if self.options.cleanup_ops:
                 for op_name in self.options.cleanup_ops:
-                    op = CleanupOperation(op_name)
-                    result = TextCleaner.apply_operation(result, op)
+                    op = TextCleaner.resolve_operation(op_name)
+                    if op is None:
+                        raise ValueError(f"Unknown cleanup operation: {op_name}")
+                    result = TextCleaner.cleanup(result, op)
                     self._verbose(f"  Applied cleanup: {op_name}")
             
             # Apply preset
             if self.options.preset:
                 preset = self.preset_manager.get_preset(self.options.preset)
                 if preset:
-                    executor = PresetExecutor(self.preset_manager)
-                    result = executor.execute(preset, result)
+                    # (#92 A) Called the way the GUI calls it: no arguments, then execute_preset(text, preset).
+                    executor = PresetExecutor()
+                    result, _applied = executor.execute_preset(result, preset)
                     self._verbose(f"  Applied preset: {self.options.preset}")
             
             # Apply transform mode
@@ -399,45 +403,46 @@ class CLIProcessor:
         print("\nUsage: rnv-transform input.txt --preset \"Preset Name\"")
         print()
     
+    # What --list-cleanup prints for each operation, by group. Every
+    # CleanupOperation is listed once; --cleanup accepts each name shown.
+    _CLEANUP_GROUPS: ClassVar[list[tuple[str, list[tuple[CleanupOperation, str]]]]] = [
+        ("Whitespace Operations", [
+            (CleanupOperation.TRIM_WHITESPACE, "Remove leading/trailing whitespace from the whole text"),
+            (CleanupOperation.REMOVE_EXTRA_SPACES, "Replace runs of spaces and tabs with one space"),
+            (CleanupOperation.REMOVE_LEADING_SPACES, "Remove leading whitespace from each line"),
+            (CleanupOperation.REMOVE_TRAILING_SPACES, "Remove trailing whitespace from each line"),
+            (CleanupOperation.REMOVE_EXTRA_LINES, "Collapse three or more line breaks into one blank line"),
+            (CleanupOperation.REMOVE_ALL_BLANK_LINES, "Remove empty/blank lines"),
+            (CleanupOperation.FIX_LINE_ENDINGS_UNIX, "Convert line endings to LF"),
+            (CleanupOperation.FIX_LINE_ENDINGS_WINDOWS, "Convert line endings to CRLF"),
+        ]),
+        ("Line Operations", [
+            (CleanupOperation.REMOVE_DUPLICATE_LINES, "Remove duplicate lines, keeping the first"),
+            (CleanupOperation.SORT_LINES, "Sort lines alphabetically (A-Z)"),
+            (CleanupOperation.SORT_LINES_REVERSE, "Sort lines in reverse (Z-A)"),
+        ]),
+        ("Character Operations", [
+            (CleanupOperation.STRIP_HTML_TAGS, "Remove HTML tags"),
+            (CleanupOperation.REMOVE_NON_PRINTABLE, "Remove control characters"),
+            (CleanupOperation.NORMALIZE_UNICODE, "Normalize Unicode (NFC)"),
+        ]),
+    ]
+    
     def _list_cleanup(self) -> None:
         """List available cleanup operations."""
         print(f"\n{APP_NAME} - Available Cleanup Operations\n")
         print("-" * 50)
         
-        print("\nWhitespace Operations:")
-        whitespace_ops = [
-            ("trim_whitespace", "Remove leading/trailing whitespace from each line"),
-            ("normalize_spaces", "Replace multiple spaces with single space"),
-            ("remove_blank_lines", "Remove empty/blank lines"),
-            ("normalize_line_endings", "Convert line endings to LF"),
-        ]
-        for op, desc in whitespace_ops:
-            print(f"  • {op}")
-            print(f"      {desc}")
-        
-        print("\nLine Operations:")
-        line_ops = [
-            ("remove_duplicate_lines", "Remove duplicate lines"),
-            ("sort_lines", "Sort lines alphabetically"),
-            ("reverse_lines", "Reverse line order"),
-            ("number_lines", "Add line numbers"),
-        ]
-        for op, desc in line_ops:
-            print(f"  • {op}")
-            print(f"      {desc}")
-        
-        print("\nCharacter Operations:")
-        char_ops = [
-            ("remove_non_ascii", "Remove non-ASCII characters"),
-            ("normalize_unicode", "Normalize Unicode (NFC)"),
-            ("strip_html_tags", "Remove HTML tags"),
-            ("remove_punctuation", "Remove punctuation"),
-        ]
-        for op, desc in char_ops:
-            print(f"  • {op}")
-            print(f"      {desc}")
+        for group, ops in self._CLEANUP_GROUPS:
+            print(f"\n{group}:")
+            for op, desc in ops:
+                aliases = [a for a, target in CLEANUP_ALIASES.items() if target is op]
+                also = f" (also: {', '.join(aliases)})" if aliases else ""
+                print(f"  • {TextCleaner.operation_key(op)}{also}")
+                print(f"      {desc} [\"{op.value}\"]")
         
         print("\nUsage: rnv-transform input.txt --cleanup trim_whitespace,remove_blank_lines")
+        print("The name in brackets, as the GUI shows it, is accepted too.")
         print()
     
     def _verbose(self, message: str) -> None:
@@ -475,7 +480,7 @@ Examples:
   rnv-transform *.txt --mode snake_case --output-dir ./converted/
 
   # Apply a preset
-  rnv-transform input.txt --preset "Code Cleanup" --output clean.txt
+  rnv-transform input.txt --preset "Code Variable Cleanup" --output clean.txt
 
   # Apply cleanup operations
   rnv-transform input.txt --cleanup trim_whitespace,remove_blank_lines

@@ -2,432 +2,184 @@
 
 ## PyQt6 Theme Guide for RNV Applications
 
-**Version:** 1.2  
 **Brand:** RNV (Chris Vizirov)  
 **Font:** Montserrat Black (fallback: Arial)  
 **Framework:** Python 3.13 / PyQt6  
-**Applications:** RNV Text Transformer, RNV ICO Builder, RNV Color Mixer
+**Applications:** RNV Text Transformer, RNV Icon Builder, RNV Color Mixer
+
+This page says which palette key each part of the app takes, and why. It holds no color values.
+The values are in [`COLORS.md`](../COLORS.md), which `python tools/sync_colors.py` writes from
+`brand_map.json` and the pinned rnv-brand, together with the color lines of `utils/colors.py`.
+Contrast figures belong to the rnv-brand register, which owns them; this page does not repeat them.
 
 ---
 
-## Brand Identity Colors
+## Why Two Golds?
 
-The RNV brand uses a **gold accent on dark/neutral backgrounds** across all applications. Two gold values exist — a bright gold for dark surfaces and a deeper gold for light surfaces, ensuring proper contrast in both contexts.
+The RNV brand uses a gold accent across all applications. One gold cannot serve both themes:
+the bright brand gold reads clearly on the dark surfaces, but on white and the light grays it
+is too light to carry text or even a border. So each palette has its own gold under the same
+keys:
 
-| Role | Dark / Image Mode | Light Mode | Usage |
-|------|-------------------|------------|-------|
-| **Brand Gold (Primary)** | `#d2bc93` | `#8c7337` | Accent, borders, selections, hover states |
-| **Brand Gold (Hover)** | `#dcc9a3` | `#9f864a` | Lighter tint for hover feedback — derived as accent +19/channel |
-| **Brand Gold (Pressed)** | `#b7a480` | `#8c7337` | Pressed/active. On light this **is** the accent: a darker shade drops black-on-gold under 4.5 and would force white text |
+- **Dark and Image mode** take the bright gold, `BRAND_GOLD` (rnv-brand's `APP.accent`).
+- **Light mode** takes a deeper gold, `BRAND_DARK_GOLD` (rnv-brand's `APP.accent-light-mode`),
+  with the same hue. It is the light palette's fill, border and selection gold.
 
-### Why Two Golds?
+Light mode has one more step, `BRAND_DARK_GOLD_DEEP`, worked out in `utils/colors.py` from
+`BRAND_DARK_GOLD`. As text, the light gold is too faint on the gray grounds a dialog uses, so
+every key that puts gold *text* on a light ground (`accent_ink`, `info`) takes the deeper step.
+The light palette's hover rows (`accent_hover`) take it too, because they carry white text.
+Dark mode needs neither: `accent_ink` and `info` are the accent itself, and its `accent_hover`
+is a lighter step of the gold.
 
-`#d2bc93` (bright gold) on a white background has poor contrast (fails WCAG AA). `#8c7337` (dark gold) clears the 4.5 floor on light surfaces — as text, as a border, and as a fill under black — while keeping the same gold identity. On dark backgrounds, `#d2bc93` reads clearly and feels premium.
+The pressed gold is the accent itself in both modes (`accent_pressed`). A darker light-mode
+gold would no longer carry black text.
 
-**`#8c7337` replaced `#b19145` on 17 August 2026.** The retired value measured **2.997638:1** against white — short of the 3.0 floor by 0.0024, and of the 4.5 text floor by far more. It cleared 1 of its 6 jobs; the current value clears 5. The exception is gold as text on `#EEEEEE` (3.9156:1), which still fails and is still not permitted.
-
-**Text on gold.** The register rules `#000000`. At `#8c7337` both clear the 4.5 floor — black 4.6226:1, white 4.5429:1 — so the dialog buttons' gold/white inversion, which puts `#FFFFFF` on the pressed state as the mirror of hover, is compliant at this value. It was not at `#b19145`, where white measured 2.9976:1. Worth a ruling from Brand Infrastructure rather than a silent choice either way.
+Text on gold: the dark palette puts black on it (`accent_text`, `selection_text`). The light
+palette puts white on it under the same keys, while the register's rule is black on gold;
+which of the two the light palette should use is an open question.
 
 ### One Accent, Everywhere
 
-Every interactive accent in the app uses brand gold — checkboxes, radio buttons, selections, focused borders, hover states, scrollbar hover, search highlights, line number indicators, info messages, and output text. There are no secondary accent colors. This creates a unified, instantly recognizable brand identity.
+Every interactive accent in the app is the mode's gold: checkboxes, radio buttons, selections,
+focused borders, dialog button hover and press, scrollbar hover, Find's highlights, the output
+text, tooltips' borders, group box titles, tips and info messages. There are no secondary
+accent colors. The main window's action buttons are the one exception, below.
 
 ---
 
-## Complete Color Dictionaries
-
-### Dark Mode / Image Mode
-
-Used when `theme_manager.current_theme` is `'dark'` or `'image'`. Image Mode shares the same colors but uses semi-transparent backgrounds over a background image.
-
-```python
-DARK = {
-    # ── Backgrounds ──
-    'bg':              '#1A1A1A',   # Primary surface (dialogs, panels)
-    'bg_secondary':    '#2A2A2A',   # Cards, inputs, tooltips, elevated surfaces
-    'bg_tertiary':     '#333333',   # Disabled buttons, table headers, subtle dividers
-    'bg_hover':        '#3A3A3A',   # Hover state for buttons and interactive elements
-
-    # ── Text ──
-    'text':            '#E0E0E0',   # Primary text
-    'text_muted':      '#888888',   # Secondary/help text, descriptions
-    'text_disabled':   '#555555',   # Disabled/inactive text
-
-    # ── Borders ──
-    'border':          '#333333',   # Standard borders (inputs, panels, dividers)
-    'border_light':    '#444444',   # Subtle borders (internal separators)
-    'border_focus':    '#d2bc93',   # Focus ring color (gold)
-
-    # ── Accent (Brand Gold) ──
-    'accent':          '#d2bc93',   # Primary accent — buttons, links, active states
-    'accent_hover':    '#dcc9a3',   # Hover tint
-    'accent_pressed':  '#b7a480',   # Pressed/active shade
-    'accent_text':     '#000000',   # Text ON accent background (dark on bright gold)
-
-    # ── Semantic Status Colors ──
-    'success':         '#28a745',   # Success messages, confirmations
-    'error':           '#dc3545',   # Error messages, destructive actions
-    'warning':         '#ffc107',   # Warning messages, caution states
-    'info':            '#d2bc93',   # Informational messages, output text (gold)
-
-    # ── Selections ──
-    'selection_bg':    '#d2bc93',   # Text selection background
-    'selection_text':  '#000000',   # Text selection foreground
-
-    # ── Scrollbars ──
-    'scrollbar_bg':    '#252525',   # Scrollbar track
-    'scrollbar_handle':'#444444',   # Scrollbar thumb (handle)
-    #                  '#d2bc93'    # Scrollbar thumb on hover (uses accent)
-
-    # ── Tooltips ──
-    'tooltip_border':  '#d2bc93',   # Tooltip border (gold)
-    #                  '#2A2A2A'    # Tooltip background (uses bg_secondary)
-    #                  '#E0E0E0'    # Tooltip text (uses text)
-
-    # ── Main Window Specific ──
-    'window_bg':       '#000000',   # Main window background (pure black)
-    'main_btn_bg':       '#1A1A1A',   # Main window button background
-    'main_btn_text':     '#E0E0E0',   # Main window button text
-    'main_btn_hover_bg': '#333333',   # Main window button hover
-    'main_btn_pressed_text': '#000000', # Text when button is pressed (on gold bg)
-    'input_bg':        '#1A1A1A',   # Text input background
-    'input_text':      '#E0E0E0',   # Text input foreground
-    'input_border':    '#333333',   # Text input border
-    'label_bg':        '#000000',   # Label background (matches window)
-    'label_text':      '#E0E0E0',   # Label text
-    'output_text_color':'#d2bc93',  # Output text area accent (gold)
-    'border_color':    '#333333',   # Legacy alias for border
-    'text_color':      '#E0E0E0',   # Legacy alias for text
-}
-```
-
-### Light Mode
-
-Used when `theme_manager.current_theme` is `'light'`.
-
-```python
-LIGHT = {
-    # ── Backgrounds ──
-    'bg':              '#F5F5F5',   # Primary surface (dialogs, panels)
-    'bg_secondary':    '#FFFFFF',   # Cards, inputs, tooltips, elevated surfaces
-    'bg_tertiary':     '#E8E8E8',   # Disabled buttons, table headers, subtle dividers
-    'bg_hover':        '#EEEEEE',   # Hover state for buttons and interactive elements
-
-    # ── Text ──
-    'text':            '#000000',   # Primary text
-    'text_muted':      '#666666',   # Secondary/help text, descriptions
-    'text_disabled':   '#AAAAAA',   # Disabled/inactive text
-
-    # ── Borders ──
-    'border':          '#CCCCCC',   # Standard borders (inputs, panels, dividers)
-    'border_light':    '#DDDDDD',   # Subtle borders (internal separators)
-    'border_focus':    '#8c7337',   # Focus ring color (dark gold)
-
-    # ── Accent (Brand Gold — Dark Variant) ──
-    'accent':          '#8c7337',   # Primary accent — buttons, links, active states
-    'accent_hover':    '#9f864a',   # Hover tint (derived from accent)
-    'accent_pressed':  '#8c7337',   # Pressed/active — the accent itself
-    'accent_text':     '#FFFFFF',   # Text ON accent background (white on dark gold)
-
-    # ── Semantic Status Colors ──
-    'success':         '#28a745',   # Success messages, confirmations
-    'error':           '#dc3545',   # Error messages, destructive actions
-    'warning':         '#ffc107',   # Warning messages, caution states
-    'info':            '#8c7337',   # Informational messages, output text (dark gold)
-
-    # ── Selections ──
-    'selection_bg':    '#8c7337',   # Text selection background
-    'selection_text':  '#FFFFFF',   # Text selection foreground
-
-    # ── Scrollbars ──
-    'scrollbar_bg':    '#E0E0E0',   # Scrollbar track
-    'scrollbar_handle':'#AAAAAA',   # Scrollbar thumb (handle)
-    #                  '#8c7337'    # Scrollbar thumb on hover (uses accent)
-
-    # ── Tooltips ──
-    'tooltip_border':  '#8c7337',   # Tooltip border (dark gold)
-    #                  '#FFFFFF'    # Tooltip background (uses bg_secondary)
-    #                  '#000000'    # Tooltip text (uses text)
-
-    # ── Main Window Specific ──
-    'window_bg':       '#F5F5F5',   # Main window background
-    'main_btn_bg':       '#FFFFFF',   # Main window button background
-    'main_btn_text':     '#000000',   # Main window button text
-    'main_btn_hover_bg': '#333333',   # Main window button hover
-    'main_btn_pressed_text': '#FFFFFF', # Text when button is pressed (on dark gold bg)
-    'input_bg':        '#FFFFFF',   # Text input background
-    'input_text':      '#000000',   # Text input foreground
-    'input_border':    '#CCCCCC',   # Text input border
-    'label_bg':        '#F5F5F5',   # Label background (matches window)
-    'label_text':      '#000000',   # Label text
-    'output_text_color':'#8c7337',  # Output text area accent (dark gold)
-    'border_color':    '#CCCCCC',   # Legacy alias for border
-    'text_color':      '#000000',   # Legacy alias for text
-}
-```
-
----
-
-## Image Mode Transparency Values
-
-Image Mode uses the Dark Mode color dictionary but applies semi-transparent overlays so the background image shows through.
-
-| Element | Value | Opacity | Usage |
-|---------|-------|---------|-------|
-| Text input / Output | `rgba(0, 0, 0, 171)` | 67% | Main text areas |
-| Labels | `rgba(0, 0, 0, 171)` | 67% | Info labels over background |
-| Dropdown bg | `rgba(26, 26, 26, 191)` | 75% | ComboBox dropdown |
-| Info labels | `rgba(0, 0, 0, 171)` | 67% | Status/stats labels |
-| Checkbox indicator | `rgba(0, 0, 0, 100)` | 39% | Unchecked checkbox bg |
-| Scrollbar track | `rgba(51, 51, 51, 100)` | 39% | Scrollbar background |
-| Scrollbar handle | `rgba(80, 80, 80, 150)` | 59% | Scrollbar thumb |
-| Scrollbar hover | `rgba(100, 100, 100, 200)` | 78% | Scrollbar thumb hover |
-| Drag highlight | `#BFd2bc93` | 75% | Drag-drop border and fill |
-
----
-
-## Button Systems
-
-The application uses two distinct button systems with different styling approaches.
-
-### Main Window Buttons (ImageButton)
-
-The main window action buttons (Transform, Copy, Load, Save, Settings) use the custom `ImageButton` class. These buttons have **three rendering modes**:
-
-**Image Mode** — Renders custom PNG graphics (`base`, `hover`, `pressed` states). No CSS background or border. The button images themselves are the branding.
-
-```
-QPushButton { border: none; background: transparent; }
-```
-
-**Dark / Light Text Mode** — Renders as text-only buttons with a **subtle hover** that only changes background. No gold accent on hover — the main window buttons stay neutral to avoid visual competition with the content area.
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `button_bg` | `button_text` | `border_color` |
-| Hover | `button_hover_bg` | `button_text` | `border_color` |
-
-Resolved colors (Dark Mode):
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `#1A1A1A` | `#E0E0E0` | `#333333` |
-| Hover | `#333333` | `#E0E0E0` | `#333333` |
-
-Resolved colors (Light Mode):
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `#FFFFFF` | `#000000` | `#CCCCCC` |
-| Hover | `#333333` | `#000000` | `#CCCCCC` |
-
-### Main Window Theme Toggle Button
-
-The theme toggle button ("Dark Mode" / "Light Mode" / "Image Mode") at the bottom-right corner uses a separate stylesheet builder. It also has a **subtle hover** without gold accent.
-
-| State | Dark/Image Background | Dark/Image Text | Light Background | Light Text |
-|-------|-----------------------|-----------------|-----------------|------------|
-| Normal | `#1A1A1A` | `#E0E0E0` | `button_bg` | `button_text` |
-| Hover | `#333333` | `#E0E0E0` | `button_hover_bg` | `button_text` |
-| Pressed | `#333333` | `#000000` | `button_hover_bg` | `button_pressed_text` |
-
-Font size is fixed at `7.5pt` for the theme button.
-
-### Dialog Buttons (DialogStyleManager)
-
-All dialog buttons (Settings, Batch, Export, Find/Replace, Compare, Encoding, Regex, Presets, Watch Folder) use the `DialogStyleManager` base stylesheet. These buttons have the **full gold accent system** — gold text and border on hover, gold background on press.
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `bg_secondary` | `text` | `border` |
-| Hover | `bg_hover` | **`accent`** | **`accent`** |
-| Pressed | **`accent`** | `accent_text` | `accent` |
-| Disabled | `bg_tertiary` | `text_disabled` | `border` |
-| Default (focus) | `bg_secondary` | `text` | **`accent`** |
-
-Resolved colors (Dark / Image Mode):
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `#2A2A2A` | `#E0E0E0` | `#333333` |
-| Hover | `#3A3A3A` | **`#d2bc93`** | **`#d2bc93`** |
-| Pressed | **`#d2bc93`** | `#000000` | `#d2bc93` |
-| Disabled | `#333333` | `#555555` | `#333333` |
-| Default | `#2A2A2A` | `#E0E0E0` | **`#d2bc93`** |
-
-Resolved colors (Light Mode):
-
-| State | Background | Text | Border |
-|-------|-----------|------|--------|
-| Normal | `#FFFFFF` | `#000000` | `#CCCCCC` |
-| Hover | `#EEEEEE` | **`#8c7337`** | **`#8c7337`** |
-| Pressed | **`#8c7337`** | `#FFFFFF` | `#8c7337` |
-| Disabled | `#E8E8E8` | `#AAAAAA` | `#CCCCCC` |
-| Default | `#FFFFFF` | `#000000` | **`#8c7337`** |
-
-### Why Two Different Styles?
-
-The main window is a **content workspace** — the buttons (Transform, Copy, Load, Save) are large, frequently-used tools. Subtle hover keeps attention on the text content. The dialogs are **configuration panels** — buttons need clear visual affordance. Gold hover/pressed states provide stronger feedback that helps users navigate options confidently.
-
----
-
-## Checkbox & Radio Button Colors
-
-Checkboxes and radio buttons use brand gold across all modes — consistent with every other interactive accent in the app.
-
-| Mode | Checked Background | Checked Border | Hover Border | Unchecked Border | Unchecked Background |
-|------|-------------------|----------------|--------------|------------------|----------------------|
-| Dark | `#d2bc93` | `#d2bc93` | `#d2bc93` | `#555555` | `#1A1A1A` |
-| Image | `#d2bc93` | `#d2bc93` | `#d2bc93` | `#555555` | `rgba(0,0,0,100)` |
-| Light | `#8c7337` | `#8c7337` | `#8c7337` | `#AAAAAA` | `#FFFFFF` |
-
----
-
-## Line Number Gutter Colors
-
-Used by the `LineNumberTextEdit` widget.
-
-| Element | Dark / Image Mode | Light Mode |
-|---------|-------------------|------------|
-| Gutter background | `#1A1A1A` | `#F0F0F0` |
-| Line number text | `#666666` | `#999999` |
-| Current line background | `#2A2A2A` | `#E8E8E8` |
-| Current line number | `#d2bc93` (gold) | `#8c7337` (dark gold) |
-
----
-
-## Find & Replace Highlight Colors
-
-Search match highlighting uses brand gold for visual consistency.
-
-| Mode | Highlight Color |
-|------|----------------|
-| Dark / Image | `#d2bc93` |
-| Light | `#8c7337` |
+## Which Key Each Part Takes
+
+The keys are in `DARK` and `LIGHT` in `utils/colors.py`; `DialogStyleManager.DARK` and
+`.LIGHT` serve the same two dictionaries. Dark and Image mode read `DARK`; Light mode reads
+`LIGHT`. Image mode adds the `image_*` keys, which are translucent so the background shows
+through; they exist in `DARK` only.
+
+### Dialogs (`utils/dialog_styles.py`)
+
+Every dialog built on `BaseDialog` takes this stylesheet. The About dialog builds its own from
+the same keys.
+
+| Part | State | Keys |
+|------|-------|------|
+| Dialog | | ground `bg`, text `text` |
+| Group box | | border `border`, title `accent_ink` |
+| Line edit, text edit, combo box, spin box | normal | ground `bg_secondary`, text `text`, border `border` |
+| | focus | border `border_focus` |
+| | disabled | ground `bg_tertiary`, text `text_disabled` |
+| | selected text | `selection_bg`, `selection_text` |
+| Combo box list | selected row | `selection_bg`, `selection_text` |
+| | hovered row | `accent_hover`, text `selection_text` |
+| Check box, radio button | indicator | border `border_light`, ground `bg_secondary` |
+| | checked | fill and border `accent` |
+| | hover | border `accent` |
+| | disabled | text `text_disabled` |
+| Push button | normal | ground `bg_secondary`, text `text`, border `border` |
+| | hover | ground `bg_hover`, text `accent_ink`, border `accent` |
+| | pressed | ground `accent`, text `accent_text` |
+| | disabled | ground `bg_tertiary`, text `text_disabled`, border `border` |
+| | default | border `accent` |
+| Tab bar | tab | ground `bg_secondary`, text `text_muted` |
+| | selected tab | ground `bg`, text `accent_ink`, underline `accent` |
+| | hovered tab | ground `bg_hover`, text `accent_ink`, underline `accent_pressed` |
+| Table, list, tree | rows | ground `bg_secondary`, text `text`, border and grid `border` |
+| | selected row | `selection_bg`, `selection_text` |
+| | hovered row | `accent_hover`, text `selection_text` |
+| | header | ground `bg_tertiary`, text `text` |
+| Menu | | ground `bg_secondary`, text `text`, border `border` |
+| | selected item | `selection_bg`, `selection_text` |
+| Scroll bar | | track `scrollbar_bg`, handle `scrollbar_handle`, hover `accent` |
+| Progress bar, slider | | ground `bg_secondary`, border `border`, fill or handle `accent`, handle hover `accent_hover` |
+| Splitter handle | | `border`, hover `accent` |
+| Header, subtitle, description | | `text`; `text_muted` |
+| Tip | | `accent_ink`, italic |
+| Status text | | `success`, `warning`, `error`, `info`, muted `text_muted` |
+
+### Feature dialogs
+
+| Part | Keys |
+|------|------|
+| Find & Replace highlights | `accent`, made translucent (`FIND_HIGHLIGHT_ALPHA`) |
+| Regex Builder match highlight | `regex_match_bg` |
+| Compare & Merge lines | `diff_added_bg`, `diff_removed_bg`, `diff_changed_bg` |
+| Compare & Merge change marks (`+`, `-`, `~`) and Accepted / Rejected / Pending | `success`, `error`, `warning`; `success`, `error`, `text_muted` |
+| HTML diff report (exported) | the `diff_html_*` keys of `LIGHT` |
+| Encoding detection confidence (high, medium, low) | `success`, `warning`, `error`, with the word beside the figure |
+| Export dialog: whether the format's library is installed | `success` or `error`, with a ✔ or ✘ |
+| HTML export | *Dark theme* on: `DARK`'s `bg`; off: `LIGHT`'s `bg_secondary`; then `text`, line numbers `text_muted`, `accent` |
+| Tooltip | ground `bg_secondary`, text `text`, border `tooltip_border` |
+| About: version label and credits line | `accent` |
+
+### Main window (`ui/main_window.py`, `ui/image_button.py`)
+
+| Part | Keys |
+|------|------|
+| Window ground | `window_bg` |
+| Labels | text `label_text`, ground `label_bg` (Image: `image_overlay_bg`) |
+| Input and output panes, mode combo box | ground `input_bg` (Image: `image_overlay_bg`), text `input_text`, border `input_border`, selected text `selection_bg` and `selection_text` |
+| Output text | `output_text_color` |
+| Mode list | Dark: `bg`, `text`, `border`; Light: `bg_secondary`, `text`, `border`; hovered and selected row `list_hover_bg`, `list_hover_text`. Image: `image_dropdown_bg`, `image_dropdown_border`, `image_dropdown_selection` |
+| Status, *Output:* and statistics labels | ground `input_bg` (Image: `image_overlay_bg_dark`), text `input_text`, border `input_border` |
+| Top bar behind the input label | ground `input_bg` (Image: `image_overlay_bg`), border `input_border` |
+| Scroll bars | track `scrollbar_bg`, border `border`, handle `scrollbar_handle_main`, hover `accent`. Image: transparent track, `image_scrollbar_border`, `image_scrollbar_handle`, hover `accent` |
+| Action buttons (Transform, Copy, Load, Save) in Dark and Light | normal `main_btn_bg`, `main_btn_text`, border `border_color`; hover `main_btn_hover_bg`, `main_btn_hover_text`; pressed `main_btn_pressed_bg`, `main_btn_pressed_text` |
+| Theme button | the same `main_btn_*` keys and `border_color`; in Image mode, while held, `bg_tertiary` and `accent_text` |
+| Selection everywhere (the application palette) | `selection_bg`, `selection_text` |
+
+In Image mode the action buttons and the settings gear are PNG images in
+`resources/button_images/` (base, hover, pressed); the gear is an image in every mode.
+
+### Why two button styles?
+
+The main window is a content workspace. Its action buttons are large and used all the time,
+so their hover stays neutral (`main_btn_*`) and leaves the attention on the text. The dialogs
+are configuration panels, where buttons need clear feedback, so their buttons take the gold on
+hover and press.
 
 ---
 
 ## Font System
 
-| Property | Value | Fallback |
-|----------|-------|----------|
-| Font family | Montserrat Black | Arial |
-| Font file | `Montserrat-Black.ttf` | System font |
-| Loading | Embedded base64 or file from `resources/fonts/` | — |
-| Applied via | `QApplication.setFont()` at startup | — |
+| Property | Value |
+|----------|-------|
+| Font family | Montserrat Black, falling back to Arial |
+| Font file | `resources/fonts/Montserrat-Black.ttf` |
+| Loading | `FontManager.load_embedded_font()` in `utils/config.py`: embedded base64 data if `MONT_FONT_BASE64` holds any (it holds a placeholder), else the file, else Arial |
+| Applied via | `QApplication.setFont()` at startup |
 
-Montserrat Black is applied globally via `QApplication.setFont()`. Individual stylesheets reference the font family via `font-family: '{font_family}'` using the runtime-resolved family name.
+Stylesheets name the font with `font-family: '{font_family}'`, using the family name resolved at
+run time.
 
-ImageButton calculates font size dynamically based on button height: `max(8, int(button_height * 0.28))` pt. The theme toggle button uses a fixed `7.5pt`.
-
----
-
-## Color Hierarchy & Contrast Rules
-
-### Background Layering (Dark Mode)
-
-```
-#000000  ── Main window background (deepest)
-#1A1A1A  ── Dialog background, inputs, panels, main buttons
-#2A2A2A  ── Cards, tooltips, elevated surfaces, dialog buttons
-#333333  ── Table headers, disabled states, dividers, hover states
-#3A3A3A  ── Dialog button hover states
-```
-
-Each step is approximately `+16` in RGB value, creating a subtle but perceptible depth hierarchy.
-
-### Background Layering (Light Mode)
-
-```
-#FFFFFF  ── Cards, inputs, elevated surfaces, dialog buttons (brightest)
-#F5F5F5  ── Main window, dialog background, main buttons
-#EEEEEE  ── Dialog button hover states
-#E8E8E8  ── Table headers, disabled states
-#E0E0E0  ── Scrollbar tracks
-```
-
-### Text on Background Contrast
-
-| Background | Text Color | Contrast Ratio | WCAG |
-|-----------|------------|----------------|------|
-| `#000000` | `#E0E0E0` | 15.91:1 | AAA |
-| `#1A1A1A` | `#E0E0E0` | 13.18:1 | AAA |
-| `#2A2A2A` | `#E0E0E0` | 10.87:1 | AAA |
-| `#d2bc93` | `#000000` | 11.35:1 | AAA |
-| `#F5F5F5` | `#000000` | 19.26:1 | AAA |
-| `#FFFFFF` | `#000000` | 21.00:1 | AAA |
-| `#8c7337` | `#000000` | 4.62:1 | AA |
-
-> **Measured, not transcribed.** Every ratio above is computed from the hex values by `apply_gold_alignment.py` using the WCAG 2.x relative-luminance formula. The previous version of this table had six of its seven rows wrong; the seventh read `4.0:1, AA (large text)` for a pair that measures 2.9976:1, and the light palette was built on it.
-
-### Accent on Background
-
-| Background | Accent | Measured | Result |
-|-----------|--------|----------|--------|
-| `#1A1A1A` | `#d2bc93` | 9.4107:1 | Gold text/border on dark — high visibility |
-| `#2A2A2A` | `#d2bc93` | 7.7610:1 | Gold border on tooltip — clear definition |
-| `#FFFFFF` | `#8c7337` | 4.5429:1 | Dark gold on white |
-| `#F5F5F5` | `#8c7337` | 4.1670:1 | Dark gold on light gray |
-| `#EEEEEE` | `#8c7337` | 3.9156:1 | Dark gold on hover gray — **not permitted for text** |
-
----
-
-## Semantic Color Usage
-
-These colors are consistent across all modes:
-
-| Color | Hex | Usage |
-|-------|-----|-------|
-| Success | `#28a745` | Operation complete, validation pass |
-| Error | `#dc3545` | Errors, destructive actions, delete buttons |
-| Warning | `#ffc107` | Caution states, deprecation notices |
-
-Info uses brand gold (consistent with accent):
-
-| Mode | Info Color | Hex |
-|------|-----------|-----|
-| Dark / Image | Brand gold | `#d2bc93` |
-| Light | Dark gold | `#8c7337` |
-
----
-
-## All Accent Surfaces (Quick Reference)
-
-Every interactive element uses brand gold — no secondary colors:
-
-| Element | Dark / Image | Light |
-|---------|-------------|-------|
-| Dialog button hover text & border | `#d2bc93` | `#8c7337` |
-| Dialog button pressed background | `#d2bc93` | `#8c7337` |
-| Dialog button default border | `#d2bc93` | `#8c7337` |
-| Focus border | `#d2bc93` | `#8c7337` |
-| Checkbox checked | `#d2bc93` | `#8c7337` |
-| Radio button checked | `#d2bc93` | `#8c7337` |
-| Text selection background | `#d2bc93` | `#8c7337` |
-| Scrollbar hover | `#d2bc93` | `#8c7337` |
-| Tooltip border | `#d2bc93` | `#8c7337` |
-| Search highlight | `#d2bc93` | `#8c7337` |
-| Current line number | `#d2bc93` | `#8c7337` |
-| Output text color | `#d2bc93` | `#8c7337` |
-| Info status messages | `#d2bc93` | `#8c7337` |
-| GroupBox title | `#d2bc93` | `#8c7337` |
-| Tip text | `#d2bc93` | `#8c7337` |
-| Version label (About) | `#d2bc93` | `#8c7337` |
-
-Note: Main window action buttons (Transform, Copy, Load, Save) do **not** use gold on hover — they use subtle background darkening only. See "Button Systems" section above.
+`ImageButton` sizes its label from the button's height, `max(8, int(button_height * 0.28))` pt,
+and shrinks it further only when the label would not fit the button's width. The theme button
+uses a fixed `7.5pt`.
 
 ---
 
 ## Integration Checklist for New RNV Apps
 
-1. **Set Fusion style**: `app.setStyle("Fusion")` before any UI creation
-2. **Load Montserrat Black**: via `QFontDatabase.addApplicationFont()` or embedded base64
-3. **Apply font globally**: `app.setFont(custom_font)`
-4. **Create color dictionaries**: Copy DARK and LIGHT from this document
-5. **Wire theme manager**: Return DARK for dark/image mode, LIGHT for light mode
-6. **Image mode transparency**: Use `rgba()` overlays from the transparency table
-7. **Use brand gold for ALL accents**: `#d2bc93` on dark, `#8c7337` on light — no blue, no secondary colors
-8. **Choose button style per context**: Subtle hover for workspace buttons, full gold accent for dialog buttons
-9. **Implement custom tooltips**: See `RNV_Custom_Tooltip_System.md`
-10. **Set window icon**: Use `ResourceLoader.load_app_icon()` in base dialog and standalone dialogs
-11. **Test all three modes**: Dark, Light, Image — verify gold accent visibility in each
+1. **Set Fusion style**: `app.setStyle("Fusion")` before any UI is created, for consistent widget
+   rendering across platforms.
+2. **Load Montserrat Black** with `QFontDatabase.addApplicationFont()` and apply it globally with
+   `app.setFont(custom_font)`.
+3. **Map each color in `brand_map.json`**, at the repository root: a name in rnv-brand (such as
+   `APP.accent`), or a value the app owns, with the reason.
+4. **Pin rnv-brand** in `tests/requirements-dev.txt`, and install it.
+5. **Write the colors with `python tools/sync_colors.py`.** It writes the value on each mapped
+   line of `utils/colors.py` and writes `COLORS.md`. Never type a value into `utils/colors.py`
+   by hand; a derived step, such as a lighter or translucent gold, stays code there and follows
+   its base.
+6. **Add `tests/test_colors_in_sync.py`**, which runs `python tools/sync_colors.py --check`, so a
+   hand edit fails the suite.
+7. **Build `DARK` and `LIGHT` from those names** in `utils/colors.py`, with the same keys in both,
+   plus the `image_*` keys in `DARK` for Image mode.
+8. **Wire the theme manager**: `DARK` for Dark and Image mode, `LIGHT` for Light mode.
+9. **Use the gold keys for every accent**: `accent` for fills, borders and selections,
+   `accent_ink` for gold text. No secondary accent colors.
+10. **Choose the button style per context**: neutral `main_btn_*` hover for workspace buttons, the
+    full gold for dialog buttons.
+11. **List the images that carry the gold** with `python tools/accent_images.py`, which writes
+    `ACCENT_IMAGES.md`; they are redrawn by hand when the gold moves.
+12. **Implement custom tooltips**: see [`RNV_Custom_Tooltip_System.md`](RNV_Custom_Tooltip_System.md).
+13. **Set the window icon**: `ResourceLoader.load_app_icon()` in the base dialog and standalone dialogs.
+14. **Test all three modes**: Dark, Light, Image.

@@ -68,9 +68,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/RNVSoftware/rnv-text-transformer"
-Repository = "https://github.com/RNVSoftware/rnv-text-transformer"
-Issues = "https://github.com/RNVSoftware/rnv-text-transformer/issues"
+Homepage = "https://github.com/RNVizion/rnv-text-transformer"
+Repository = "https://github.com/RNVizion/rnv-text-transformer"
+Issues = "https://github.com/RNVizion/rnv-text-transformer/issues"
 
 # ---- Entry points -----------------------------------------------------------
 # Console script for the CLI
@@ -97,6 +97,9 @@ packages = ["core", "ui", "utils", "cli"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "RNV_Text_Transformer.py" = "RNV_Text_Transformer.py"
+# The font, icons, button images and background. utils/config.py looks for
+# resources/ beside utils/, which is where this puts it in an installed copy.
+"resources" = "resources"
 
 [tool.hatch.build.targets.sdist]
 include = [

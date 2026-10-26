@@ -234,12 +234,12 @@ operations.</p>
 
 <h4>Core Capabilities:</h4>
 <ul>
-<li><b>Multiple Transform Modes</b> - 15+ text transformation styles</li>
+<li><b>Multiple Transform Modes</b> - 11 text transformation styles</li>
 <li><b>File Support</b> - TXT, DOCX, PDF, RTF, MD, and code files</li>
 <li><b>Batch Processing</b> - Transform multiple files at once</li>
 <li><b>Regex Builder</b> - Visual regex pattern construction</li>
 <li><b>Text Cleanup</b> - Remove whitespace, normalize, deduplicate</li>
-<li><b>Export Options</b> - Multiple formats including clipboard</li>
+<li><b>Export Options</b> - TXT, DOCX, HTML, PDF, MD and RTF</li>
 <li><b>Watch Folders</b> - Auto-transform files in monitored directories</li>
 </ul>
 
@@ -279,7 +279,7 @@ operations.</p>
 <ul>
 <li><b>Case Modes</b> - UPPERCASE, lowercase, Title Case, Sentence case</li>
 <li><b>Developer Modes</b> - camelCase, PascalCase, snake_case, kebab-case</li>
-<li><b>Special Modes</b> - CONSTANT_CASE, dot.case, Alternating Case, Reverse</li>
+<li><b>Special Modes</b> - CONSTANT_CASE, dot.case, iNVERTED cASE</li>
 <li><b>Real-time Preview</b> - See transformation results instantly</li>
 <li><b>Auto-transform</b> - Automatic transformation on input change</li>
 </ul>
@@ -295,9 +295,9 @@ operations.</p>
 
 <h4>🔧 Text Cleanup</h4>
 <ul>
-<li><b>Whitespace Tools</b> - Trim, normalize spaces, remove blank lines</li>
-<li><b>Line Operations</b> - Sort, reverse, deduplicate, number lines</li>
-<li><b>Character Cleanup</b> - Remove special chars, fix encoding</li>
+<li><b>Whitespace Tools</b> - Trim, remove extra spaces, remove blank lines, fix line endings</li>
+<li><b>Line Operations</b> - Sort A-Z or Z-A, remove duplicate lines</li>
+<li><b>Character Cleanup</b> - Strip HTML tags, remove non-printable characters, normalize Unicode</li>
 <li><b>Split/Join</b> - Split text or join lines with custom separators</li>
 </ul>
 
@@ -306,7 +306,7 @@ operations.</p>
 <li><b>Basic Search</b> - Find text with highlighting</li>
 <li><b>Regex Support</b> - Full regular expression patterns</li>
 <li><b>Replace Options</b> - Single or replace all occurrences</li>
-<li><b>Case Sensitivity</b> - Optional case-sensitive matching</li>
+<li><b>Options</b> - Case sensitive, whole word, and search in the input or the output</li>
 </ul>
 
 <h4>📊 Advanced Features</h4>
@@ -315,7 +315,7 @@ operations.</p>
 <li><b>Transform Presets</b> - Save and reuse custom configurations</li>
 <li><b>Compare View</b> - Side-by-side diff with highlighting</li>
 <li><b>Multi-format Export</b> - Export to various formats</li>
-<li><b>Encoding Detection</b> - Handle different text encodings</li>
+<li><b>Encoding Converter</b> - Detect and convert encodings, and repair mojibake</li>
 </ul>
 
 <h4>🎨 Themes</h4>
@@ -391,10 +391,9 @@ operations.</p>
 <tr><td><b>Ctrl+Q</b></td><td>Quit Application</td></tr>
 </table>
 
-<h4>Debug & Display</h4>
+<h4>Display</h4>
 <table width="100%">
 <tr><td width="40%"><b>F11</b></td><td>Toggle Tooltips On/Off</td></tr>
-<tr><td><b>F12</b></td><td>Toggle Debug Mode</td></tr>
 </table>
 """
         

@@ -15,8 +15,8 @@ Both suites run under a single coverage report via `run_tests.py`.
 # Run everything (both suites + combined coverage report)
 python run_tests.py
 
-# Run only the pytest suite
-python -m pytest tests/
+# Run only the pytest suite, without the benchmarks
+python -m pytest tests/ --benchmark-disable
 
 # Run only the unittest suite
 python -m unittest test_rnv_text_transformer
@@ -24,12 +24,18 @@ python -m unittest test_rnv_text_transformer
 # Run a single pytest file
 python -m pytest tests/test_main_window.py -v
 
-# Run with benchmarks (off by default)
-python -m pytest tests/test_benchmarks.py --benchmark-enable
+# Run only the benchmarks (no coverage)
+python run_tests.py --benchmark
 ```
 
+The benchmarks in `test_benchmarks.py` are timed whenever pytest collects them: a plain
+`python -m pytest tests/` runs their timing rounds too. `--benchmark-disable` runs each of
+them once, untimed, as an ordinary test; `run_tests.py` and CI pass it.
+
 On Windows, `python -m pytest` is required (not `pytest tests/...`) so the
-working directory is added to `sys.path`.
+working directory is added to `sys.path`. Everywhere, run the suites with the venv's
+Python (`python -m pytest`, `python -m coverage`) rather than a `pytest` or `coverage`
+found on PATH: another interpreter's copy has another rnv-brand, and the pin tests fail.
 
 ---
 
@@ -62,8 +68,8 @@ working directory is added to `sys.path`.
 | `test_snapshots.py` | Syrupy snapshot tests for dialog stylesheets and export formats |
 | `test_benchmarks.py` | Performance benchmarks (import time, stylesheet cache, transforms, diff, file loading) |
 
-These are the suite's first files. Files added since are not listed here; each opens with a
-docstring that says what it holds.
+These are the suite's first files. Files added since are not listed here, apart from the
+guard tests below; each opens with a docstring that says what it holds.
 
 **Total: over 1,000 tests** (over 300 unittest tests and over 600 pytest tests, snapshot tests and benchmarks among them)
 
@@ -71,36 +77,41 @@ docstring that says what it holds.
 
 ## Coverage
 
-The project tracks coverage with `coverage.py` and reports it on every run.
-
-Current landing: **~76% on Windows** (Python 3.13).
-
-Per-module highlights (above 85%):
-- `core/text_transformer.py` — 99.4%
-- `core/text_statistics.py` — 100%
-- `cli/__init__.py` — 100%
-- `utils/dialog_styles.py` — 94.2%
-- `utils/settings_manager.py` — 91.9%
-- `core/regex_patterns.py` — 88.9%
-- `utils/dialog_helper.py` — 88.5%
-- `ui/find_replace_dialog.py` — 87.0%
-- `core/preset_manager.py` — 87.0%
-- `ui/watch_folder_dialog.py` — 86.7%
-- `core/text_cleaner.py` — 85.6%
-- `core/export_manager.py` — 85.7%
-- `utils/base_dialog.py` — 86.0%
+Coverage is measured on every full run. `python run_tests.py --report` prints the current
+figure for every module; it differs a little between Windows and Linux. CI prints the report
+at the end of each job.
 
 Modules with lower coverage are documented limitations:
-- QThread `run()` bodies don't instrument under `coverage.py` (affects `batch_dialog`, `encoding_dialog`, `compare_dialog` scroll-sync handlers)
-- CSS stylesheet builders in `main_window.py` are exercised transitively but not per-branch (~315 statements)
+- QThread `run()` bodies don't instrument under `coverage.py` (affects `BatchWorkerThread` in
+  `ui/batch_dialog.py`, `DetectionThread` in `ui/encoding_dialog.py`, and the workers in
+  `utils/async_workers.py`)
+- CSS stylesheet builders in `main_window.py` are exercised transitively but not per-branch
 - `drag_drop_text_edit.py` event handlers (Qt drag events are hard to simulate)
+
+---
+
+## Guard tests
+
+Besides the tests of the app's behavior, a set of guard tests holds rules that span the
+repository:
+
+| Test | Holds |
+|---|---|
+| `tests/test_colors_in_sync.py` | the color file and `COLORS.md` are what `brand_map.json` and the pinned brand say |
+| `tests/test_register_pin.py` | the installed rnv-brand is the pinned commit |
+| `tests/test_atomic_state_writes.py` | every file the app keeps is written atomically |
+| `tests/test_status_carried_by_a_word.py` | a status is never shown by color alone: each one has a word or a mark beside it |
+| `tests/test_accent_images.py` | `ACCENT_IMAGES.md` matches the images |
+| `tests/test_setup_scripts.py` | `in.sh` and `in.ps1` install the same files |
+| `tests/test_readme_test_counts.py` | every test count the docs state is a floor that holds |
 
 ---
 
 ## Conventions
 
 **Fixtures.** Common fixtures live in `tests/conftest.py`:
-- `qapp` — single `QApplication` instance shared across tests
+- `qapp` — the `QApplication`, from pytest-qt; `conftest.py` makes the one instance at the
+  start of the session (`_qapplication_singleton`), shared across tests
 - `qtbot` — pytest-qt helper (from the plugin)
 - `main_window` — fully-constructed `MainWindow` with isolated `QSettings`
 - `tmp_settings` — temporary `QSettings` scope so tests don't pollute the user's real settings
@@ -116,7 +127,8 @@ handlers driven directly with hand-emitted signal payloads rather than
 spinning up the thread. This sidesteps the `coverage.py` limitation around
 QThread bodies while still exercising the dialog's response code paths.
 
-**Snapshot tests.** Use `syrupy` for stylesheets and export output formats.
+**Snapshot tests.** Use `syrupy` for stylesheets, color dictionaries, export output formats,
+and diff renderings.
 Re-record snapshots after intentional changes with:
 
 ```bash

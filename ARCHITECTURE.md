@@ -44,20 +44,26 @@ Every architectural decision below flows from one of these principles.
 rnv-text-transformer/
 ├── RNV_Text_Transformer.py     # GUI entry point
 │
-├── core/     Business logic. No PyQt6 dependency except where unavoidable
-│             (e.g. ThemeManager needs QPixmap for background image caching).
+├── core/     Business logic. Uses PyQt6 where it must: ThemeManager and
+│             ResourceLoader hold QPixmaps, PresetManager asks QStandardPaths
+│             where to keep presets (the GUI's folder, which the CLI reads
+│             too), and the watch rules live in QSettings.
 │
 ├── ui/       PyQt6 widgets, dialogs, and the main window. Depends on core
 │             and utils.
 │
-├── utils/    Cross-cutting services (config, logging, settings persistence,
-│             file I/O, error handling, threading primitives, dialog styles).
-│             Depends only on PyQt6 and the standard library.
+├── utils/    Cross-cutting services (colors, config, logging, settings
+│             persistence, file I/O, atomic writes, error handling, threading
+│             primitives, dialog styles). Depends on PyQt6 and the standard
+│             library, and in one place on core: the transform worker in
+│             async_workers.py runs TextTransformer.
 │
 ├── cli/      Command-line interface. Imports from core and utils, never ui.
+│
+├── tools/    sync_colors.py and accent_images.py, run by hand and by the tests.
 ```
 
-The layout follows a strict layering rule: **upper layers may import from lower layers, never the reverse.**
+The layout follows a layering rule: **upper layers import from lower layers.** `ui` and `cli` sit on top and do not import each other. Below them, `core` imports from `utils`, and `utils` imports from `core` in one place, listed below.
 
 ---
 
@@ -65,7 +71,7 @@ The layout follows a strict layering rule: **upper layers may import from lower 
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
-│       ui        │◄────────│      cli        │
+│       ui        │         │      cli        │
 └────────┬────────┘         └────────┬────────┘
          │                           │
          └──────────┬────────────────┘
@@ -79,8 +85,8 @@ The layout follows a strict layering rule: **upper layers may import from lower 
          └─────────────────┘
 ```
 
-- `utils` imports only from PyQt6 and stdlib. It is the foundation.
-- `core` imports from `utils` and PyQt6 (reluctantly — only for `QPixmap`/`QByteArray`).
+- `utils` imports from PyQt6 and stdlib. It is the foundation, with one exception: `utils/async_workers.py` imports `core.text_transformer` for `TextTransformThread`.
+- `core` imports from `utils` and PyQt6 (`QPixmap`, `QIcon`, `QStandardPaths`, `QSettings`).
 - `ui` imports from `core`, `utils`, and PyQt6. Full freedom.
 - `cli` imports from `core` and `utils`. **Never from `ui`** — the CLI must work headless.
 
@@ -97,16 +103,17 @@ This invariant is worth preserving. It means:
 When the user launches the app, `RNV_Text_Transformer.py::main()` runs the following steps in order:
 
 ```
- 1. Python version check (>= 3.10)
+ 1. Python version check (>= 3.13)
       └─▶ Exit with message if Python is too old
  2. Initialize Logger
  3. QApplication(sys.argv)
  4. app.setStyle("Fusion")
-      └─▶ Critical: prevents Windows native tooltip frames from
-          overriding Qt CSS styling. See Known Constraints.
+      └─▶ Consistent widget rendering across platforms. It does not
+          fix tooltips; see Known Constraints.
  5. FontManager.load_embedded_font()
-      └─▶ Loads Montserrat-Black from embedded base64 or file,
-          falls back to Arial. Cached as ClassVar.
+      └─▶ Loads Montserrat-Black from embedded base64 if there is any
+          (the slot holds a placeholder), else from
+          resources/fonts/, else falls back to Arial. Cached as ClassVar.
  6. app.setFont(custom_font)
       └─▶ Sets the application-wide default font
  7. DialogStyleManager.prewarm_cache(font_family)
@@ -119,7 +126,7 @@ When the user launches the app, `RNV_Text_Transformer.py::main()` runs the follo
 10. app.exec()
 ```
 
-Steps 4 and 7 are particularly important. Without the Fusion style, custom tooltip CSS is silently ignored on Windows. Without stylesheet pre-warming, the first dialog open can stutter noticeably on cold start.
+Step 7 is particularly important: without stylesheet pre-warming, the first dialog open can stutter noticeably on cold start. Inside `MainWindow()`, the saved settings are applied once the widgets exist: the statistics bar's position, *Show button tooltips*, and *Maximum recent files*, which trims the recent files list. The last step installs the application-wide event filter that draws the themed tooltips.
 
 ---
 
@@ -129,25 +136,26 @@ The UI thread must never block. Two worker threads handle expensive operations.
 
 ### `FileLoaderThread`
 
-Defined in `utils/async_workers.py`. Handles loading of `.docx`, `.pdf`, `.rtf`, and any text file above a size threshold.
+Defined in `utils/async_workers.py`. Every file the main window loads goes through it: Load, a recent file, and a dropped file.
 
 ```
 MainWindow              FileLoaderThread
      │                        │
-     │ ── start(path) ───────▶│
+     │ ── start() ───────────▶│
      │                        │ [reads file off UI thread]
-     │ ◄── progress(50) ──────│
-     │ ◄── finished(text) ────│
+     │                        │ progress(10/90/100), which nothing connects
+     │ ◄── finished(text, name)│
+     │ ◄── error(message) ────│  (instead, on failure)
      │                        │ [thread terminates]
 ```
 
 ### `TextTransformThread`
 
-For transforms applied to very large buffers. Most transforms are fast enough to run synchronously; the helper `should_use_thread_for_transform(text)` in `utils/async_workers.py` decides based on content length.
+For transforms applied to very large buffers. Most transforms are fast enough to run synchronously; the helper `should_use_thread_for_transform(text)` in `utils/async_workers.py` decides based on content length (`LARGE_TEXT_THRESHOLD`).
 
 ### `FolderWatcher`
 
-Not a `QThread` — uses the `watchdog` library's observer thread. Emits signals that MainWindow handles on the main thread. See `core/folder_watcher.py`.
+Not a `QThread` — uses the `watchdog` library's observer thread and a processing thread of its own. It reports through a callback, not a Qt signal: `WatchFolderDialog` sets it with `set_event_callback()` and shows each event in its activity log. The watcher runs only while that dialog is open; closing it stops the watcher. See `core/folder_watcher.py`.
 
 ---
 
@@ -184,13 +192,13 @@ DialogStyleManager.get_dialog_stylesheet(is_dark, font_family) -> str
 
 ### How Image Mode works
 
-Image Mode is Dark Mode with semi-transparent overlays and a custom background pixmap painted by `MainWindow.paintEvent()`. Dialogs in Image Mode use the `image_overlay_*` keys from the DARK palette (rgba values instead of solid hex), which is why `DialogStyleManager.DARK` is the only palette consulted when `image_mode_active` is true.
+Image Mode is Dark Mode with semi-transparent overlays and a custom background image, shown in a `QLabel` (`background_label`) under the main window's widgets and sized to the window on every resize. The main window's stylesheets use the `image_*` keys of the DARK palette (colors with an alpha channel) for its panes, labels, list and scroll bars. Dialogs in Image Mode take the plain DARK palette, so `DialogStyleManager.DARK` is the only palette consulted when `image_mode_active` is true.
 
 ---
 
 ## Dialog Styling & the BaseDialog Pattern
 
-Every dialog in the app inherits from `BaseDialog` (defined in `ui/base_dialog.py`). The pattern looks like this:
+Every dialog in the app but `AboutDialog` inherits from `BaseDialog` (defined in `ui/base_dialog.py`). `AboutDialog` is a plain `QDialog` with its own stylesheet, built from the same palette keys. The pattern looks like this:
 
 ```python
 class MyDialog(BaseDialog):
@@ -212,7 +220,7 @@ class MyDialog(BaseDialog):
 - Calling `DialogStyleManager.get_dialog_stylesheet()` with the correct parameters
 - Providing helpers: `_create_close_button()`, `_create_button_row()`, `_create_main_layout()`
 
-This means no dialog manually constructs a stylesheet. No dialog stores colors. No dialog hardcodes window flags. The design system is the default, and overriding it requires explicit effort.
+This means no `BaseDialog` dialog manually constructs its base stylesheet, stores colors, or hardcodes window flags. The design system is the default, and overriding it requires explicit effort. `refresh_theme()` builds a dialog's sheet again after a theme switch; the main window calls it on every open non-modal dialog.
 
 ---
 
@@ -223,19 +231,20 @@ Qt's signal/slot system is used extensively to decouple components. The key flow
 ### Settings changes
 
 ```
-SettingsDialog                MainWindow
-     │                             │
-     │ theme_changed(str) ────────▶│ applies theme
-     │ auto_transform_changed(b) ─▶│ enables/disables
-     │ stats_position_changed(s) ─▶│ repositions stats
-     │ undo_requested() ──────────▶│ restores prior output
-     │ redo_requested() ──────────▶│ replays output
-     │ cleanup_requested(str) ────▶│ runs cleanup op
-     │ split_join_requested(str) ─▶│ runs split/join
-     │ export_requested() ────────▶│ opens export dialog
+SettingsDialog                        MainWindow
+     │                                     │
+     │ theme_change_requested(str) ───────▶│ _apply_theme_from_settings
+     │ settings_changed() ────────────────▶│ _on_settings_changed (tooltips)
+     │ stats_position_changed(str) ───────▶│ _update_stats_position
+     │ undo_requested() ──────────────────▶│ _undo_output
+     │ redo_requested() ──────────────────▶│ _redo_output
+     │ open_recent_file_requested(str) ───▶│ _open_recent_file
+     │ cleanup_requested(str) ────────────▶│ _apply_cleanup
+     │ split_join_requested(str) ─────────▶│ _apply_split_join
+     │ export_requested() ────────────────▶│ _open_export_dialog
 ```
 
-Settings dialogs never directly manipulate main window state. They emit signals; MainWindow owns the handlers. This is the same pattern as an undo history dialog or a preferences pane in any large Qt app.
+Auto-transform is not a signal: the dialog saves it, and the main window reads it from `SettingsManager` each time the input changes. Most of the dialog's actions are signals that MainWindow handles. Two are not: Clear All and Swap call the parent window's `_clear_all()` and `_swap_input_output()` directly.
 
 ### File loading
 
@@ -245,40 +254,44 @@ User drops file
      ▼
 DragDropTextEdit.dropEvent()
      │
-     ▼ emits file_dropped(path)
-MainWindow._on_file_dropped()
+     ▼ emits fileDropped(path)
+MainWindow._handle_dropped_file()
      │
-     ├─── small text file ──▶ FileHandler.read() (sync)
-     │
-     └─── large or binary ──▶ FileLoaderThread.start(path)
-                                       │
-                                       ▼ emits finished(text)
-                               MainWindow._on_file_loaded()
+     └──▶ FileLoaderThread(path).start()      (every file, any size)
+                │
+                ├─ finished(text, name) ──▶ MainWindow._on_file_loaded_dragdrop()
+                │                            sets the input, then transforms
+                └─ error(message) ────────▶ MainWindow._on_file_error()
 ```
+
+Load (`Ctrl+O`) and a recent file take the same thread, ending in `MainWindow._on_file_loaded()`.
 
 ### Folder watching
 
 ```
 watchdog observer thread
      │
-     ▼ (file landed matching rule)
-FolderWatcher emits processed(src, dst)
+     ▼ (file landed matching a rule)
+FolderWatcher processing thread
      │
-     ▼ (Qt queues signal onto main thread)
-MainWindow handler updates status bar
+     ▼ WatchEvent passed to the callback set by set_event_callback()
+WatchFolderDialog._on_watch_event()
+     │
+     ▼ (queued; a timer on the main thread drains it)
+the dialog's activity log
 ```
 
 ---
 
 ## Caching Strategy
 
-Three distinct caches, each with a different lifetime and invalidation model:
+Four distinct caches, each with a different lifetime and invalidation model:
 
 ### Stylesheet cache (`DialogStyleManager._cache`)
 
-- **Key:** `(is_dark: bool, font_family: str)`
+- **Key:** `(is_dark: bool, font_family: str)`; a second cache, `_component_cache`, adds the extra components a dialog asks for
 - **Value:** complete stylesheet string
-- **Invalidation:** never (stylesheets depend only on theme and font, both of which are stable after startup)
+- **Invalidation:** the oldest entry goes when a cache is full (`_MAX_BASE_CACHE_SIZE`, `_MAX_COMPONENT_CACHE_SIZE`); `DialogStyleManager.clear_cache()` empties both. Stylesheets depend only on theme and font, both of which are stable after startup.
 - **Pre-warming:** called at startup for both themes
 
 ### Color palette access
@@ -292,7 +305,7 @@ Three distinct caches, each with a different lifetime and invalidation model:
 
 - **Key:** image name
 - **Value:** loaded `QPixmap`
-- **Invalidation:** never (resources are app-lifetime)
+- **Invalidation:** the oldest entry goes when the cache is full (`_MAX_CACHE_SIZE`); otherwise app-lifetime
 - **Pre-warming:** `preload_button_images(['transform', 'copy', 'load', 'save'])` at startup
 
 ### Font cache (`FontManager`)
@@ -301,7 +314,7 @@ Three distinct caches, each with a different lifetime and invalidation model:
 - **Value:** loaded `QFont` instance
 - **Invalidation:** `FontManager.clear_cache()` (only used in tests)
 
-All four caches use `ClassVar` storage so they're shared across all instances and survive Qt object lifecycle events.
+All four use `ClassVar` storage so they're shared across all instances and survive Qt object lifecycle events.
 
 ---
 
@@ -312,17 +325,18 @@ The project enforces single-source-of-truth for two critical values:
 ### Version string
 
 - **Lives in:** `utils/config.py` as `APP_VERSION`
-- **Read by:** `RNV_Text_Transformer.py` (startup banner), `ui/about_dialog.py` (display), `pyproject.toml` (via regex extraction at build time)
-- **Never duplicated.** Tests enforce this.
+- **Read by:** `RNV_Text_Transformer.py` (startup banner), `ui/about_dialog.py` (display), `cli/rnv_transform.py` (`--version`), `pyproject.toml` (via regex extraction at build time)
+- **Not written anywhere else**, the README included. No test holds this; `test_rnv_text_transformer.py` checks only that the string has the form `X.Y.Z`.
 
 ### Color palette
 
-- **Lives in:** `utils/colors.py` as `DARK` and `LIGHT`, which `DialogStyleManager.DARK` and `.LIGHT` serve
+- **Lives in:** `utils/colors.py` as `DARK` and `LIGHT`, which `DialogStyleManager.DARK` and `.LIGHT` serve. Their keys name constants in the same file.
+- **Values come from:** `brand_map.json`, which names each constant's source: a name in rnv-brand at the commit `tests/requirements-dev.txt` pins, or a value the app owns, with the reason. `python tools/sync_colors.py` writes the values into `utils/colors.py` and writes `COLORS.md`; `tests/test_colors_in_sync.py` fails when either is out of date, so a value typed into `utils/colors.py` by hand does not last. Derived steps (`lighten()`, `with_alpha()`) stay code and follow their base. See *Changing a color* in the README.
 - **Accessed via:** `DialogStyleManager.get_colors(is_dark)` — returns the class-level dict by reference
-- **Every component** that needs a color — main window, every dialog, diff highlighting, regex match coloring, line number gutters, scrollbar styling — reads from this one place
+- **Every component** that needs a color — main window, every dialog, diff highlighting, regex match coloring, scrollbar styling, exports — reads from this one place
 - **No component** ever constructs its own colors
 
-This discipline has real value. When the brand gold accent changed during development, it was a one-line edit. Had colors been scattered across 20+ files, the same change would have been a days-long audit.
+This discipline has real value. When a brand color moves, the change is a new pin and one run of the sync, and the diff of `utils/colors.py` shows exactly what moved. The images do not follow: `ACCENT_IMAGES.md` lists the ones with the gold drawn into their pixels.
 
 ---
 
@@ -384,33 +398,33 @@ The architecture is designed to make common extensions straightforward. Each ext
 
 1. Add a new variant to the `TransformMode` enum in `core/text_transformer.py`
 2. Add the transformation logic (either a new method or a new branch in an existing `match` statement)
-3. The mode appears automatically in the main window dropdown, the batch dialog, the watch folder rules, and the CLI's `--list-modes` output — none of those need modification
+3. The mode appears automatically in the main window dropdown, the batch dialog, the watch folder rules, the preset editor, and the CLI's `--mode` check, all of which read `TextTransformer.get_available_modes()`. The CLI's `--list-modes` output is the exception: it prints two hand-kept lists, `get_original_modes()` and `get_developer_modes()`, so add the mode to one of them
 
 ### Adding a new export format
 
 1. Add a new variant to the `ExportFormat` enum in `core/export_manager.py`
 2. Add a private `_export_<format>()` method
-3. Dispatch from the public `export()` method
-4. Add the option to the `ExportDialog` combo box
+3. Dispatch from the public `export()` method, and, if it needs a library, add a branch to `ExportManager.check_format_dependencies()`
+4. The format appears by itself in the `ExportDialog`'s format list, which is built from `ExportFormat`. The list of formats on Settings > Export is written by hand in `ui/settings_dialog.py`
 
 ### Adding a new cleanup operation
 
 1. Add a variant to `CleanupOperation` in `core/text_cleaner.py`
 2. Implement the operation in `TextCleaner.cleanup()`
-3. The new operation appears automatically in the Settings Adjustments tab (populated from `TextCleaner.get_cleanup_operations()`)
+3. The new operation appears automatically in the Settings Adjustments tab and the preset editor's Cleanup step (both populated from `TextCleaner.get_cleanup_operations()`). The CLI's `--cleanup` takes it at once, by its snake_case member name (`TextCleaner.operation_key()`) or its value. Its `--list-cleanup` text is written by hand in `CLIProcessor._CLEANUP_GROUPS` (`cli/rnv_transform.py`): add a line there, or `tests/test_cli.py` fails.
 
 ### Adding a new dialog
 
 1. Create a new file in `ui/` that subclasses `BaseDialog`
 2. Override the `_DIALOG_WIDTH`, `_DIALOG_HEIGHT`, `_DIALOG_TITLE` class constants
 3. Build UI in `_setup_ui()`, then call `self.apply_base_styling()`
-4. Theme support, window flags, and font are handled automatically
+4. Theme support, window flags, and font are handled automatically. If the dialog is non-modal, open it through `MainWindow._track_open_dialog()` so it follows a theme switch
 
 ### Adding a new preset action type
 
 1. Add a variant to `ActionType` in `core/preset_manager.py`
-2. Add a branch to `PresetExecutor.execute_step()` match statement
-3. Presets using the new action appear and execute immediately
+2. Add a branch to `PresetExecutor.execute_step()` match statement, and, for a readable step name, one to `PresetStep.get_display_name()`
+3. Presets that already hold the new action (a file imported or edited by hand) execute it at once. To build it in the preset editor, add it to the action list and the parameter widgets in `StepEditorWidget` (`ui/preset_dialog.py`), which are written by hand
 
 ---
 
@@ -420,29 +434,29 @@ The architecture is designed to make common extensions straightforward. Each ext
 
 PyQt6 tooltips on Windows are rendered by the native OS tooltip system, which creates a top-level window with an OS-provided frame that cannot be styled through Qt stylesheets. This is a platform limitation, not a bug.
 
-Two workarounds are used:
+The workaround is the **custom `_ThemedToolTip` class** in `ui/main_window.py`, which bypasses `QToolTip` entirely. `MainWindow` installs an event filter on the `QApplication`, so it catches the tooltip event of every widget in the app, dialogs included, and shows a frameless `QLabel` with a manual `paintEvent()` that renders a fully themed rounded rectangle. `app.setStyle("Fusion")` does not fix the native frame; the app sets it for consistent widget rendering only.
 
-1. **`app.setStyle("Fusion")`** in startup prevents *some* native styling from leaking through.
-2. **Custom `_ThemedToolTip` class** in `ui/main_window.py` bypasses `QToolTip` entirely for the main button bar. It uses a frameless `QLabel` with a manual `paintEvent()` to render a fully themed rounded rectangle.
+See [docs/RNV_Custom_Tooltip_System.md](docs/RNV_Custom_Tooltip_System.md) for details.
 
-See [RNV_Custom_Tooltip_System.md](RNV_Custom_Tooltip_System.md) for details.
+### Resize events during construction
 
-### Resize event ordering during Fusion style application
-
-Qt fires `resizeEvent` on child widgets before their `__init__` has completed when `setStyle("Fusion")` triggers a style recalculation. Affected handlers use a `hasattr()` guard:
+`MainWindow.__init__()` restores the saved geometry, and may maximize the window, before `_setup_ui()` has built the widgets, so Qt fires `resizeEvent` while some attributes do not exist yet. The handler guards each widget it touches with `hasattr()`:
 
 ```python
-def resizeEvent(self, event):
-    if not hasattr(self, '_font_metrics_cache'):
-        return
-    # ... rest of the handler
+def resizeEvent(self, event: QResizeEvent) -> None:
+    super().resizeEvent(event)
+    ...
+    if hasattr(self, 'background_label') and self.background_label.isVisible():
+        self.background_label.setGeometry(0, 0, w, h)
+    if hasattr(self, 'theme_button'):
+        ...  # keep it in the bottom-right corner
 ```
 
-This prevents AttributeError crashes during early startup. It's defensive, not elegant, but it's the cheapest correct fix.
+`_setup_theme_button()` positions the button itself when it is made, for the case where that early resize came before it existed. It's defensive, not elegant, but it's the cheapest correct fix.
 
 ### Double-encoded UTF-8 ("mojibake")
 
-When text containing special characters (✔, ✘, →, ──) is copied from certain Windows sources, it may arrive as cp1252 bytes interpreted as UTF-8 (or vice versa). Byte-level pattern replacement in `TextCleaner` normalizes the most common cases. This is platform-dependent and cannot be fully solved at the application layer.
+When text containing special characters (✔, ✘, →, ──) is copied from certain Windows sources, it may arrive as cp1252 bytes interpreted as UTF-8 (or vice versa). Nothing repairs it automatically. The Encoding Converter (`Ctrl+Shift+E`) has an opt-in *Fix mojibake* option, `EncodingDetector.fix_mojibake()` in `ui/encoding_dialog.py`, which encodes the text with the wrong encoding and decodes it with the right one. This is platform-dependent and cannot be fully solved at the application layer.
 
 ### Main window decomposition is deferred
 
@@ -452,9 +466,10 @@ When text containing special characters (✔, ✘, →, ──) is copied from c
 
 ## Subsystem Documentation
 
-More detailed write-ups live alongside this file:
+More detailed write-ups, the first two under `docs/`:
 
-- **[RNV_Custom_Tooltip_System.md](RNV_Custom_Tooltip_System.md)** — why Qt's native tooltips are insufficient on Windows, the `_ThemedToolTip` class, singleton coordination, paint logic
-- **[RNV_Brand_Color_System.md](RNV_Brand_Color_System.md)** — the dual-gold brand palette, accessibility considerations, how `DARK` and `LIGHT` maintain structural parity
+- **[docs/RNV_Custom_Tooltip_System.md](docs/RNV_Custom_Tooltip_System.md)** — why Qt's native tooltips are insufficient on Windows, the `_ThemedToolTip` class, singleton coordination, paint logic
+- **[docs/RNV_Brand_Color_System.md](docs/RNV_Brand_Color_System.md)** — why there are two golds, which palette key each widget and state takes, the font, and the integration checklist
+- **[COLORS.md](COLORS.md)** — every color value, written by `tools/sync_colors.py`
 
 Together with this document, they form the complete architectural record of the project.

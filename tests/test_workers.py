@@ -391,3 +391,60 @@ class TestFolderWatcher:
             assert received, "FolderWatcher did not deliver a WatchEvent within 3s"
         finally:
             watcher.stop()
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 6. FolderWatcher rules that run a preset or cleanup steps (#94 A)
+# ════════════════════════════════════════════════════════════════════════════
+
+class TestFolderWatcherRuleSteps:
+    """
+    A watch rule with a preset failed on every file: the watcher built
+    PresetExecutor(preset_manager), which takes no argument, and asked for
+    cleanup through TextCleaner.apply_operation, which does not exist. Each
+    file raised, the log showed an error, and no output was written.
+    """
+
+    @staticmethod
+    def _run_rule(tmp_path, **rule_fields) -> tuple[Path, list]:
+        """Watch tmp_path/in, drop one file in, return its output path and the events."""
+        from core.folder_watcher import FolderWatcher, WatchRule
+
+        inp, out = tmp_path / "in", tmp_path / "out"
+        inp.mkdir()
+        received: list = []
+        watcher = FolderWatcher()
+        watcher.set_event_callback(received.append)
+        assert watcher.add_rule(WatchRule(
+            id="steps", input_folder=inp, output_folder=out, **rule_fields))
+        try:
+            assert watcher.start() is True
+            time.sleep(0.2)
+            (inp / "a.txt").write_text("  hello   world  \n", encoding="utf-8")
+            deadline = time.time() + 5.0
+            while time.time() < deadline and not any(
+                    e.event_type in ("processing_complete", "processing_error")
+                    for e in received):
+                time.sleep(0.05)
+        finally:
+            watcher.stop()
+        return out / "a.txt", received
+
+    def test_rule_with_a_preset_writes_the_preset_result(
+        self, folder_watcher_unavailable_skip, tmp_path
+    ):
+        """The preset runs as the GUI runs it, and the output is written."""
+        output, events = self._run_rule(tmp_path, preset_name="Title Case Headlines")
+        errors = [e.message for e in events if e.event_type == "processing_error"]
+        assert errors == []
+        assert output.read_text(encoding="utf-8") == "Hello   World"
+
+    def test_rule_with_cleanup_steps_applies_them(
+        self, folder_watcher_unavailable_skip, tmp_path
+    ):
+        """Cleanup steps by command-line or display name are applied in order."""
+        output, events = self._run_rule(
+            tmp_path, cleanup_ops=["Remove Extra Spaces", "trim_whitespace"])
+        errors = [e.message for e in events if e.event_type == "processing_error"]
+        assert errors == []
+        assert output.read_text(encoding="utf-8") == "hello world"

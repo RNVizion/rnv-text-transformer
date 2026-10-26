@@ -36,6 +36,20 @@ class CleanupOperation(StrEnum):
     REMOVE_TRAILING_SPACES = "Remove Trailing Spaces"
 
 
+# Other names for the cleanup operations. The CLI documented these, and the
+# built-in presets were written with them before they were mapped to the
+# operations above, so presets saved from those built-ins can still hold them.
+CLEANUP_ALIASES: dict[str, CleanupOperation] = {
+    "normalize_spaces": CleanupOperation.REMOVE_EXTRA_SPACES,
+    "collapse_whitespace": CleanupOperation.REMOVE_EXTRA_SPACES,
+    "remove_blank_lines": CleanupOperation.REMOVE_ALL_BLANK_LINES,
+    "collapse_blank_lines": CleanupOperation.REMOVE_EXTRA_LINES,
+    "normalize_line_endings": CleanupOperation.FIX_LINE_ENDINGS_UNIX,
+    "remove_trailing_whitespace": CleanupOperation.REMOVE_TRAILING_SPACES,
+    "strip_html": CleanupOperation.STRIP_HTML_TAGS,
+}
+
+
 class SplitJoinOperation(StrEnum):
     """Available split/join operations."""
     SPLIT_BY_COMMA = "Split by Comma"
@@ -528,7 +542,44 @@ class TextCleaner:
             List of operation display names
         """
         return [op.value for op in CleanupOperation]
-    
+
+    @staticmethod
+    def operation_key(operation: CleanupOperation) -> str:
+        """
+        Get the command-line name of a cleanup operation.
+
+        Args:
+            operation: Cleanup operation
+
+        Returns:
+            Its snake_case name, e.g. 'trim_whitespace'
+        """
+        return operation.name.lower()
+
+    @staticmethod
+    def resolve_operation(name: str) -> CleanupOperation | None:
+        """
+        Find the cleanup operation a name stands for.
+
+        Accepts the display name ('Trim Whitespace'), the command-line
+        name ('trim_whitespace'), or one of CLEANUP_ALIASES.
+
+        Args:
+            name: Operation name
+
+        Returns:
+            The operation, or None if the name matches none
+        """
+        name = name.strip()
+        for op in CleanupOperation:
+            if name == op.value:
+                return op
+        key = name.lower()
+        for op in CleanupOperation:
+            if key == TextCleaner.operation_key(op):
+                return op
+        return CLEANUP_ALIASES.get(key)
+
     @staticmethod
     def get_split_join_operations() -> list[str]:
         """

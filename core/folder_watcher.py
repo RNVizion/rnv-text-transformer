@@ -551,30 +551,32 @@ class FolderWatcher:
         """Process a file according to its rule."""
         # Import here to avoid circular imports
         from core.text_transformer import TextTransformer
-        from core.text_cleaner import TextCleaner, CleanupOperation
+        from core.text_cleaner import TextCleaner
         from core.preset_manager import PresetManager, PresetExecutor
         from utils.file_handler import FileHandler
-        
+
         # Read file
         content = FileHandler.read_file_content(file_path)
         if content is None:
             raise ValueError(f"Could not read file: {file_path}")
-        
+
         result = content
-        
+
         # Apply cleanup operations
+        # (#94 A) Through TextCleaner.cleanup, and a preset the way the GUI runs one.
         if rule.cleanup_ops:
             for op_name in rule.cleanup_ops:
-                op = CleanupOperation(op_name)
-                result = TextCleaner.apply_operation(result, op)
-        
+                op = TextCleaner.resolve_operation(op_name)
+                if op is None:
+                    raise ValueError(f"Unknown cleanup operation: {op_name}")
+                result = TextCleaner.cleanup(result, op)
+
         # Apply preset
         if rule.preset_name:
             preset_manager = PresetManager()
             preset = preset_manager.get_preset(rule.preset_name)
             if preset:
-                executor = PresetExecutor(preset_manager)
-                result = executor.execute(preset, result)
+                result, _applied = PresetExecutor().execute_preset(result, preset)
         
         # Apply transform mode
         if rule.transform_mode:
