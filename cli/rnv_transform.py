@@ -89,6 +89,30 @@ class CLIOptions:
     use_stdin: bool = False
 
 
+def _write_utf8() -> None:
+    """
+    Make stdout and stderr write UTF-8, whatever the system's code page.
+
+    Python writes to a Windows console in UTF-8, but to a pipe or a file in
+    the system's code page, often cp1252. That code page has no arrow, so
+    `rnv-transform --list-cleanup > ops.txt` stopped with UnicodeEncodeError
+    at "Fix Line Endings (→ LF)", and so did any transformed text holding a
+    character outside it (found when the Windows CI went red, 26 October).
+    UTF-8 holds every character, and it is what the CLI writes to files by
+    default. A stream that is already UTF-8, or cannot be reconfigured (a
+    test's capture), is left as it is.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        encoding = (getattr(stream, "encoding", None) or "").lower().replace("-", "").replace("_", "")
+        reconfigure = getattr(stream, "reconfigure", None)
+        if encoding == "utf8" or reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8")
+        except (ValueError, OSError):
+            pass
+
+
 class CLIProcessor:
     """
     Command-line processor for text transformations.
@@ -121,6 +145,8 @@ class CLIProcessor:
         Returns:
             Exit code (0 for success, non-zero for errors)
         """
+        _write_utf8()
+
         # Handle list commands first
         if self.options.list_modes:
             self._list_modes()

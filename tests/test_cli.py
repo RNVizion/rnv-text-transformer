@@ -266,3 +266,50 @@ class TestCLICleanup:
         for name in names + aliases:
             assert TextCleaner.resolve_operation(name) is not None, name
             assert CLIProcessor(CLIOptions(cleanup_ops=[name], use_stdin=True))._validate_options(), name
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 6. Output through a code page: what Windows gives a pipe or a file
+# ════════════════════════════════════════════════════════════════════════════
+
+def _code_page_stream() -> tuple[io.BytesIO, io.TextIOWrapper]:
+    """A stream like Windows' stdout when it is a pipe or a file: cp1252, no arrow in it.
+
+    The Windows CI's unittest run wrote to such a pipe, and --list-cleanup stopped there
+    with UnicodeEncodeError at "Fix Line Endings (→ LF)" (26 October). Made here so the
+    case runs on every system, not only on Windows.
+    """
+    raw = io.BytesIO()
+    return raw, io.TextIOWrapper(raw, encoding="cp1252", write_through=True)
+
+
+class TestCLIOutputThroughACodePage:
+    """The CLI writes UTF-8 to stdout and stderr, whatever the system's code page."""
+
+    def test_list_cleanup_writes_every_label(self, monkeypatch):
+        out_raw, out = _code_page_stream()
+        err_raw, err = _code_page_stream()
+        monkeypatch.setattr(sys, "stdout", out)
+        monkeypatch.setattr(sys, "stderr", err)
+
+        assert CLIProcessor(CLIOptions(list_cleanup=True)).run() == 0
+        out.flush()
+        text = out_raw.getvalue().decode("utf-8")
+        assert '["Fix Line Endings (→ LF)"]' in text
+        assert '["Fix Line Endings (→ CRLF)"]' in text
+        assert out.encoding == "utf-8" and err.encoding == "utf-8"
+
+    def test_piped_text_outside_the_code_page_comes_through_whole(self, monkeypatch):
+        out_raw, out = _code_page_stream()
+        monkeypatch.setattr(sys, "stdout", out)
+        monkeypatch.setattr(sys, "stdin", io.StringIO("left → right, naïve, 日本語"))
+
+        assert CLIProcessor(CLIOptions(mode="UPPERCASE", use_stdin=True)).run() == 0
+        out.flush()
+        assert out_raw.getvalue().decode("utf-8") == "LEFT → RIGHT, NAÏVE, 日本語"
+
+    def test_a_utf8_stream_is_left_as_it_is(self, capsys):
+        before = sys.stdout
+        assert main(["--list-cleanup"]) == 0
+        assert sys.stdout is before
+        assert "(→ LF)" in capsys.readouterr().out

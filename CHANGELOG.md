@@ -84,6 +84,10 @@ Changes since 3.3.0, the version of May 2026. The version number has not moved s
   shows it. It takes both now. `--list-cleanup` lists every operation `--cleanup` takes, and
   no longer lists four it never had (`reverse_lines`, `number_lines`, `remove_non_ascii`,
   `remove_punctuation`).
+- **CLI output on Windows.** Written to a pipe or a file, `rnv-transform --list-cleanup` stopped
+  with `UnicodeEncodeError` at *Fix Line Endings (→ LF)*, because Windows gives a pipe the
+  system's code page, which has no arrow. Piped text outside that code page stopped the same
+  way. The CLI writes stdout and stderr in UTF-8 now, as it writes files.
 - **Built-in presets.** Every cleanup step in the six built-in presets named an operation that
   does not exist, so it did nothing: *Markdown Cleanup* and *Plain Text Export* returned the
   text unchanged. Each step now runs the operation it meant. A preset saved with the old
