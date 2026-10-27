@@ -251,7 +251,7 @@ class BaseDialog(QDialog):
     
     @staticmethod
     def _show_highlights(edit: QTextEdit, spans: Iterable[tuple[int, int]],
-                         color: QColor) -> None:
+                         color: QColor, ink: QColor | None = None) -> None:
         """
         Show highlights over edit's text without touching the text.
         
@@ -271,9 +271,14 @@ class BaseDialog(QDialog):
             edit: The text edit the highlights are shown over
             spans: (start, end) positions in the text, in order
             color: The color every span is filled with
+            ink: The color of the text on it; None keeps the pane's own.
+                Ruling 101 B (2026-10-26): Find's matches in image mode,
+                whose ground the pane's light text cannot read on.
         """
         fmt = QTextCharFormat()
         fmt.setBackground(QBrush(color))
+        if ink is not None:
+            fmt.setForeground(QBrush(ink))
         selections = []
         for start, end in spans:
             cursor = QTextCursor(edit.document())

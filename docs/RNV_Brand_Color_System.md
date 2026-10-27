@@ -99,7 +99,7 @@ the same keys.
 
 | Part | Keys |
 |------|------|
-| Find & Replace highlights | `accent`, made translucent (`FIND_HIGHLIGHT_ALPHA`) |
+| Find & Replace highlights | `accent`, made translucent (`FIND_HIGHLIGHT_ALPHA`); in Image mode `IMAGE_FIND_HIGHLIGHT_ALPHA`, with black text, so a match reads over any picture |
 | Regex Builder match highlight | `regex_match_bg` |
 | Compare & Merge lines | `diff_added_bg`, `diff_removed_bg`, `diff_changed_bg` |
 | Compare & Merge change marks (`+`, `-`, `~`) and Accepted / Rejected / Pending | `success`, `error`, `warning`; `success`, `error`, `text_muted` |

@@ -24,7 +24,11 @@ jobs:
   linux:
     name: Linux (Ubuntu, Python 3.13)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 40, as in the mixer, whose suite runs as long. At 15 the job was
+    # canceled on 26 October with every test so far passing: the pytest
+    # step was at 85% when the fifteenth minute ran out, so the job needs
+    # about 20. The Windows job ran the same suites in 8.
+    timeout-minutes: 40
 
     steps:
       - name: Check out repository

@@ -24,7 +24,7 @@ from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor, QBrush
 
 from ui.base_dialog import BaseDialog
 from utils.dialog_styles import DialogStyleManager
-from utils.colors import FIND_HIGHLIGHT_ALPHA
+from utils.colors import FIND_HIGHLIGHT_ALPHA, IMAGE_FIND_HIGHLIGHT_ALPHA, TRUE_BLACK
 
 if TYPE_CHECKING:
     from core.theme_manager import ThemeManager
@@ -719,15 +719,28 @@ class FindReplaceDialog(BaseDialog):
     def _highlight_color(self) -> QColor:
         """
         The color matches are highlighted in: the mode's accent, at
-        FIND_HIGHLIGHT_ALPHA (80).
+        FIND_HIGHLIGHT_ALPHA (80), or in image mode at
+        IMAGE_FIND_HIGHLIGHT_ALPHA (160), under _highlight_ink().
         
         RNV-FIND-REPAINT 2026-09-28: one place for it, read by the Find that
         paints the highlights and by the switch that paints them again.
         """
-        is_dark = self.theme_manager.current_theme in ('dark', 'image')
-        highlight_color = QColor(DialogStyleManager.get_colors(is_dark)['accent'])
-        highlight_color.setAlpha(FIND_HIGHLIGHT_ALPHA)  # Semi-transparent
+        mode = self.theme_manager.current_theme
+        highlight_color = QColor(DialogStyleManager.get_colors(mode in ('dark', 'image'))['accent'])
+        highlight_color.setAlpha(IMAGE_FIND_HIGHLIGHT_ALPHA if mode == 'image' else FIND_HIGHLIGHT_ALPHA)
         return highlight_color
+    
+    def _highlight_ink(self) -> QColor | None:
+        """
+        The color of the text on a match: black in image mode, else the pane's own.
+        
+        Ruling 101 B, 2026-10-26. In image mode the pane is a translucent
+        black over the picture, and its light text read 3.36:1 on a match
+        over a bright part of it. On IMAGE_FIND_HIGHLIGHT_ALPHA, black reads
+        4.73:1 or more over any picture. In dark and light the matches lie on
+        the pane's opaque ground, and its text reads on them.
+        """
+        return QColor(TRUE_BLACK) if self.theme_manager.current_theme == 'image' else None
     
     def _highlight_all_matches(self) -> None:
         """Highlight all matches in the text edit."""
@@ -740,7 +753,7 @@ class FindReplaceDialog(BaseDialog):
         # clipboard. Setting the selections replaces the old ones.
         highlight_color = self._highlight_color()
         spans = self._in_qt(self.target_text_edit.toPlainText(), self._current_matches)
-        self._show_highlights(self.target_text_edit, spans, highlight_color)
+        self._show_highlights(self.target_text_edit, spans, highlight_color, self._highlight_ink())
         self._painted_highlight = QColor(highlight_color)
     
     def _highlight_current_match(self) -> None:
@@ -804,6 +817,9 @@ class FindReplaceDialog(BaseDialog):
         selections = edit.extraSelections()
         recolored = QTextCharFormat()
         recolored.setBackground(QBrush(color))
+        ink = self._highlight_ink()                # ruling 101 B: black text in image mode
+        if ink is not None:
+            recolored.setForeground(QBrush(ink))
         for selection in selections:
             if selection.format.background().color() == painted:
                 selection.format = recolored

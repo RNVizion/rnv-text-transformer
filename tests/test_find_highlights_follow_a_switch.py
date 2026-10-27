@@ -4,8 +4,8 @@ tests/test_find_highlights_follow_a_switch.py
 RNV-FIND-REPAINT, 2026-09-28. The highlights Find paints into the main
 window's text follow a theme switch made while the dialog is open.
 
-Find paints every match into the text in the mode's accent, at alpha 80,
-when it runs. RNV-DIALOG-SWITCH made the open dialog follow a switch; the
+Find paints every match into the text in the mode's accent, at alpha 80
+(160, with black text, in image mode: ruling 101 B), when it runs. RNV-DIALOG-SWITCH made the open dialog follow a switch; the
 highlights it had drawn did not, and kept the old mode's accent until the
 next Find -- dark's accent on light's ground. Now the dialog paints them
 again when it is refreshed:
@@ -183,18 +183,32 @@ class TestFindHighlightsFollowASwitch:
         dlg.close()
 
     def test_a_switch_that_keeps_the_color_leaves_the_text_alone(self, main_window):
-        """Image paints with dark's accent: from image to dark there is
-        nothing to repaint, and nothing is added to the text's undo history."""
+        """A theme applied that keeps the highlights' color repaints nothing,
+        and adds nothing to the text's undo history.
+
+        Until ruling 101 B (2026-10-26) image painted with dark's accent at
+        dark's alpha, so a switch from image to dark was such a switch. Now
+        each mode paints its own (image at IMAGE_FIND_HIGHLIGHT_ALPHA, with
+        black text). The road left that keeps the color is Settings applying
+        the mode the application is already in: the dialog is refreshed, and
+        finds nothing to repaint. The refresh is counted, so the test cannot
+        pass on a refresh that never ran."""
         win = main_window
         _in_dark(win)
         win.text_input.setPlainText(TEXT)
         dlg = _found(win)
         doc = win.text_input.document()
-        assert [_switch(win, "cycle"), _switch(win, "cycle")] == ["light", "image"]
-        spans, steps = _spans(win.text_input), doc.availableUndoSteps()
-        assert _switch(win, "cycle") == "dark"
-        assert _spans(win.text_input) == spans, "image to dark changed the highlights"
-        assert doc.availableUndoSteps() == steps, "a switch that keeps the color added to the undo history"
+        refreshed = []
+        original = dlg.refresh_theme
+        dlg.refresh_theme = lambda *a, **k: (refreshed.append(1), original(*a, **k))
+        for mode in ("dark", "light", "image"):
+            if win.theme_manager.current_theme != mode:
+                assert _switch(win, "cycle") == mode
+            spans, steps, before = _spans(win.text_input), doc.availableUndoSteps(), len(refreshed)
+            assert _switch(win, "settings", mode) == mode
+            assert len(refreshed) > before, f"{mode}: Settings applied the mode and the dialog was not refreshed"
+            assert _spans(win.text_input) == spans, f"{mode}: the same mode applied again changed the highlights"
+            assert doc.availableUndoSteps() == steps, f"{mode}: a switch that keeps the color added to the undo history"
         dlg.close()
 
     def test_highlights_moved_by_an_edit_are_repainted_where_they_now_are(self, main_window):

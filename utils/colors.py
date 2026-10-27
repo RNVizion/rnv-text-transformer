@@ -594,7 +594,19 @@ composite this application already derived; its byte was written in place."""
 FIND_HIGHLIGHT_ALPHA: Final[int] = 0x50
 """80. Find's highlight on a match: the mode's accent at this alpha.
 RNV-NAMED-AND-USED (2026-10-04): was setAlpha(80), written out in the
-Find dialog; the same byte."""
+Find dialog; the same byte. Dark and light; image mode takes the next."""
+
+IMAGE_FIND_HIGHLIGHT_ALPHA: Final[int] = 0xA0
+"""160. Find's highlight on a match in image mode (BRAND_GOLD), under black
+text. Ruling 101 B, 2026-10-26. In image mode the text pane is TRUE_BLACK at
+IMAGE_FIELD_ALPHA over the picture, and the picture can be any color. At
+FIND_HIGHLIGHT_ALPHA under the pane's light text, a match read 3.36:1 over a
+bright picture (measured by Brand Infrastructure, BRAND_COLORS.md rev 47).
+The register's rule for an alpha under text over a picture: its ink clears
+4.5 against the alpha's composite over black AND over white. Black ink here
+reads 4.73 over black and 7.15 over white, and the current match, the
+selection in solid BRAND_GOLD, stays plainly brighter than the others.
+tests/test_find_highlight_reads.py holds it."""
 
 
 # ==================== COLORS THE CODE SPELLED OUT ====================
@@ -918,6 +930,7 @@ __all__ = [
     'DROPDOWN_BORDER_ALPHA',
     'DRAG_HIGHLIGHT_ALPHA',
     'FIND_HIGHLIGHT_ALPHA',
+    'IMAGE_FIND_HIGHLIGHT_ALPHA',
     'SEMANTIC_EXPORT_FOOTER',
     'SEMANTIC_EXPORT_RTF_INK',
     'SEMANTIC_HEX_PATTERN_EXAMPLE',
