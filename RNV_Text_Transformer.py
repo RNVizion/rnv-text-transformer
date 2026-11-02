@@ -42,6 +42,7 @@ from PyQt6.QtWidgets import QApplication
 
 from ui.main_window import MainWindow
 from utils.config import FontManager, APP_NAME, APP_VERSION
+from utils import brand_fonts
 from utils.logger import Logger, header, separator
 from utils.dialog_styles import DialogStyleManager
 from core.resource_loader import ResourceLoader
@@ -70,7 +71,7 @@ def main() -> None:
     logger.success("Font applied to application")
     
     # Pre-warm stylesheet cache for faster dialog opening
-    font_family = custom_font.family() if custom_font else "Arial"
+    font_family = custom_font.family() if custom_font else brand_fonts.family("body")
     DialogStyleManager.prewarm_cache(font_family)
     logger.info("Stylesheet cache pre-warmed")
     

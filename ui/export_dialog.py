@@ -23,6 +23,7 @@ from PyQt6.QtCore import pyqtSignal
 
 from ui.base_dialog import BaseDialog
 from core.export_manager import ExportManager, ExportFormat, ExportOptions, ExportError
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 from utils.dialog_styles import DialogStyleManager
 
@@ -64,7 +65,7 @@ class ExportDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         text_content: str = "",
         parent: QWidget | None = None
     ) -> None:
@@ -217,7 +218,7 @@ class ExportDialog(BaseDialog):
         self.preview_text = QTextEdit()
         self.preview_text.setReadOnly(True)
         self.preview_text.setMaximumHeight(100)
-        self.preview_text.setStyleSheet("font-family: Consolas; font-size: 9pt;")
+        self.preview_text.setStyleSheet(f"font-family: {brand_fonts.css('mono')}; font-size: 9pt;")
         preview_layout.addWidget(self.preview_text)
         
         layout.addWidget(preview_group)
@@ -390,7 +391,7 @@ class ExportWidget(QWidget):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """

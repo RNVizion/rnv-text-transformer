@@ -18,6 +18,7 @@ from PyQt6.QtGui import QFont, QFontDatabase
 from PyQt6.QtCore import QByteArray
 
 from utils.logger import get_module_logger
+from utils import brand_fonts
 
 _logger = get_module_logger("FontManager")
 
@@ -89,12 +90,15 @@ class FontManager:
         Load Montserrat-Black font from embedded base64 or file.
         
         Returns:
-            QFont: The loaded custom font or Arial fallback
+            QFont: The loaded custom font, or the brand's body face (Inter) as the fallback
         """
         if cls._cached_font is not None:
             return cls._cached_font
         
         logger = _logger
+        
+        # The brand's interface faces, Inter and JetBrains Mono (ruling 107 A)
+        brand_fonts.register(FONTS_DIR)
         
         # Try embedded font first
         if MONT_FONT_BASE64.strip() and "<BASE64 FONT STRING" not in MONT_FONT_BASE64:
@@ -123,11 +127,12 @@ class FontManager:
                     cls._font_family = families[0]
                     return cls._cached_font
         
-        # Fallback to Arial
+        # Fallback to the brand's body face (ruling 107 A; Arial until 2026-11-02)
+        fallback = brand_fonts.family("body")
         if logger:
-            logger.warning("Using fallback font", details="Arial")
-        cls._cached_font = QFont("Arial", 10)
-        cls._font_family = "Arial"
+            logger.warning("Using fallback font", details=fallback)
+        cls._cached_font = QFont(fallback, 10)
+        cls._font_family = fallback
         return cls._cached_font
     
     @classmethod
@@ -140,7 +145,7 @@ class FontManager:
         """
         if cls._font_family is None:
             cls.load_embedded_font()
-        return cls._font_family or "Arial"
+        return cls._font_family or brand_fonts.family("body")
     
     @classmethod
     def clear_cache(cls) -> None:

@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QThread
 
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 
 from ui.base_dialog import BaseDialog
@@ -304,7 +305,7 @@ class EncodingDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         input_text: str = "",
         parent: QWidget | None = None
     ) -> None:
@@ -620,7 +621,7 @@ class EncodingWidget(QWidget):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         super().__init__(parent)

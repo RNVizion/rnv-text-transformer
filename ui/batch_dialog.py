@@ -25,6 +25,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from ui.base_dialog import BaseDialog
 from core.batch_processor import BatchProcessor, BatchResult, BatchProgress
 from core.text_transformer import TextTransformer
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 
 if TYPE_CHECKING:
@@ -102,7 +103,7 @@ class BatchDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """

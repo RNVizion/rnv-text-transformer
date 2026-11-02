@@ -31,6 +31,7 @@ from PyQt6.QtGui import (
 
 from ui.base_dialog import BaseDialog
 from core.diff_engine import DiffEngine, DiffResult, DiffChange, ChangeType
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 from utils.dialog_styles import DialogStyleManager
 
@@ -98,7 +99,7 @@ class ChangeWidget(QFrame):
         text = self.change.right_text or self.change.left_text
         preview = text[:40] + "..." if len(text) > 40 else text
         preview_label = QLabel(preview)
-        preview_label.setStyleSheet("font-family: monospace;")
+        preview_label.setStyleSheet(f"font-family: {brand_fonts.css('mono')};")
         preview_label.setMinimumWidth(120)
         layout.addWidget(preview_label, 1)
         
@@ -238,7 +239,7 @@ class CompareDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         input_text: str = "",
         output_text: str = "",
         parent: QWidget | None = None
@@ -378,7 +379,7 @@ class CompareDialog(BaseDialog):
         self.input_edit = QTextEdit()
         self.input_edit.setReadOnly(True)
         self.input_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
-        self.input_edit.setFont(QFont("Consolas", 10))
+        self.input_edit.setFont(brand_fonts.font("mono", 10))
         left_layout.addWidget(self.input_edit)
         
         self.diff_splitter.addWidget(left_widget)
@@ -395,7 +396,7 @@ class CompareDialog(BaseDialog):
         self.output_edit = QTextEdit()
         self.output_edit.setReadOnly(True)
         self.output_edit.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
-        self.output_edit.setFont(QFont("Consolas", 10))
+        self.output_edit.setFont(brand_fonts.font("mono", 10))
         right_layout.addWidget(self.output_edit)
         
         self.diff_splitter.addWidget(right_widget)

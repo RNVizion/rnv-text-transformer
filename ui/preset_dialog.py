@@ -30,6 +30,7 @@ from core.preset_manager import (
 )
 from core.text_transformer import TextTransformer
 from core.text_cleaner import TextCleaner
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 from utils.dialog_styles import DialogStyleManager
 
@@ -434,7 +435,7 @@ class PresetDialog(BaseDialog):
         self,
         theme_manager: ThemeManager,
         preset_manager: PresetManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         preset: TransformPreset | None = None,
         parent: QWidget | None = None
     ) -> None:
@@ -821,7 +822,7 @@ class PresetManagerDialog(BaseDialog):
         self,
         theme_manager: ThemeManager,
         preset_manager: PresetManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         super().__init__(theme_manager, font_family, parent)

@@ -17,7 +17,7 @@ Usage:
         _DIALOG_HEIGHT = 400
         _DIALOG_TITLE = "My Dialog"
         
-        def __init__(self, theme_manager, font_family="Arial", parent=None):
+        def __init__(self, theme_manager, font_family="Inter", parent=None):
             super().__init__(theme_manager, font_family, parent)
             self._setup_ui()
             self.apply_base_styling()
@@ -39,6 +39,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QBrush, QColor, QTextCharFormat, QTextCursor
+from utils import brand_fonts
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -96,7 +97,7 @@ class BaseDialog(QDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """

@@ -23,6 +23,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor, QBrush
 
 from ui.base_dialog import BaseDialog
+from utils import brand_fonts
 from utils.dialog_styles import DialogStyleManager
 from utils.colors import FIND_HIGHLIGHT_ALPHA, IMAGE_FIND_HIGHLIGHT_ALPHA, TRUE_BLACK
 
@@ -88,7 +89,7 @@ class FindReplaceDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         target_text_edit: QTextEdit | None = None,
         replace_mode: bool = False,
         parent: QWidget | None = None,

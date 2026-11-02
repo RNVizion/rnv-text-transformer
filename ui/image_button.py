@@ -21,6 +21,7 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QIcon, QCursor, QPixmap, QEnterEvent, QFont, QFontMetrics
 
 from core.resource_loader import ResourceLoader
+from utils import brand_fonts
 from utils.config import DRAG_TRACK_INTERVAL
 
 if TYPE_CHECKING:
@@ -379,7 +380,7 @@ class ImageButton(QPushButton):
                 return font_family
         
         # Return fallback without caching - allows retry on next call
-        return 'Arial'
+        return brand_fonts.family("body")
     
     def resizeEvent(self, event: QResizeEvent) -> None:
         """Handle resize to update icon size."""

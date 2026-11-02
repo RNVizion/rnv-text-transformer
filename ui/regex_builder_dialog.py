@@ -29,6 +29,7 @@ from PyQt6.QtGui import (
 
 from ui.base_dialog import BaseDialog
 from core.regex_patterns import RegexPatterns, RegexHelper, PatternInfo
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 from utils.dialog_styles import DialogStyleManager
 
@@ -75,7 +76,7 @@ class RegexBuilderDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         input_text: str = "",
         parent: QWidget | None = None
     ) -> None:
@@ -140,7 +141,7 @@ class RegexBuilderDialog(BaseDialog):
         pattern_input_row.addWidget(QLabel("Pattern:"))
         self.pattern_input = QLineEdit()
         self.pattern_input.setPlaceholderText("Enter regex pattern...")
-        self.pattern_input.setFont(QFont("Consolas", 10))
+        self.pattern_input.setFont(brand_fonts.font("mono", 10))
         self.pattern_input.textChanged.connect(self._on_pattern_changed)
         pattern_input_row.addWidget(self.pattern_input)
         pattern_layout.addLayout(pattern_input_row)
@@ -150,7 +151,7 @@ class RegexBuilderDialog(BaseDialog):
         replacement_row.addWidget(QLabel("Replace:"))
         self.replacement_input = QLineEdit()
         self.replacement_input.setPlaceholderText("Replacement text (use \\1, \\2 for groups)...")
-        self.replacement_input.setFont(QFont("Consolas", 10))
+        self.replacement_input.setFont(brand_fonts.font("mono", 10))
         self.replacement_input.textChanged.connect(self._on_replacement_changed)
         replacement_row.addWidget(self.replacement_input)
         pattern_layout.addLayout(replacement_row)
@@ -196,7 +197,7 @@ class RegexBuilderDialog(BaseDialog):
         test_group = QGroupBox("Test Text")
         test_layout = QVBoxLayout(test_group)
         self.test_text = QTextEdit()
-        self.test_text.setFont(QFont("Consolas", 10))
+        self.test_text.setFont(brand_fonts.font("mono", 10))
         self.test_text.setMinimumHeight(150)
         self.test_text.textChanged.connect(self._on_test_text_changed)
         test_layout.addWidget(self.test_text)
@@ -237,7 +238,7 @@ class RegexBuilderDialog(BaseDialog):
         replace_layout.setContentsMargins(5, 5, 5, 5)
         
         self.result_preview = QTextEdit()
-        self.result_preview.setFont(QFont("Consolas", 10))
+        self.result_preview.setFont(brand_fonts.font("mono", 10))
         self.result_preview.setReadOnly(True)
         replace_layout.addWidget(self.result_preview)
         results_tabs.addTab(replace_widget, "Replace Preview")

@@ -14,7 +14,7 @@ Usage:
     from utils.dialog_styles import DialogStyleManager
     
     # Pre-warm cache at application startup (optional but recommended)
-    DialogStyleManager.prewarm_cache("Arial")
+    DialogStyleManager.prewarm_cache(brand_fonts.family("body"))
     
     # Get complete dialog stylesheet (cached)
     is_dark = self.theme_manager.is_dark_mode
@@ -36,6 +36,7 @@ from typing import ClassVar
 from functools import lru_cache
 
 from utils import colors
+from utils import brand_fonts
 
 
 class DialogStyleManager:
@@ -248,7 +249,7 @@ class DialogStyleManager:
         return cls._get_menu_style(cls.get_colors(is_dark))
 
     @classmethod
-    def prewarm_cache(cls, font_family: str = "Arial") -> None:
+    def prewarm_cache(cls, font_family: str = brand_fonts.family("body")) -> None:
         """
         Pre-populate cache with common stylesheet combinations.
         

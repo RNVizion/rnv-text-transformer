@@ -25,6 +25,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 from ui.base_dialog import BaseDialog
 from core.text_cleaner import TextCleaner
+from utils import brand_fonts
 from utils.dialog_styles import DialogStyleManager
 
 if TYPE_CHECKING:
@@ -82,7 +83,7 @@ class SettingsDialog(BaseDialog):
         self, 
         settings_manager: SettingsManager,
         theme_manager: ThemeManager,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """

@@ -32,6 +32,7 @@ from core.folder_watcher import (
 )
 from core.text_transformer import TextTransformer
 from core.preset_manager import PresetManager
+from utils import brand_fonts
 from utils.dialog_helper import DialogHelper
 
 if TYPE_CHECKING:
@@ -56,7 +57,7 @@ class RuleEditWidget(QWidget):
         self,
         rule: WatchRule,
         theme_manager: 'ThemeManager',
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """Initialize rule edit widget."""
@@ -295,7 +296,7 @@ class WatchFolderDialog(BaseDialog):
     def __init__(
         self,
         theme_manager: 'ThemeManager',
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """Initialize watch folder dialog."""

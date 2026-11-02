@@ -39,6 +39,21 @@ Changes since 3.3.0, the version of May 2026. The version number has not moved s
 
 ### Changed
 
+- **The brand register is read as `rnv_brand.brand`.** rnv-brand 48.1.0 (`108213b`)
+  installs it under that name, which no other package's `engine` can hide.
+  `tools/sync_colors.py` imports it so, the daily brand-sync checks that name, and
+  `tests/requirements-dev.txt` pins `108213b`. No color moved.
+- **The interface fonts are the brand's.** Inter, for interface text, and JetBrains Mono,
+  for fixed-width text, replace Arial, Segoe UI, Consolas and Courier wherever the app used
+  them; the mark stays Montserrat Black. `python tools/sync_fonts.py` makes them
+  from rnv-brand's files at the pin, one TrueType file per weight (Qt on Windows
+  loads no woff2), into `resources/fonts/`, with `fonts.json`, and
+  `utils/brand_fonts.py` registers them at startup, by file. `tests/test_fonts_in_sync.py`
+  holds the copy to the pin. Exported files keep the fonts they name.
+- **Each font's license travels with it.** `resources/fonts/` holds `OFL-Montserrat.txt`,
+  `OFL-Inter.txt` and `OFL-JetBrains-Mono.txt`; Montserrat Black had been committed and
+  bundled without its license. `tests/test_font_license.py` holds it, and the README's
+  License section says so.
 - **Python 3.13 is required.** `pyproject.toml` says `requires-python = ">=3.13"`, the entry
   point checks for 3.13, and CI runs 3.13 on Linux and Windows. Earlier releases said 3.10.
 - **rnv-brand is pinned.** `tests/requirements-dev.txt` installs rnv-brand from GitHub at a

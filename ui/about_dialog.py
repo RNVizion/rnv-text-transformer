@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QIcon
+from utils import brand_fonts
 
 if TYPE_CHECKING:
     from core.theme_manager import ThemeManager
@@ -76,7 +77,7 @@ class AboutDialog(QDialog):
     def __init__(
         self, 
         theme_manager: ThemeManager | None = None,
-        font_family: str = "Arial",
+        font_family: str = brand_fonts.family("body"),
         parent: QWidget | None = None
     ) -> None:
         """
