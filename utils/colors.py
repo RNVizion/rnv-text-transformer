@@ -368,12 +368,18 @@ BRAND_GOLD_PRESSED: Final[str] = BRAND_GOLD
 #
 # Named by their byte so the ramp reads in order and a step cannot be
 # confused with a role. Adding one is not drift.
+#
+# FIVE OF THEM ARE THE REGISTER'S NOW. rnv-brand rev 49 (2 November 2026,
+# ruled here as 104 A) names five steps of its ink grid, gray(n) = n * 0x11,
+# in its GRAY table: gray-4, gray-5, gray-6, gray-8 and gray-12. GRAY_44,
+# GRAY_55, GRAY_66, GRAY_88 and GRAY_CC take them from brand_map.json, and
+# PROVENANCE marks them register. No value moved. The rest stay this app's.
 
-GRAY_44: Final[str] = '#444444'  # app-owned
-GRAY_55: Final[str] = '#555555'  # app-owned
-GRAY_66: Final[str] = '#666666'  # app-owned
-GRAY_88: Final[str] = '#888888'  # app-owned
-GRAY_CC: Final[str] = '#cccccc'  # app-owned
+GRAY_44: Final[str] = '#444444'  # brand: GRAY.gray-4
+GRAY_55: Final[str] = '#555555'  # brand: GRAY.gray-5
+GRAY_66: Final[str] = '#666666'  # brand: GRAY.gray-6
+GRAY_88: Final[str] = '#888888'  # brand: GRAY.gray-8
+GRAY_CC: Final[str] = '#cccccc'  # brand: GRAY.gray-12
 GRAY_DD: Final[str] = '#dddddd'  # app-owned
 #: The LIGHT scrollbar track. Held by APP_TEXT until 2026-08-28, when the ink
 #: moved to gray(13) and this did not follow -- it is a surface, and the
@@ -882,17 +888,17 @@ PROVENANCE: Final[dict[str, str]] = {
     'STATUS_SUCCESS_TEXT_LIGHT': 'register',
     'STATUS_WARNING_TEXT_LIGHT': 'register',
     'STATUS_ERROR_TEXT_LIGHT': 'register',
+    'GRAY_44': 'register',
+    'GRAY_55': 'register',
+    'GRAY_66': 'register',
+    'GRAY_88': 'register',
+    'GRAY_CC': 'register',
     # -- derived
     'BRAND_DARK_GOLD_DEEP': 'derived',
     'BRAND_DARK_GOLD_PRESSED': 'derived',
     'BRAND_GOLD_HOVER': 'derived',
     'BRAND_GOLD_PRESSED': 'derived',
     # -- app-ramp
-    'GRAY_44': 'app-ramp',
-    'GRAY_55': 'app-ramp',
-    'GRAY_66': 'app-ramp',
-    'GRAY_88': 'app-ramp',
-    'GRAY_CC': 'app-ramp',
     'GRAY_DD': 'app-ramp',
     'GRAY_E0': 'app-ramp',
     'GRAY_EE': 'app-ramp',

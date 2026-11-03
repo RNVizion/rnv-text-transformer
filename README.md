@@ -1,10 +1,10 @@
 # RNV Text Transformer
 
-![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)
-![PyQt6](https://img.shields.io/badge/PyQt-6-41CD52)
-![License](https://img.shields.io/badge/license-MIT-yellow)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgray)
-![Tests](https://img.shields.io/badge/tests-1000%2B%20passing-brightgreen)
+![Python](https://img.shields.io/badge/python-3.13-d2bc93?logo=python&logoColor=white&labelColor=25253a)
+![PyQt6](https://img.shields.io/badge/PyQt-6-d2bc93?labelColor=25253a)
+![License](https://img.shields.io/badge/license-MIT-d2bc93?labelColor=25253a)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-d2bc93?labelColor=25253a)
+![Tests](https://img.shields.io/badge/tests-1000%2B%20passing-d2bc93?labelColor=25253a)
 
 [![Tests (Linux)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Linux%29&logo=linux)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)
 [![Tests (Windows)](https://img.shields.io/github/actions/workflow/status/RNVizion/rnv-text-transformer/tests.yml?branch=main&label=Tests%20%28Windows%29&logo=windows)](https://github.com/RNVizion/rnv-text-transformer/actions/workflows/tests.yml)

@@ -154,7 +154,7 @@ def test_the_maps_this_file_iterates_are_not_empty():
 # ------------------------------------------------------------------ the values
 
 def test_the_new_constants_hold_the_registered_values():
-    """The local half. Runs everywhere, including where engine.brand is not
+    """The local half. Runs everywhere, including where rnv_brand.brand is not
     importable -- which is exactly the case that let these three sit
     misclassified for two days.
 
@@ -168,7 +168,7 @@ def test_the_new_constants_hold_the_registered_values():
 
 def test_the_new_constants_match_rnv_brand():
     brand = pytest.importorskip(
-        'engine.brand',
+        'rnv_brand.brand',
         reason='rnv-brand not importable here; the local values are doing the work')
     drift = []
     for name in NEW:

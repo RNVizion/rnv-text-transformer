@@ -55,6 +55,8 @@ def _brand_value(brand, name: str):
 
     APP_TEXT_DIM  -> APP["text-dim"]
     STATUS_ERROR  -> STATUS["error"]
+    GRAY_66       -> GRAY["gray-6"], the step whose byte the name repeats
+                     (rev 49 named five steps of the ink grid; ruling 104 A)
     anything else -> the module attribute of the same name
 
     Convention rather than a second hardcoded map, which would go stale behind
@@ -64,6 +66,9 @@ def _brand_value(brand, name: str):
         if name.startswith(prefix + '_'):
             key = name[len(prefix) + 1:].lower().replace('_', '-')
             return getattr(brand, prefix)[key]
+    byte = name[len('GRAY_'):] if name.startswith('GRAY_') else ''
+    if len(byte) == 2 and byte[0] == byte[1]:
+        return brand.GRAY[f'gray-{int(byte[0], 16)}']
     return getattr(brand, name)
 
 
@@ -96,7 +101,7 @@ def test_provenance_groups_are_valid():
 def test_register_values_match_rnv_brand():
     """Every 'register' constant still equals the register. Skips if absent."""
     brand = pytest.importorskip(
-        'engine.brand',
+        'rnv_brand.brand',
         reason='rnv-brand not importable here; mirror unverified this run')
     drift = []
     for name, group in colors.PROVENANCE.items():
@@ -203,7 +208,7 @@ def _register_values(brand) -> dict:
 def test_the_register_enumeration_is_not_empty():
     """Guard the guard. Every misclassification check below asks whether a
     value is in this map. An empty map answers no to everything and passes."""
-    brand = pytest.importorskip('engine.brand', reason='rnv-brand not importable')
+    brand = pytest.importorskip('rnv_brand.brand', reason='rnv-brand not importable')
     named = _register_values(brand)
     assert len(named) >= 20, (
         f'only {len(named)} register values enumerated. The sweeps that read '
@@ -216,7 +221,7 @@ def test_the_register_enumeration_is_not_empty():
 def test_app_owned_values_are_not_register_values():
     """Something app-owned that IS a brand value is misclassified."""
     brand = pytest.importorskip(
-        'engine.brand', reason='rnv-brand not importable here')
+        'rnv_brand.brand', reason='rnv-brand not importable here')
     named = _register_values(brand)
 
     wrong = []
@@ -236,7 +241,7 @@ def test_every_coincidence_still_coincides():
     is a dead exemption, and a dead exemption is a license waiting for a
     defect: it would let a genuinely misclassified value hide behind it."""
     brand = pytest.importorskip(
-        'engine.brand', reason='rnv-brand not importable here')
+        'rnv_brand.brand', reason='rnv-brand not importable here')
     named = _register_values(brand)
     stale = []
     for name, (entry, _why) in COINCIDENT.items():

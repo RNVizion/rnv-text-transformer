@@ -61,6 +61,9 @@ REGISTERED = {name: getattr(colors, name) for name in (
     'STATUS_ERROR_TEXT',
     'STATUS_SUCCESS_TEXT_LIGHT', 'STATUS_WARNING_TEXT_LIGHT',
     'STATUS_ERROR_TEXT_LIGHT',
+    # Ruling 104 A, 2 November 2026: five steps of the ink grid, which the
+    # register names in GRAY since rev 49.
+    'GRAY_44', 'GRAY_55', 'GRAY_66', 'GRAY_88', 'GRAY_CC',
 )}
 
 DARK_DICTS = ('DARK',)
@@ -195,6 +198,9 @@ LIGHT_RULED = (
     'BRAND_BLACK', 'BRAND_DARK_GOLD', 'GOLD_TEXT_GROUND_FLOOR',
     'STATUS_ERROR_TEXT_LIGHT', 'STATUS_SUCCESS_TEXT_LIGHT', 'STATUS_WARNING_TEXT_LIGHT',
     'TRUE_BLACK', 'WHITE',
+    # Ruling 104 A, 2 November 2026: the light palette used these four steps
+    # as the app's own; since rev 49 they are the register's, unchanged.
+    'GRAY_44', 'GRAY_66', 'GRAY_88', 'GRAY_CC',
 )
 
 

@@ -24,7 +24,7 @@ found only by checking which side of the light palette boundary each use sat
 on.
 
 TWO GUARDS, NOT ONE. test_brand_mirror.py guards the register with
-importorskip('engine.brand'), so where rnv-brand is not importable it reports
+importorskip('rnv_brand.brand'), so where rnv-brand is not importable it reports
 clean and drift hides. APP_TEXT is pinned locally here as well.
 """
 from __future__ import annotations
@@ -83,7 +83,7 @@ def test_the_ink_is_a_step_on_the_grid():
 
 
 def test_the_local_pin_holds_when_the_brand_is_absent():
-    """test_brand_mirror.py checks APP_TEXT against engine.brand and SKIPS when
+    """test_brand_mirror.py checks APP_TEXT against rnv_brand.brand and SKIPS when
     rnv-brand is not importable. This is the half that always runs.
 
     RNV-COLOR-SYNC, 2026-10-16. This held the value written out, and a brand
